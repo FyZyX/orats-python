@@ -3,7 +3,7 @@ from typing import Sequence, Iterable, Mapping, Any
 
 import httpx
 
-from model import Ticker, Strike, MoneyImplied, MoneyForecast
+from model import Ticker, Strike, MoneyImplied, MoneyForecast, SmvSummary
 
 
 class DataApi:
@@ -150,26 +150,32 @@ class DataApi:
         )
         return [MoneyForecast(**m) for m in data]
 
-    def summaries(self, *symbols: str, fields: Iterable[str] = None):
-        return self._get(
+    def summaries(
+            self,
+            *symbols: str,
+            fields: Iterable[str] = None,
+    ) -> Sequence[SmvSummary]:
+        data = self._get(
             'summaries',
             ticker=','.join(symbols),
             fields=fields,
         )
+        return [SmvSummary(**m) for m in data]
 
     def summaries_history(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ):
+    ) -> Sequence[SmvSummary]:
         assert len(symbols) and trade_date is not None
-        return self._get(
+        data = self._get(
             'hist/summaries',
             ticker=','.join(symbols),
             tradeDate=trade_date,
             fields=fields,
         )
+        return [SmvSummary(**m) for m in data]
 
     def core_data(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
