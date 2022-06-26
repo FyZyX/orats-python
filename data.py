@@ -3,7 +3,7 @@ from typing import Sequence, Iterable, Mapping, Any
 
 import httpx
 
-from model import Ticker
+from model import Ticker, Strike
 
 
 class DataApi:
@@ -40,14 +40,15 @@ class DataApi:
             delta: float = None,
             days_to_expiration: int = None,
             fields: Iterable[str] = None,
-    ):
-        return self._get(
+    ) -> Sequence[Strike]:
+        data = self._get(
             'strikes',
             ticker=','.join(symbols),
             fields=fields,
             dte=days_to_expiration,
             delta=delta,
         )
+        return [Strike(**s) for s in data]
 
     def strikes_history(
             self,
