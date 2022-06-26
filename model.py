@@ -537,7 +537,7 @@ class DailyPrice(BaseModel):
     updated_at: datetime.datetime = Field(..., alias='updatedAt')
 
 
-class HistoricalVolatility:
+class HistoricalVolatility(BaseModel):
     underlying_symbol: str = Field(..., alias='ticker')
     trade_date: datetime.date = Field(..., alias='tradeDate')
     hv_1_day: float = Field(..., alias='orHv1d')
