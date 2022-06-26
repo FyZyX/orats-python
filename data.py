@@ -3,7 +3,7 @@ from typing import Sequence, Iterable, Mapping, Any
 
 import httpx
 
-from model import Ticker, Strike
+from model import Ticker, Strike, MoneyImplied, MoneyForecast
 
 
 class DataApi:
@@ -98,45 +98,57 @@ class DataApi:
         )
         return [Strike(**s) for s in data]
 
-    def monies_implied(self, *symbols: str, fields: Iterable[str] = None):
-        return self._get(
+    def monies_implied(
+            self,
+            *symbols: str,
+            fields: Iterable[str] = None,
+    ) -> Sequence[MoneyImplied]:
+        data = self._get(
             'monies/implied',
             ticker=','.join(symbols),
             fields=fields,
         )
+        return [MoneyImplied(**m) for m in data]
 
-    def monies_forecast(self, *symbols: str, fields: Iterable[str] = None):
-        return self._get(
+    def monies_forecast(
+            self,
+            *symbols: str,
+            fields: Iterable[str] = None,
+    ) -> Sequence[MoneyForecast]:
+        data = self._get(
             'monies/forecast',
             ticker=','.join(symbols),
             fields=fields,
         )
+        return [MoneyForecast(**m) for m in data]
 
     def monies_implied_history(
             self,
             *symbols: str,
             trade_date: datetime.date,
             fields: Iterable[str] = None,
-    ):
-        return self._get(
+    ) -> Sequence[MoneyImplied]:
+        data = self._get(
             'hist/monies/implied',
             ticker=','.join(symbols),
             tradeDate=trade_date,
             fields=fields,
         )
+        return [MoneyImplied(**m) for m in data]
 
     def monies_forecast_history(
             self,
             *symbols: str,
             trade_date: datetime.date,
             fields: Iterable[str] = None,
-    ):
-        return self._get(
+    ) -> Sequence[MoneyForecast]:
+        data = self._get(
             'hist/monies/forecast',
             ticker=','.join(symbols),
             tradeDate=trade_date,
             fields=fields,
         )
+        return [MoneyForecast(**m) for m in data]
 
     def summaries(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
