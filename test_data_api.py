@@ -20,6 +20,11 @@ class MyDataApi(unittest.TestCase):
         self.assertIsInstance(ticker.max_date, datetime.date)
         self.assertIsInstance(ticker.min_date, datetime.date)
 
+    def test_strikes(self):
+        strikes = self._api.strikes('IBM')
+        for strike in strikes:
+            self.assertIsInstance(strike, model.Strike)
+
 
 if __name__ == '__main__':
     unittest.main()
