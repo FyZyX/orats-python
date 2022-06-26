@@ -1,3 +1,6 @@
+import datetime
+from typing import Iterable, Mapping, Any
+
 import httpx
 
 
@@ -10,22 +13,31 @@ class DataApi:
     def _url(self, path):
         return '/'.join((self._base_url, path))
 
-    def _update_params(self, params):
+    def _update_params(self, params: Mapping[str, Any]):
         updated_params = dict(token=self._token)
-        for key, param in params:
+        for key, param in params.items():
             if param is None:
                 continue
             updated_params[key] = param
         return updated_params
 
-    def _get(self, path, **params):
-        response = httpx.get(self._url(path), params=self._update_params(params))
+    def _get(self, path: str, **params: Any):
+        response = httpx.get(
+            self._url(path),
+            params=self._update_params(params),
+        )
         return response.json()
 
-    def tickers(self, symbol=None):
+    def tickers(self, symbol: str = None):
         return self._get('tickers', ticker=symbol)
 
-    def strikes(self, *symbols, fields=None, days_to_expiration=None, delta=None):
+    def strikes(
+            self,
+            *symbols: str,
+            delta: float = None,
+            days_to_expiration: int = None,
+            fields: Iterable[str] = None,
+    ):
         return self._get(
             'strikes',
             ticker=','.join(symbols),
@@ -34,8 +46,14 @@ class DataApi:
             delta=delta,
         )
 
-    def strikes_history(self, *symbols, trade_date, fields=None,
-                        days_to_expiration=None, delta=None):
+    def strikes_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date,
+            fields: Iterable[str] = None,
+            days_to_expiration: int = None,
+            delta: float = None,
+    ):
         return self._get(
             'hist/strikes',
             ticker=','.join(symbols),
@@ -45,7 +63,12 @@ class DataApi:
             delta=delta,
         )
 
-    def strikes_by_options(self, symbol, expiration_date, strike):
+    def strikes_by_options(
+            self,
+            symbol: str,
+            strike: float,
+            expiration_date: datetime.date,
+    ):
         return self._get(
             'strikes/options',
             ticker=symbol,
@@ -53,8 +76,13 @@ class DataApi:
             strike=strike,
         )
 
-    def strikes_history_by_options(self, symbol, expiration_date, strike,
-                                   trade_date=None):
+    def strikes_history_by_options(
+            self,
+            symbol: str,
+            strike: float,
+            expiration_date: datetime.date,
+            trade_date: datetime.date = None
+    ):
         return self._get(
             'hist/strikes/options',
             ticker=symbol,
@@ -63,21 +91,26 @@ class DataApi:
             strike=strike,
         )
 
-    def monies_implied(self, *symbols, fields=None):
+    def monies_implied(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
             'monies/implied',
             ticker=','.join(symbols),
             fields=fields,
         )
 
-    def monies_forecast(self, *symbols, fields=None):
+    def monies_forecast(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
             'monies/forecast',
             ticker=','.join(symbols),
             fields=fields,
         )
 
-    def monies_implied_history(self, *symbols, trade_date, fields=None):
+    def monies_implied_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date,
+            fields: Iterable[str] = None,
+    ):
         return self._get(
             'hist/monies/implied',
             ticker=','.join(symbols),
@@ -85,7 +118,12 @@ class DataApi:
             fields=fields,
         )
 
-    def monies_forecast_history(self, *symbols, trade_date, fields=None):
+    def monies_forecast_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date,
+            fields: Iterable[str] = None,
+    ):
         return self._get(
             'hist/monies/forecast',
             ticker=','.join(symbols),
@@ -93,14 +131,19 @@ class DataApi:
             fields=fields,
         )
 
-    def summaries(self, *symbols, fields=None):
+    def summaries(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
             'summaries',
             ticker=','.join(symbols),
             fields=fields,
         )
 
-    def summaries_history(self, *symbols, trade_date=None, fields=None):
+    def summaries_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date = None,
+            fields: Iterable[str] = None,
+    ):
         assert len(symbols) and trade_date is not None
         return self._get(
             'hist/summaries',
@@ -109,14 +152,19 @@ class DataApi:
             fields=fields,
         )
 
-    def core_data(self, *symbols, fields=None):
+    def core_data(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
             'cores',
             ticker=','.join(symbols),
             fields=fields,
         )
 
-    def core_data_history(self, *symbols, trade_date=None, fields=None):
+    def core_data_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date = None,
+            fields: Iterable[str] = None,
+    ):
         assert len(symbols) and trade_date is not None
         return self._get(
             'hist/cores',
@@ -125,7 +173,12 @@ class DataApi:
             fields=fields,
         )
 
-    def daily_price(self, *symbols, trade_date=None, fields=None):
+    def daily_price(
+            self,
+            *symbols: str,
+            trade_date: datetime.date = None,
+            fields: Iterable[str] = None,
+    ):
         assert len(symbols) and trade_date is not None
         return self._get(
             'hist/dailies',
@@ -134,7 +187,12 @@ class DataApi:
             fields=fields,
         )
 
-    def historical_volatility(self, *symbols, trade_date=None, fields=None):
+    def historical_volatility(
+            self,
+            *symbols: str,
+            trade_date: datetime.date = None,
+            fields: Iterable[str] = None,
+    ):
         assert len(symbols) and trade_date is not None
         return self._get(
             'hist/hvs',
@@ -143,26 +201,31 @@ class DataApi:
             fields=fields,
         )
 
-    def dividend_history(self, *symbols):
+    def dividend_history(self, *symbols: str):
         return self._get(
             'hist/divs',
             ticker=','.join(symbols),
         )
 
-    def stock_split_history(self, *symbols):
+    def stock_split_history(self, *symbols: str):
         return self._get(
             'hist/splits',
             ticker=','.join(symbols),
         )
 
-    def iv_rank(self, *symbols, fields=None):
+    def iv_rank(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
             'ivrank',
             ticker=','.join(symbols),
             fields=fields,
         )
 
-    def iv_rank_history(self, *symbols, trade_date=None, fields=None):
+    def iv_rank_history(
+            self,
+            *symbols: str,
+            trade_date: datetime.date = None,
+            fields: Iterable[str] = None,
+    ):
         assert len(symbols) and trade_date is not None
         return self._get(
             'hist/ivrank',
