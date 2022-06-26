@@ -25,7 +25,7 @@ class DataApi:
 
     def _get(self, path: str, **params: Any):
         response = httpx.get(
-            self._url(path),
+            url=self._url(path),
             params=self._update_params(params),
         )
         return response.json()['data']
@@ -57,8 +57,8 @@ class DataApi:
             fields: Iterable[str] = None,
             days_to_expiration: int = None,
             delta: float = None,
-    ):
-        return self._get(
+    ) -> Sequence[Strike]:
+        data = self._get(
             'hist/strikes',
             ticker=','.join(symbols),
             tradeDate=trade_date,
@@ -66,19 +66,21 @@ class DataApi:
             dte=days_to_expiration,
             delta=delta,
         )
+        return [Strike(**s) for s in data]
 
     def strikes_by_options(
             self,
             symbol: str,
             strike: float,
             expiration_date: datetime.date,
-    ):
-        return self._get(
+    ) -> Sequence[Strike]:
+        data = self._get(
             'strikes/options',
             ticker=symbol,
             expirDate=expiration_date,
             strike=strike,
         )
+        return [Strike(**s) for s in data]
 
     def strikes_history_by_options(
             self,
@@ -86,14 +88,15 @@ class DataApi:
             strike: float,
             expiration_date: datetime.date,
             trade_date: datetime.date = None
-    ):
-        return self._get(
+    ) -> Sequence[Strike]:
+        data = self._get(
             'hist/strikes/options',
             ticker=symbol,
             tradeDate=trade_date,
             expirDate=expiration_date,
             strike=strike,
         )
+        return [Strike(**s) for s in data]
 
     def monies_implied(self, *symbols: str, fields: Iterable[str] = None):
         return self._get(
