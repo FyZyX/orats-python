@@ -1,5 +1,5 @@
 import datetime
-from typing import Iterable, Mapping, Any
+from typing import Sequence, Iterable, Mapping, Any
 
 import httpx
 
@@ -28,14 +28,11 @@ class DataApi:
             self._url(path),
             params=self._update_params(params),
         )
-        return response.json()
+        return response.json()['data']
 
-    def tickers(self, symbol: str = None):
-        content = self._get('tickers', ticker=symbol)
-        tickers = []
-        for ticker_data in content['data']:
-            tickers.append(Ticker(**ticker_data))
-        return tickers
+    def tickers(self, symbol: str = None) -> Sequence[Ticker]:
+        data = self._get('tickers', ticker=symbol)
+        return [Ticker(**t) for t in data]
 
     def strikes(
             self,

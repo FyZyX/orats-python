@@ -6,7 +6,10 @@ from model import Strike
 
 def entrypoint():
     api = DataApi('demo')
-    print(api.tickers('IBM'))
+    tickers = api.tickers('IBM')
+    ticker = tickers[0]
+    print(ticker.underlying_symbol)
+    print(ticker.max_date - ticker.min_date)
 
 
 def test():
