@@ -46,7 +46,7 @@ class Strike(BaseModel):
     updated_at: datetime.datetime = Field(..., alias='updatedAt')
 
 
-class Money(BaseModel):
+class MoneyImplied(BaseModel):
     underlying_symbol: str = Field(..., alias='ticker')
     trade_date: datetime.date = Field(..., alias='tradeDate')
     expiration_date: datetime.date = Field(..., alias='expirDate')
@@ -517,6 +517,20 @@ class Core(BaseModel):
     updated_at: datetime.datetime = Field(..., alias='updatedAt')
 
 
+class DailyPrice(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    trade_date: datetime.date = Field(..., alias='tradeDate')
+    open: float = Field(..., alias='open')
+    high: float = Field(..., alias='hiPx')
+    low: float = Field(..., alias='loPx')
+    close: float = Field(..., alias='clsPx')
+    unadjusted_open: float = Field(..., alias='unadjOpen')
+    unadjusted_high: float = Field(..., alias='unadjHiPx')
+    unadjusted_low: float = Field(..., alias='unadjLoPx')
+    unadjusted_close: float = Field(..., alias='unadjClsPx')
+    updated_at: datetime.datetime = Field(..., alias='updatedAt')
+
+
 class HistoricalVolatility:
     underlying_symbol: str = Field(..., alias='ticker')
     trade_date: datetime.date = Field(..., alias='tradeDate')
@@ -565,3 +579,35 @@ class HistoricalVolatility:
     close_to_close_hv_ex_earnings_100_day: float = Field(..., alias='clsHvXern252d')
     close_to_close_hv_ex_earnings_120_day: float = Field(..., alias='clsHvXern500d')
     close_to_close_hv_ex_earnings_252_day: float = Field(..., alias='clsHvXern1000d')
+
+
+class DividendHistory(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    ex_dividend_date: datetime.date = Field(..., alias='exDate')
+    dividend_amount: float = Field(..., alias='divAmt')
+    dividend_frequency: int = Field(..., alias='divFreq')
+    declared_date: datetime.date = Field(..., alias='declaredDate')
+
+
+class EarningsHistory(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    earnings_date: datetime.date = Field(..., alias='earnDate')
+    time_of_day_announced: int = Field(..., alias='anncTod')
+    updated_at: datetime.date = Field(..., alias='updatedAt')
+
+
+class StockSplitHistory(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    split_date: datetime.date = Field(..., alias='splitDate')
+    divisor: float
+
+
+class IvRank(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    trade_date: datetime.date = Field(..., alias='tradeDate')
+    iv: float = Field(..., alias='iv')
+    iv_rank_1_month: float = Field(..., alias='ivRank1m')
+    iv_percentile_1_month: float = Field(..., alias='ivPct1m')
+    iv_rank_1_year: float = Field(..., alias='ivRank1y')
+    iv_percentile_1_year: float = Field(..., alias='ivPct1y')
+    updated_at: datetime.datetime = Field(..., alias='updatedAt')
