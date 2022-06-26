@@ -3,6 +3,8 @@ from typing import Iterable, Mapping, Any
 
 import httpx
 
+from model import Ticker
+
 
 class DataApi:
     _base_url = 'https://api.orats.io/datav2'
@@ -29,7 +31,11 @@ class DataApi:
         return response.json()
 
     def tickers(self, symbol: str = None):
-        return self._get('tickers', ticker=symbol)
+        content = self._get('tickers', ticker=symbol)
+        tickers = []
+        for ticker_data in content['data']:
+            tickers.append(Ticker(**ticker_data))
+        return tickers
 
     def strikes(
             self,

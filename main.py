@@ -6,7 +6,7 @@ from model import Strike
 
 def entrypoint():
     api = DataApi('demo')
-    print(api.tickers())
+    print(api.tickers('IBM'))
 
 
 def test():
