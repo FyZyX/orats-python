@@ -3,6 +3,12 @@ import datetime
 from pydantic import BaseModel, Field
 
 
+class Ticker(BaseModel):
+    underlying_symbol: str = Field(..., alias='ticker')
+    min_date: datetime.date = Field(..., alias='min')
+    max_date: datetime.date = Field(..., alias='max')
+
+
 class Strike(BaseModel):
     underlying_symbol: str = Field(..., alias='ticker')
     trade_date: datetime.date = Field(..., alias='tradeDate')
@@ -380,9 +386,9 @@ class Core(BaseModel):
         ..., alias='ivHvXernRatioStdv1y')
     etf_iv_hv_ex_earnings_ratio: float = Field(..., alias='etfIvHvXernRatio')
     etf_iv_hv_ex_earnings_ratio_average_1_month: float = Field(...,
-                                                         alias='etfIvHvXernRatio1m')
+                                                               alias='etfIvHvXernRatio1m')
     etf_iv_hv_ex_earnings_ratio_average_1_year: float = Field(...,
-                                                         alias='etfIvHvXernRatio1y')
+                                                              alias='etfIvHvXernRatio1y')
     etf_iv_hv_ex_earnings_ratio_standard_deviation_1_year: float = Field(
         ..., alias='etfIvHvXernRatioStdv1y')
     slope_percentile: float = Field(..., alias='slopepctile')
