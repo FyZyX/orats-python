@@ -1,10 +1,11 @@
 import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .response import OratsResponse
 
 
-class Core(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class Core(OratsResponse):
     trade_date: datetime.date = Field(..., alias='tradeDate')
     asset_type: int = Field(..., alias='assetType')
     prior_close: float = Field(..., alias='priorCls')

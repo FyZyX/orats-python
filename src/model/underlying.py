@@ -1,16 +1,16 @@
 import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .response import OratsResponse
 
 
-class Ticker(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class Ticker(OratsResponse):
     min_date: datetime.date = Field(..., alias='min')
     max_date: datetime.date = Field(..., alias='max')
 
 
-class DailyPrice(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class DailyPrice(OratsResponse):
     trade_date: datetime.date = Field(..., alias='tradeDate')
     open: float = Field(..., alias='open')
     high: float = Field(..., alias='hiPx')
@@ -23,22 +23,19 @@ class DailyPrice(BaseModel):
     updated_at: datetime.datetime = Field(..., alias='updatedAt')
 
 
-class DividendHistory(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class DividendHistory(OratsResponse):
     ex_dividend_date: datetime.date = Field(..., alias='exDate')
     dividend_amount: float = Field(..., alias='divAmt')
     dividend_frequency: int = Field(..., alias='divFreq')
     declared_date: datetime.date = Field(..., alias='declaredDate')
 
 
-class EarningsHistory(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class EarningsHistory(OratsResponse):
     earnings_date: datetime.date = Field(..., alias='earnDate')
     time_of_day_announced: int = Field(..., alias='anncTod')
     updated_at: datetime.date = Field(..., alias='updatedAt')
 
 
-class StockSplitHistory(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class StockSplitHistory(OratsResponse):
     split_date: datetime.date = Field(..., alias='splitDate')
     divisor: float

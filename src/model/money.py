@@ -2,9 +2,10 @@ import datetime
 
 from pydantic import BaseModel, Field
 
+from .response import OratsResponse
 
-class MoneyImplied(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+
+class MoneyImplied(OratsResponse):
     trade_date: datetime.date = Field(..., alias='tradeDate')
     expiration_date: datetime.date = Field(..., alias='expirDate')
     underlying_price: float = Field(..., alias='stockPrice')

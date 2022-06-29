@@ -1,9 +1,11 @@
 import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from src.model.response import OratsResponse
 
 
-class SmvSummary(BaseModel):
+class SmvSummary(OratsResponse):
     underlying_symbol: str = Field(..., alias='ticker')
     trade_date: datetime.date = Field(..., alias='tradeDate')
     underlying_price: float = Field(..., alias='stockPrice')

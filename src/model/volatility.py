@@ -1,10 +1,11 @@
 import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from .response import OratsResponse
 
 
-class HistoricalVolatility(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class HistoricalVolatility(OratsResponse):
     trade_date: datetime.date = Field(..., alias='tradeDate')
     hv_1_day: float = Field(..., alias='orHv1d')
     hv_5_day: float = Field(..., alias='orHv5d')
@@ -53,8 +54,7 @@ class HistoricalVolatility(BaseModel):
     close_to_close_hv_ex_earnings_252_day: float = Field(..., alias='clsHvXern1000d')
 
 
-class IvRank(BaseModel):
-    underlying_symbol: str = Field(..., alias='ticker')
+class IvRank(OratsResponse):
     trade_date: datetime.date = Field(..., alias='tradeDate')
     iv: float = Field(..., alias='iv')
     iv_rank_1_month: float = Field(..., alias='ivRank1m')
