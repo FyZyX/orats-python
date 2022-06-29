@@ -2,7 +2,7 @@ import datetime
 import unittest
 
 from src import model
-from src.data import DataApi
+from src.api.data import DataApi
 
 
 class MyDataApi(unittest.TestCase):

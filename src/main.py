@@ -1,6 +1,6 @@
 import json
 
-from data import DataApi
+from api.data import DataApi
 from model import Strike
 
 

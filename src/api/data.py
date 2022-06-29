@@ -3,7 +3,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
-import model
+from .. import model
 
 
 class DataApi:
