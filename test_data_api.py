@@ -1,8 +1,8 @@
 import datetime
 import unittest
 
-import model
-from data import DataApi
+from src import model
+from src.data import DataApi
 
 
 class MyDataApi(unittest.TestCase):
