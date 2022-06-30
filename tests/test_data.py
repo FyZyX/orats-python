@@ -1,8 +1,9 @@
 import datetime
 import unittest
 
-from src.orats import model
-from src.orats.api.data import DataApi
+from orats.api.data import DataApi
+from orats.model.strike import Strike
+from orats.model.underlying import Ticker
 
 
 class MyDataApi(unittest.TestCase):
@@ -15,7 +16,7 @@ class MyDataApi(unittest.TestCase):
         tickers = self._api.tickers('IBM')
         self.assertEqual(len(tickers), 1)
         ticker = tickers[0]
-        self.assertIsInstance(ticker, model.Ticker)
+        self.assertIsInstance(ticker, Ticker)
         self.assertIsInstance(ticker.underlying_symbol, str)
         self.assertIsInstance(ticker.max_date, datetime.date)
         self.assertIsInstance(ticker.min_date, datetime.date)
@@ -23,7 +24,7 @@ class MyDataApi(unittest.TestCase):
     def test_strikes(self):
         strikes = self._api.strikes('IBM')
         for strike in strikes:
-            self.assertIsInstance(strike, model.Strike)
+            self.assertIsInstance(strike, Strike)
 
 
 if __name__ == '__main__':

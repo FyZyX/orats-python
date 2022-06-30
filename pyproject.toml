@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools >= 35.0.2", "wheel >= 0.29.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -41,8 +41,6 @@ Homepage = "https://github.com/lucasmlofaro/orats-python"
 tests = [
     "flake8~=4.0.1",
     "mypy~=0.961",
-    "pytest~=3.7",
+    "pytest~=7.1.2",
+    "tox~=3.25.1",
 ]
-
-[tool.setuptools]
-package-dir = { "" = "src/" }
