@@ -1,5 +1,7 @@
 # ORATS Python SDK
 
+> **BEWARE** This project is **unstable** and in early stages of development!
+
 This project is a wrapper around [ORATS](https://orats.com/) APIs.
 
 > **NOTE**: ORATS offers numerous subscription services.
