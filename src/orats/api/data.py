@@ -3,7 +3,18 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
-from orats import model
+from orats.model.core import Core
+from orats.model.money import MoneyForecast, MoneyImplied
+from orats.model.strike import Strike
+from orats.model.summary import SmvSummary
+from orats.model.underlying import (
+    Ticker,
+    DailyPrice,
+    DividendHistory,
+    EarningsHistory,
+    StockSplitHistory,
+)
+from orats.model.volatility import HistoricalVolatility, IvRank
 
 
 class DataApi:
@@ -30,9 +41,9 @@ class DataApi:
         )
         return response.json()['data']
 
-    def tickers(self, symbol: str = None) -> Sequence[model.Ticker]:
+    def tickers(self, symbol: str = None) -> Sequence[Ticker]:
         data = self._get('tickers', ticker=symbol)
-        return [model.Ticker(**t) for t in data]
+        return [Ticker(**t) for t in data]
 
     def strikes(
             self,
@@ -40,7 +51,7 @@ class DataApi:
             delta: float = None,
             days_to_expiration: int = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.Strike]:
+    ) -> Sequence[Strike]:
         data = self._get(
             'strikes',
             ticker=','.join(symbols),
@@ -48,7 +59,7 @@ class DataApi:
             dte=days_to_expiration,
             delta=delta,
         )
-        return [model.Strike(**s) for s in data]
+        return [Strike(**s) for s in data]
 
     def strikes_history(
             self,
@@ -57,7 +68,7 @@ class DataApi:
             fields: Iterable[str] = None,
             days_to_expiration: int = None,
             delta: float = None,
-    ) -> Sequence[model.Strike]:
+    ) -> Sequence[Strike]:
         data = self._get(
             'hist/strikes',
             ticker=','.join(symbols),
@@ -66,21 +77,21 @@ class DataApi:
             dte=days_to_expiration,
             delta=delta,
         )
-        return [model.Strike(**s) for s in data]
+        return [Strike(**s) for s in data]
 
     def strikes_by_options(
             self,
             symbol: str,
             strike: float,
             expiration_date: datetime.date,
-    ) -> Sequence[model.Strike]:
+    ) -> Sequence[Strike]:
         data = self._get(
             'strikes/options',
             ticker=symbol,
             expirDate=expiration_date,
             strike=strike,
         )
-        return [model.Strike(**s) for s in data]
+        return [Strike(**s) for s in data]
 
     def strikes_history_by_options(
             self,
@@ -88,7 +99,7 @@ class DataApi:
             strike: float,
             expiration_date: datetime.date,
             trade_date: datetime.date = None
-    ) -> Sequence[model.Strike]:
+    ) -> Sequence[Strike]:
         data = self._get(
             'hist/strikes/options',
             ticker=symbol,
@@ -96,78 +107,78 @@ class DataApi:
             expirDate=expiration_date,
             strike=strike,
         )
-        return [model.Strike(**s) for s in data]
+        return [Strike(**s) for s in data]
 
     def monies_implied(
             self,
             *symbols: str,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.MoneyImplied]:
+    ) -> Sequence[MoneyImplied]:
         data = self._get(
             'monies/implied',
             ticker=','.join(symbols),
             fields=fields,
         )
-        return [model.MoneyImplied(**m) for m in data]
+        return [MoneyImplied(**m) for m in data]
 
     def monies_forecast(
             self,
             *symbols: str,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.MoneyForecast]:
+    ) -> Sequence[MoneyForecast]:
         data = self._get(
             'monies/forecast',
             ticker=','.join(symbols),
             fields=fields,
         )
-        return [model.MoneyForecast(**m) for m in data]
+        return [MoneyForecast(**m) for m in data]
 
     def monies_implied_history(
             self,
             *symbols: str,
             trade_date: datetime.date,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.MoneyImplied]:
+    ) -> Sequence[MoneyImplied]:
         data = self._get(
             'hist/monies/implied',
             ticker=','.join(symbols),
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.MoneyImplied(**m) for m in data]
+        return [MoneyImplied(**m) for m in data]
 
     def monies_forecast_history(
             self,
             *symbols: str,
             trade_date: datetime.date,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.MoneyForecast]:
+    ) -> Sequence[MoneyForecast]:
         data = self._get(
             'hist/monies/forecast',
             ticker=','.join(symbols),
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.MoneyForecast(**m) for m in data]
+        return [MoneyForecast(**m) for m in data]
 
     def summaries(
             self,
             *symbols: str,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.SmvSummary]:
+    ) -> Sequence[SmvSummary]:
         data = self._get(
             'summaries',
             ticker=','.join(symbols),
             fields=fields,
         )
-        return [model.SmvSummary(**s) for s in data]
+        return [SmvSummary(**s) for s in data]
 
     def summaries_history(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.SmvSummary]:
+    ) -> Sequence[SmvSummary]:
         assert len(symbols) and trade_date is not None
         data = self._get(
             'hist/summaries',
@@ -175,26 +186,26 @@ class DataApi:
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.SmvSummary(**m) for m in data]
+        return [SmvSummary(**m) for m in data]
 
     def core_data(
             self,
             *symbols: str,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.Core]:
+    ) -> Sequence[Core]:
         data = self._get(
             'cores',
             ticker=','.join(symbols),
             fields=fields,
         )
-        return [model.Core(**c) for c in data]
+        return [Core(**c) for c in data]
 
     def core_data_history(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.Core]:
+    ) -> Sequence[Core]:
         assert len(symbols) and trade_date is not None
         data = self._get(
             'hist/cores',
@@ -202,14 +213,14 @@ class DataApi:
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.Core(**c) for c in data]
+        return [Core(**c) for c in data]
 
     def daily_price(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.DailyPrice]:
+    ) -> Sequence[DailyPrice]:
         assert len(symbols) and trade_date is not None
         data = self._get(
             'hist/dailies',
@@ -217,14 +228,14 @@ class DataApi:
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.DailyPrice(**p) for p in data]
+        return [DailyPrice(**p) for p in data]
 
     def historical_volatility(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.HistoricalVolatility]:
+    ) -> Sequence[HistoricalVolatility]:
         assert len(symbols) and trade_date is not None
         data = self._get(
             'hist/hvs',
@@ -232,56 +243,56 @@ class DataApi:
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.HistoricalVolatility(**hv) for hv in data]
+        return [HistoricalVolatility(**hv) for hv in data]
 
     def dividend_history(
             self,
             *symbols: str,
-    ) -> Sequence[model.DividendHistory]:
+    ) -> Sequence[DividendHistory]:
         data = self._get(
             'hist/divs',
             ticker=','.join(symbols),
         )
-        return [model.DividendHistory(**d) for d in data]
+        return [DividendHistory(**d) for d in data]
 
     def earnings_history(
             self,
             *symbols: str,
-    ) -> Sequence[model.EarningsHistory]:
+    ) -> Sequence[EarningsHistory]:
         data = self._get(
             'hist/earnings',
             ticker=','.join(symbols),
         )
-        return [model.EarningsHistory(**e) for e in data]
+        return [EarningsHistory(**e) for e in data]
 
     def stock_split_history(
             self,
             *symbols: str,
-    ) -> Sequence[model.StockSplitHistory]:
+    ) -> Sequence[StockSplitHistory]:
         data = self._get(
             'hist/splits',
             ticker=','.join(symbols),
         )
-        return [model.StockSplitHistory(**e) for e in data]
+        return [StockSplitHistory(**e) for e in data]
 
     def iv_rank(
             self,
             *symbols: str,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.IvRank]:
+    ) -> Sequence[IvRank]:
         data = self._get(
             'ivrank',
             ticker=','.join(symbols),
             fields=fields,
         )
-        return [model.IvRank(**e) for e in data]
+        return [IvRank(**e) for e in data]
 
     def iv_rank_history(
             self,
             *symbols: str,
             trade_date: datetime.date = None,
             fields: Iterable[str] = None,
-    ) -> Sequence[model.IvRank]:
+    ) -> Sequence[IvRank]:
         assert len(symbols) and trade_date is not None
         data = self._get(
             'hist/ivrank',
@@ -289,4 +300,4 @@ class DataApi:
             tradeDate=trade_date,
             fields=fields,
         )
-        return [model.IvRank(**e) for e in data]
+        return [IvRank(**e) for e in data]
