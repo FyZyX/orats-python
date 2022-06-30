@@ -4,7 +4,8 @@
 
 This project is a wrapper around [ORATS](https://orats.com/) APIs.
 
-![Tests](../../actions/workflows/python-package.yml/badge.svg)
+![Tests](../../actions/workflows/build-docs.yml/badge.svg)
+![Tests](../../actions/workflows/run-tests.yml/badge.svg)
 
 > **NOTE**: ORATS offers numerous subscription services.
 Depending on your personal subscriptions, you will be issued an API key with

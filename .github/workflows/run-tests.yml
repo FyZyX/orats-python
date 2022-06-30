@@ -1,4 +1,4 @@
-name: ORATS Python SDK
+name: Tests
 
 on:
   push:
