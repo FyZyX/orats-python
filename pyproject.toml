@@ -39,6 +39,8 @@ Homepage = ""
 
 [project.optional-dependencies]
 tests = [
+    "flake8>=4.0.1",
+    "mypy>=0.961",
     "pytest>=3.7",
 ]
 
