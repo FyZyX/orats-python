@@ -1,8 +1,8 @@
 import datetime
 import unittest
 
-from src import model
-from src.api.data import DataApi
+from src.orats import model
+from src.orats.api.data import DataApi
 
 
 class MyDataApi(unittest.TestCase):

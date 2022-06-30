@@ -2,7 +2,7 @@ import datetime
 
 from pydantic import Field
 
-from src.model.response import OratsResponse
+from .response import OratsResponse
 
 
 class SmvSummary(OratsResponse):

@@ -13,7 +13,7 @@ def entrypoint():
 
 
 def test():
-    with open('../tests/fixtures/strike.json') as handle:
+    with open('../../tests/fixtures/strike.json') as handle:
         strike = Strike(**json.load(handle))
     print(strike)
 

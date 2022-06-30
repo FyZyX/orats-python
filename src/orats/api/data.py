@@ -3,7 +3,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
-from .. import model
+from orats import model
 
 
 class DataApi:
