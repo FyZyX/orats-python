@@ -43,3 +43,6 @@ tests = [
     "pytest~=7.1.2",
     "tox~=3.25.1",
 ]
+docs = [
+    "sphinx~=5.0.2"
+]
