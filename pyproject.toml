@@ -37,7 +37,7 @@ Homepage = "https://github.com/lucasmlofaro/orats-python"
 
 [project.optional-dependencies]
 dev = [
-    "black",
+    "black~=22.6.0",
 ]
 tests = [
     "mypy~=0.961",
