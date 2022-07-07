@@ -50,6 +50,3 @@ docs = [
 
 [tool.setuptools]
 package-data = {"orats" = ["py.typed"]}
-
-[tool.mypy]
-mypy_path = "./src"

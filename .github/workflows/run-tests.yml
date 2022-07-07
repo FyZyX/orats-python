@@ -26,6 +26,6 @@ jobs:
         python -m pip install .[tests]
     - name: Type checking
       run: |
-        mypy src/orats/
+        mypy src
     - name: Run tox
       run: tox -e py
