@@ -1,9 +1,16 @@
 import datetime
+import json
 import unittest
 
 from orats.api.data import DataApi
 from orats.model.strike import Strike
 from orats.model.underlying import Ticker
+
+
+def test():
+    with open('../../tests/fixtures/strike.json') as handle:
+        strike = Strike(**json.load(handle))
+    print(strike)
 
 
 class MyDataApi(unittest.TestCase):

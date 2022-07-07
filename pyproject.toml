@@ -22,7 +22,6 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     # 'Framework :: AsyncIO',
-    # 'Framework :: Flake8',
     # 'Framework :: Sphinx',
     'Intended Audience :: Financial and Insurance Industry',
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -37,12 +36,20 @@ dependencies = [
 Homepage = "https://github.com/lucasmlofaro/orats-python"
 
 [project.optional-dependencies]
+dev = [
+    "black",
+]
 tests = [
-    "flake8~=4.0.1",
     "mypy~=0.961",
     "pytest~=7.1.2",
     "tox~=3.25.1",
 ]
 docs = [
-    "sphinx~=5.0.2"
+    "sphinx~=5.0.2",
 ]
+
+[tool.setuptools]
+package-data = {"orats" = ["py.typed"]}
+
+[tool.mypy]
+mypy_path = "./src"
