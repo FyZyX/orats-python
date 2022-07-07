@@ -1,17 +1,16 @@
 [build-system]
-requires = ["setuptools >= 60.0.0", "wheel >= 0.30.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "orats"
-version = '0.0.1'
+version = "0.1.0"
 description = "Client SDK for the ORATS API."
+authors = ["Lucas Lofaro <lucasmlofaro@gmail.com>"]
+license = "GPL-3.0-or-later"
 readme = "README.md"
-requires-python = ">=3.7"
-license = { file = "LICENSE" }
-authors = [
-    { name = "Lucas Lofaro", email = "lucasmlofaro@gmail.com" },
-]
+repository = "https://github.com/lucasmlofaro/orats-python"
+documentation = "https://lucasmlofaro.github.io/orats-python"
 keywords = ["options", "volatility", "orats"]
 classifiers = [
     "Development Status :: 1 - Planning",
@@ -27,26 +26,15 @@ classifiers = [
     'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
     'Operating System :: OS Independent',
 ]
-dependencies = [
-    "httpx~=0.23.0",
-    "pydantic~=1.9.1",
-]
 
-[project.urls]
-Homepage = "https://github.com/lucasmlofaro/orats-python"
+[tool.poetry.dependencies]
+python = "^3.7"
+httpx = "~=0.23.0"
+pydantic = "~=1.9.1"
 
-[project.optional-dependencies]
-dev = [
-    "black~=22.6.0",
-]
-tests = [
-    "mypy~=0.961",
-    "pytest~=7.1.2",
-    "tox~=3.25.1",
-]
-docs = [
-    "sphinx~=5.0.2",
-]
-
-[tool.setuptools]
-package-data = {"orats" = ["py.typed"]}
+[tool.poetry.dev-dependencies]
+black = "~=22.6.0"
+mypy = "~=0.961"
+pytest = "~=7.1.2"
+tox = "~=3.25.1"
+sphinx = "~=5.0.2"
