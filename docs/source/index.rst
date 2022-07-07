@@ -5,11 +5,11 @@ Welcome to the ORATS Python SDK documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   data-api
-   live-data-api
-   snapshot-api
-   backtest-api
-   scanner-api
+   apis/data
+   apis/live-data
+   apis/snapshot
+   apis/backtest
+   apis/scanner
 
 Indices and tables
 ==================
