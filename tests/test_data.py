@@ -1,5 +1,6 @@
 import datetime
 import json
+import os.path
 import unittest
 
 from orats.api.data import DataApi
@@ -8,7 +9,8 @@ from orats.model.underlying import Ticker
 
 
 def test():
-    with open('../../tests/fixtures/strike.json') as handle:
+    path = os.path.join(os.path.dirname(__file__), 'fixtures', 'strike.json')
+    with open(path) as handle:
         strike = Strike(**json.load(handle))
     print(strike)
 
