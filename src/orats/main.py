@@ -1,7 +1,7 @@
 import json
 
 from api.data import DataApi
-from model import Strike
+from model.strike import Strike
 
 
 def entrypoint():
