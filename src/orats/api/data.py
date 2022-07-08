@@ -1,3 +1,20 @@
+"""
+ORATS Data API.
+
+Primary features include
+
+* historical options data
+* historical volatilities
+* greeks
+* bid/ask quotes
+* 100+ indicators
+
+See the `product page`_ and `API docs`_.
+
+.. _product page: https://orats.com/data-api/
+.. _API docs: https://docs.orats.io/datav2-api-guide/
+"""
+
 import datetime
 from typing import Any, Iterable, Mapping, Sequence
 
@@ -18,9 +35,23 @@ from orats.model.volatility import HistoricalVolatility, IvRank
 
 
 class DataApi:
+    """Low-level interface to the Data API.
+
+    A direct translation of the Data API that simply wraps the
+    responses in structured Python objects.
+    """
     _base_url = "https://api.orats.io/datav2"
 
-    def __init__(self, token):
+    def __init__(self, token: str):
+        """Initializes an API interface from configuration.
+
+        Each API call requires a token for authentication.
+        This token is supplied to the instance to facilitate
+        the use of multiple instances utilizing different tokens.
+
+        Args:
+            token: The authentication token provided to the user.
+        """
         self._token = token
 
     def _url(self, path):
@@ -42,6 +73,15 @@ class DataApi:
         return response.json()["data"]
 
     def tickers(self, symbol: str = None) -> Sequence[Ticker]:
+        """Get the duration of available data for the given asset.
+
+        If no underlying asset is specified, the result will be a list
+        of all available ticker symbols. Each symbol is accompanied by
+        a start (min) and end (max) date for which data is available.
+
+        Args:
+            symbol: The ticker symbol of the underlying asset.
+        """
         data = self._get("tickers", ticker=symbol)
         return [Ticker(**t) for t in data]
 
