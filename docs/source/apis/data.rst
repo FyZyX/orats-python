@@ -23,18 +23,3 @@ Data API
 .. _Stock Split History: https://docs.orats.io/datav2-api-guide/data.html#stock-split-history
 .. _IV Rank: https://docs.orats.io/datav2-api-guide/data.html#iv-rank
 .. _IV Rank History: https://docs.orats.io/datav2-api-guide/data.html#iv-rank-history
-
-Data Structures
----------------
-
-History
-^^^^^^^
-
-Strikes
-^^^^^^^
-
-Core Data
-^^^^^^^^^
-
-Summaries
-^^^^^^^^^
