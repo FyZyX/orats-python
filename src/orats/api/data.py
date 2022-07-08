@@ -35,10 +35,12 @@ from orats.model.volatility import HistoricalVolatility, IvRank
 
 
 class DataApi:
-    """Low-level interface to the Data API.
+    """Low-level interface to the `Data API`_.
 
     A direct translation of the Data API that simply wraps the
     responses in structured Python objects.
+
+    .. _Data API: https://docs.orats.io/datav2-api-guide/data.html#data-api
     """
     _base_url = "https://api.orats.io/datav2"
 
@@ -73,14 +75,21 @@ class DataApi:
         return response.json()["data"]
 
     def tickers(self, symbol: str = None) -> Sequence[Ticker]:
-        """Get the duration of available data for the given asset.
+        """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
         of all available ticker symbols. Each symbol is accompanied by
         a start (min) and end (max) date for which data is available.
+        See the corresponding `Tickers`_ endpoint.
+
+        .. _Tickers: https://docs.orats.io/datav2-api-guide/data.html#tickers
 
         Args:
-            symbol: The ticker symbol of the underlying asset.
+            symbol:
+              The ticker symbol of the underlying asset.
+
+        Returns:
+            A list of tickers with data durations.
         """
         data = self._get("tickers", ticker=symbol)
         return [Ticker(**t) for t in data]
@@ -88,16 +97,39 @@ class DataApi:
     def strikes(
         self,
         *symbols: str,
-        delta: float = None,
-        days_to_expiration: int = None,
         fields: Iterable[str] = None,
+        days_to_expiration: (int, int) = None,
+        delta: (float, float) = None,
     ) -> Sequence[Strike]:
+        """Retrieves strikes data for the given asset(s).
+
+        See the corresponding `Strikes`_ endpoint.
+
+        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes
+
+        Args:
+            symbols:
+              List of assets to retrieve.
+            fields:
+              The subset of fields to retrieve.
+            days_to_expiration:
+              Filters results to a range of days to expiration.
+              Specified as a (min, max) range of integers.
+              Example: (30, 45)
+            delta:
+              Filters results to a range of delta values.
+              Specified as a (min, max) range of floating point numbers.
+              For example: (.30, .45)
+
+        Returns:
+            A list of strikes for each specified asset.
+        """
         data = self._get(
             "strikes",
             ticker=",".join(symbols),
-            fields=fields,
-            dte=days_to_expiration,
-            delta=delta,
+            fields=",".join(fields),
+            dte=",".join(days_to_expiration),
+            delta=",".join(delta),
         )
         return [Strike(**s) for s in data]
 
