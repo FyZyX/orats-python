@@ -539,6 +539,17 @@ class DataApi:
         self,
         *symbols: str,
     ) -> Sequence[EarningsHistory]:
+        """Retrieves earnings history data.
+
+        See the corresponding `Earnings History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+
+        Returns:
+          A list of earnings history data for each specified asset.
+        """
         data = self._get(
             "hist/earnings",
             ticker=",".join(symbols),
