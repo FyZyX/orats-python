@@ -16,7 +16,7 @@ See the `product page`_ and `API docs`_.
 """
 
 import datetime
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence, Tuple
 
 import httpx
 
@@ -86,11 +86,11 @@ class DataApi:
         .. _Tickers: https://docs.orats.io/datav2-api-guide/data.html#tickers
 
         Args:
-            symbol:
-              The ticker symbol of the underlying asset.
+          symbol:
+            The ticker symbol of the underlying asset.
 
         Returns:
-            A list of tickers with data durations.
+          A list of tickers with data durations.
         """
         data = self._get("tickers", ticker=symbol)
         return [Ticker(**t) for t in data]
@@ -99,8 +99,8 @@ class DataApi:
         self,
         *symbols: str,
         fields: Iterable[str] = None,
-        days_to_expiration: (int, int) = None,
-        delta: (float, float) = None,
+        days_to_expiration: Tuple[int, int] = None,
+        delta: Tuple[float, float] = None,
     ) -> Sequence[Strike]:
         """Retrieves strikes data for the given asset(s).
 
@@ -109,28 +109,30 @@ class DataApi:
         .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes
 
         Args:
-            symbols:
-              List of assets to retrieve.
-            fields:
-              The subset of fields to retrieve.
-            days_to_expiration:
-              Filters results to a range of days to expiration.
-              Specified as a (min, max) range of integers.
-              Example: (30, 45)
-            delta:
-              Filters results to a range of delta values.
-              Specified as a (min, max) range of floating point numbers.
-              For example: (.30, .45)
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+          days_to_expiration:
+            Filters results to a range of days to expiration.
+            Specified as a (min, max) range of integers.
+            Example: (30, 45)
+          delta:
+            Filters results to a range of delta values.
+            Specified as a (min, max) range of floating point numbers.
+            Example: (.30, .45)
 
         Returns:
-            A list of strikes for each specified asset.
+          A list of strikes for each specified asset.
         """
         data = self._get(
             "strikes",
             ticker=",".join(symbols),
-            fields=",".join(fields),
-            dte=",".join(days_to_expiration),
-            delta=",".join(delta),
+            fields=",".join(fields) if fields else fields,
+            dte=",".join(days_to_expiration)
+            if days_to_expiration
+            else days_to_expiration,
+            delta=",".join(delta) if delta else delta,
         )
         return [Strike(**s) for s in data]
 
