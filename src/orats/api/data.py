@@ -39,8 +39,6 @@ class DataApi:
 
     A direct translation of the Data API that simply wraps the
     responses in structured Python objects.
-
-    .. _Data API: https://docs.orats.io/datav2-api-guide/data.html#data-api
     """
 
     _base_url = "https://api.orats.io/datav2"
@@ -84,8 +82,6 @@ class DataApi:
         a start (min) and end (max) date for which data is available.
         See the corresponding `Tickers`_ endpoint.
 
-        .. _Tickers: https://docs.orats.io/datav2-api-guide/data.html#tickers
-
         Args:
           symbol:
             The ticker symbol of the underlying asset.
@@ -106,8 +102,6 @@ class DataApi:
         """Retrieves strikes data for the given asset(s).
 
         See the corresponding `Strikes`_ endpoint.
-
-        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes
 
         Args:
           symbols:
@@ -148,8 +142,6 @@ class DataApi:
         """Retrieves end of day strikes data for the given asset(s).
 
         See the corresponding `Strikes History`_ endpoint.
-
-        .. _Strikes History: https://docs.orats.io/datav2-api-guide/data.html#strikes-history
 
         Args:
           symbols:
@@ -192,8 +184,6 @@ class DataApi:
 
         See the corresponding `Strikes by Options`_ endpoint.
 
-        .. _Strikes by Options: https://docs.orats.io/datav2-api-guide/data.html#strikes-by-options
-
         Args:
           symbol:
             The ticker symbol of the underlying asset.
@@ -224,8 +214,6 @@ class DataApi:
 
         See the corresponding `Strikes History by Options`_ endpoint.
 
-        .. _Strikes History by Options: https://docs.orats.io/datav2-api-guide/data.html#strikes-history-by-options
-
         Args:
           symbol:
             The ticker symbol of the underlying asset.
@@ -253,10 +241,23 @@ class DataApi:
         *symbols: str,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyImplied]:
+        """Retrieves monthly implied data for monies.
+
+        See the corresponding `Monies`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of implied monies for each specified asset.
+        """
         data = self._get(
             "monies/implied",
             ticker=",".join(symbols),
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [MoneyImplied(**m) for m in data]
 
@@ -265,10 +266,23 @@ class DataApi:
         *symbols: str,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyForecast]:
+        """Retrieves monthly forecast data for monies.
+
+        See the corresponding `Monies`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of forecast monies for each specified asset.
+        """
         data = self._get(
             "monies/forecast",
             ticker=",".join(symbols),
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [MoneyForecast(**m) for m in data]
 
@@ -278,11 +292,26 @@ class DataApi:
         trade_date: datetime.date,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyImplied]:
+        """Retrieves end of day monthly implied history data for monies.
+
+        See the corresponding `Monies History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of implied monies for each specified asset.
+        """
         data = self._get(
             "hist/monies/implied",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [MoneyImplied(**m) for m in data]
 
@@ -292,11 +321,26 @@ class DataApi:
         trade_date: datetime.date,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyForecast]:
+        """Retrieves monthly forecast history data for monies.
+
+        See the corresponding `Monies History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of forecast monies for each specified asset.
+        """
         data = self._get(
             "hist/monies/forecast",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [MoneyForecast(**m) for m in data]
 
