@@ -53,7 +53,8 @@ class DataApi:
         the use of multiple instances utilizing different tokens.
 
         Args:
-            token: The authentication token provided to the user.
+          token:
+            The authentication token provided to the user.
         """
         self._token = token
 
@@ -184,9 +185,26 @@ class DataApi:
     def strikes_by_options(
         self,
         symbol: str,
-        strike: float,
         expiration_date: datetime.date,
+        strike: float,
     ) -> Sequence[Strike]:
+        """Retrieves current strikes data by ticker, expiry, and strike.
+
+        See the corresponding `Strikes by Options`_ endpoint.
+
+        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-by-options
+
+        Args:
+          symbol:
+            The ticker symbol of the underlying asset.
+          expiration_date:
+            The expiration date to retrieve.
+          strike:
+            The strike price to retrieve.
+
+        Returns:
+          A list of strikes for each specified asset.
+        """
         data = self._get(
             "strikes/options",
             ticker=symbol,
@@ -198,10 +216,29 @@ class DataApi:
     def strikes_history_by_options(
         self,
         symbol: str,
-        strike: float,
         expiration_date: datetime.date,
+        strike: float,
         trade_date: datetime.date = None,
     ) -> Sequence[Strike]:
+        """Retrieves current strikes data by ticker, expiry, and strike.
+
+        See the corresponding `Strikes History by Options`_ endpoint.
+
+        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-history-by-options
+
+        Args:
+          symbol:
+            The ticker symbol of the underlying asset.
+          trade_date:
+            The trade date to retrieve.
+          expiration_date:
+            The expiration date to retrieve.
+          strike:
+            The strike price to retrieve.
+
+        Returns:
+          A list of strikes for each specified asset.
+        """
         data = self._get(
             "hist/strikes/options",
             ticker=symbol,
