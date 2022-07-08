@@ -12,28 +12,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: ammaraskar/sphinx-action@master
+
+    - uses: actions/setup-python@v3
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
       with:
-        docs-folder: "docs/"
-        pre-build-command: "pip install toml sphinx-autodoc-annotation"
-    - uses: actions/upload-artifact@v3
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+        installer-parallel: true
+
+    - name: Load cached venv
+      id: venv-cache
+      uses: actions/cache@v2
       with:
-        name: DocumentationHTML
-        path: docs/build/html/
-    - name: Commit documentation changes
+        path: .venv
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+
+    - name: Install dependencies
+      if: steps.venv-cache.outputs.cache-hit != 'true'
+      run: poetry install -E docs --no-interaction --no-root
+
+    - name: Build documentation
       run: |
-        echo ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git
-        git clone ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git --branch gh-pages --single-branch gh-pages
-        cp -r docs/build/html/* gh-pages/
-        cd gh-pages
-        touch .nojekyll
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git commit -m "Update documentation" -a || true
-    - name: Push changes to gh-pages
-      uses: ad-m/github-push-action@master
+        cd docs/
+        poetry run make html
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        branch: gh-pages
-        directory: gh-pages
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/build/html
