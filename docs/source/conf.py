@@ -17,11 +17,11 @@
 import toml
 
 # Try to use a single source of truth for project info.
-with open('../../pyproject.toml', 'r') as f:
+with open("../../pyproject.toml", "r") as f:
     project_config = toml.load(f)
 
 project = "ORATS Python SDK"
-author = project_config["tool"]["poetry"]["authors"][0].split(' <')[0]
+author = project_config["tool"]["poetry"]["authors"][0].split(" <")[0]
 copyright = f"2022, {author}"
 
 # The full version, including alpha/beta/rc tags

@@ -42,6 +42,7 @@ class DataApi:
 
     .. _Data API: https://docs.orats.io/datav2-api-guide/data.html#data-api
     """
+
     _base_url = "https://api.orats.io/datav2"
 
     def __init__(self, token: str):
