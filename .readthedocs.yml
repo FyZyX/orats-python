@@ -3,14 +3,9 @@ version: 2
 build:
   os: ubuntu-20.04
   tools:
-    python: '3.10'
+    python: "3.10"
   jobs:
     post_install:
       - pip install poetry~=1.1.13
       - poetry config virtualenvs.create false
       - poetry install -E docs --no-interaction --no-root
-
-python:
-  install:
-    - method: pip
-      path: .
