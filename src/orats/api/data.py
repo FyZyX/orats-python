@@ -549,6 +549,17 @@ class DataApi:
         self,
         *symbols: str,
     ) -> Sequence[StockSplitHistory]:
+        """Retrieves stock split history data.
+
+        See the corresponding `Stock Split History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+
+        Returns:
+          A list of stock split history data for each specified asset.
+        """
         data = self._get(
             "hist/splits",
             ticker=",".join(symbols),

@@ -19,6 +19,7 @@ Data API
 .. _Daily Price: https://docs.orats.io/datav2-api-guide/data.html#daily-price
 .. _Historical Volatility: https://docs.orats.io/datav2-api-guide/data.html#historical-volatility
 .. _Dividend History: https://docs.orats.io/datav2-api-guide/data.html#dividend-history
+.. _Stock Split History: https://docs.orats.io/datav2-api-guide/data.html#stock-split-history
 
 Data Structures
 ---------------
