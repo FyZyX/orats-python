@@ -149,7 +149,7 @@ class DataApi:
 
         See the corresponding `Strikes History`_ endpoint.
 
-        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-history
+        .. _Strikes History: https://docs.orats.io/datav2-api-guide/data.html#strikes-history
 
         Args:
           symbols:
@@ -192,7 +192,7 @@ class DataApi:
 
         See the corresponding `Strikes by Options`_ endpoint.
 
-        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-by-options
+        .. _Strikes by Options: https://docs.orats.io/datav2-api-guide/data.html#strikes-by-options
 
         Args:
           symbol:
@@ -224,7 +224,7 @@ class DataApi:
 
         See the corresponding `Strikes History by Options`_ endpoint.
 
-        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-history-by-options
+        .. _Strikes History by Options: https://docs.orats.io/datav2-api-guide/data.html#strikes-history-by-options
 
         Args:
           symbol:
