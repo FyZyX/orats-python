@@ -129,10 +129,10 @@ class DataApi:
             "strikes",
             ticker=",".join(symbols),
             fields=",".join(fields) if fields else fields,
-            dte=",".join(days_to_expiration)
+            dte=",".join([str(d) for d in days_to_expiration])
             if days_to_expiration
             else days_to_expiration,
-            delta=",".join(delta) if delta else delta,
+            delta=",".join([str(d) for d in delta]) if delta else delta,
         )
         return [Strike(**s) for s in data]
 
