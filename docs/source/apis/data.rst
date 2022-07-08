@@ -12,6 +12,8 @@ Data API
 .. _Strikes History by Options: https://docs.orats.io/datav2-api-guide/data.html#strikes-history-by-options
 .. _Monies: https://docs.orats.io/datav2-api-guide/data.html#monies
 .. _Monies History: https://docs.orats.io/datav2-api-guide/data.html#monies-history
+.. _Summaries: https://docs.orats.io/datav2-api-guide/data.html#smv-summaries
+.. _Summaries History: https://docs.orats.io/datav2-api-guide/data.html#summaries-history
 
 Data Structures
 ---------------

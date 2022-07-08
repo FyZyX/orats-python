@@ -349,10 +349,23 @@ class DataApi:
         *symbols: str,
         fields: Iterable[str] = None,
     ) -> Sequence[SmvSummary]:
+        """Retrieves SMV Summary data.
+
+        See the corresponding `Summaries`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of SMV summaries for each specified asset.
+        """
         data = self._get(
             "summaries",
             ticker=",".join(symbols),
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [SmvSummary(**s) for s in data]
 
@@ -362,12 +375,27 @@ class DataApi:
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[SmvSummary]:
+        """Retrieves SMV Summary data.
+
+        See the corresponding `Summaries History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of SMV summaries for each specified asset.
+        """
         assert len(symbols) and trade_date is not None
         data = self._get(
             "hist/summaries",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [SmvSummary(**m) for m in data]
 
