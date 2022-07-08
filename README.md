@@ -7,7 +7,7 @@ This project is a wrapper around [ORATS](https://orats.com/) APIs.
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/orats)
 ![PyPI](https://img.shields.io/pypi/v/orats)
 ![PyPI - License](https://img.shields.io/pypi/l/orats)
-[![Docs](https://github.com/lucasmlofaro/orats-python/actions/workflows/build-docs.yml/badge.svg)](https://github.com/lucasmlofaro/orats-python/actions/workflows/build-docs.yml)
+[![Docs](https://readthedocs.org/projects/orats-python-sdk/badge/?version=latest)](https://orats-python-sdk.readthedocs.io/en/latest/?badge=latest)
 [![Tests](https://github.com/lucasmlofaro/orats-python/actions/workflows/run-tests.yml/badge.svg)](https://github.com/lucasmlofaro/orats-python/actions/workflows/run-tests.yml)
 
 > **NOTE**: ORATS offers numerous subscription services.
