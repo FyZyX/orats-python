@@ -141,16 +141,43 @@ class DataApi:
         *symbols: str,
         trade_date: datetime.date,
         fields: Iterable[str] = None,
-        days_to_expiration: int = None,
-        delta: float = None,
+        days_to_expiration: Tuple[int, int] = None,
+        delta: Tuple[float, float] = None,
     ) -> Sequence[Strike]:
+        """Retrieves end of day strikes data for the given asset(s).
+
+        See the corresponding `Strikes History`_ endpoint.
+
+        .. _Strikes: https://docs.orats.io/datav2-api-guide/data.html#strikes-history
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+          days_to_expiration:
+            Filters results to a range of days to expiration.
+            Specified as a (min, max) range of integers.
+            Example: (30, 45)
+          delta:
+            Filters results to a range of delta values.
+            Specified as a (min, max) range of floating point numbers.
+            Example: (.30, .45)
+
+        Returns:
+          A list of strikes for each specified asset.
+        """
         data = self._get(
             "hist/strikes",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
-            dte=days_to_expiration,
-            delta=delta,
+            fields=",".join(fields) if fields else fields,
+            dte=",".join([str(d) for d in days_to_expiration])
+            if days_to_expiration
+            else days_to_expiration,
+            delta=",".join([str(d) for d in delta]) if delta else delta,
         )
         return [Strike(**s) for s in data]
 
