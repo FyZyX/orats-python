@@ -15,7 +15,7 @@ jobs:
     - uses: ammaraskar/sphinx-action@master
       with:
         docs-folder: "docs/"
-        pre-build-command: "pip install toml"
+        pre-build-command: "pip install toml sphinx-autodoc-annotation"
     - uses: actions/upload-artifact@v3
       with:
         name: DocumentationHTML
