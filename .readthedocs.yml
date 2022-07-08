@@ -9,3 +9,8 @@ build:
       - pip install poetry~=1.1.13
       - poetry config virtualenvs.create false
       - poetry install -E docs --no-interaction --no-root
+
+python:
+  install:
+    - method: pip
+      path: .
