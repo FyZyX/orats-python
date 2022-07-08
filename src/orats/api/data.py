@@ -404,10 +404,23 @@ class DataApi:
         *symbols: str,
         fields: Iterable[str] = None,
     ) -> Sequence[Core]:
+        """Retrieves Core data.
+
+        See the corresponding `Core Data`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of core data for each specified asset.
+        """
         data = self._get(
             "cores",
             ticker=",".join(symbols),
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [Core(**c) for c in data]
 
@@ -417,12 +430,27 @@ class DataApi:
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[Core]:
+        """Retrieves end of day Core history data.
+
+        See the corresponding `Core Data History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of core data for each specified asset.
+        """
         assert len(symbols) and trade_date is not None
         data = self._get(
             "hist/cores",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [Core(**c) for c in data]
 

@@ -14,6 +14,8 @@ Data API
 .. _Monies History: https://docs.orats.io/datav2-api-guide/data.html#monies-history
 .. _Summaries: https://docs.orats.io/datav2-api-guide/data.html#smv-summaries
 .. _Summaries History: https://docs.orats.io/datav2-api-guide/data.html#summaries-history
+.. _Core Data: https://docs.orats.io/datav2-api-guide/data.html#core-data
+.. _Core Data History: https://docs.orats.io/datav2-api-guide/data.html#core-data-history
 
 Data Structures
 ---------------
