@@ -21,6 +21,8 @@ Data API
 .. _Dividend History: https://docs.orats.io/datav2-api-guide/data.html#dividend-history
 .. _Earnings History: https://docs.orats.io/datav2-api-guide/data.html#earnings-history
 .. _Stock Split History: https://docs.orats.io/datav2-api-guide/data.html#stock-split-history
+.. _IV Rank: https://docs.orats.io/datav2-api-guide/data.html#iv-rank
+.. _IV Rank History: https://docs.orats.io/datav2-api-guide/data.html#iv-rank-history
 
 Data Structures
 ---------------

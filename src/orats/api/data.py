@@ -582,10 +582,23 @@ class DataApi:
         *symbols: str,
         fields: Iterable[str] = None,
     ) -> Sequence[IvRank]:
+        """Retrieves current IV rank data.
+
+        See the corresponding `IV Rank`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of IV rank data for each specified asset.
+        """
         data = self._get(
             "ivrank",
             ticker=",".join(symbols),
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [IvRank(**e) for e in data]
 
@@ -595,11 +608,26 @@ class DataApi:
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[IvRank]:
+        """Retrieves IV rank history data.
+
+        See the corresponding `IV Rank History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of IV rank history data for each specified asset.
+        """
         assert len(symbols) and trade_date is not None
         data = self._get(
             "hist/ivrank",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [IvRank(**e) for e in data]
