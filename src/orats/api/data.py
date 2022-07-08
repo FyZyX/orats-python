@@ -460,12 +460,27 @@ class DataApi:
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[DailyPrice]:
+        """Retrieves end of day daily stock price data.
+
+        See the corresponding `Daily Price`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of daily price data for each specified asset.
+        """
         assert len(symbols) and trade_date is not None
         data = self._get(
             "hist/dailies",
             ticker=",".join(symbols),
             tradeDate=trade_date,
-            fields=fields,
+            fields=",".join(fields) if fields else fields,
         )
         return [DailyPrice(**p) for p in data]
 

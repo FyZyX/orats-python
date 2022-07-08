@@ -16,6 +16,7 @@ Data API
 .. _Summaries History: https://docs.orats.io/datav2-api-guide/data.html#summaries-history
 .. _Core Data: https://docs.orats.io/datav2-api-guide/data.html#core-data
 .. _Core Data History: https://docs.orats.io/datav2-api-guide/data.html#core-data-history
+.. _Daily Price: https://docs.orats.io/datav2-api-guide/data.html#daily-price
 
 Data Structures
 ---------------
