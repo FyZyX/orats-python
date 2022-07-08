@@ -518,6 +518,17 @@ class DataApi:
         self,
         *symbols: str,
     ) -> Sequence[DividendHistory]:
+        """Retrieves dividend history data.
+
+        See the corresponding `Dividend History`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+
+        Returns:
+          A list of dividend history data for each specified asset.
+        """
         data = self._get(
             "hist/divs",
             ticker=",".join(symbols),
