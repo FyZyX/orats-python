@@ -1,3 +1,5 @@
+"""Money-ness Specification.
+"""
 import datetime
 
 from pydantic import BaseModel, Field
@@ -6,6 +8,11 @@ from .response import OratsResponse
 
 
 class MoneyImplied(OratsResponse):
+    """Monthly implied money definitions.
+
+    See corresponding `Monies`_ response object.
+    """
+
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     underlying_price: float = Field(..., alias="stockPrice")
@@ -49,6 +56,11 @@ class MoneyImplied(OratsResponse):
 
 
 class MoneyForecast(BaseModel):
+    """Monthly forecast money definitions.
+
+    See corresponding `Monies`_ response object.
+    """
+
     underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")

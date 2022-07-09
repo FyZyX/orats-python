@@ -29,6 +29,7 @@ pydantic = "~1.9.1"
 sphinx = { version = "~5.0.2", optional = true }
 sphinx-autodoc-typehints = { version = "~1.18.3", optional = true }
 sphinx-rtd-theme = { version = "~1.0.0", optional = true }
+autodoc-pydantic = { version = "~1.7.2", optional = true }
 toml = { version = "~0.10.2", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -45,6 +46,7 @@ docs = [
     "sphinx",
     "sphinx-autodoc-typehints",
     "sphinx-rtd-theme",
+    "autodoc-pydantic",
     "toml",
 ]
 

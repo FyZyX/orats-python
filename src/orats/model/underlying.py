@@ -1,3 +1,6 @@
+"""Specifications associated with an underlying asset.
+"""
+
 import datetime
 
 from pydantic import Field
@@ -6,11 +9,18 @@ from .response import OratsResponse
 
 
 class Ticker(OratsResponse):
+    """Ticker symbol data duration definitions."""
+
     min_date: datetime.date = Field(..., alias="min")
     max_date: datetime.date = Field(..., alias="max")
 
 
 class DailyPrice(OratsResponse):
+    """Daily price definitions.
+
+    See corresponding `Daily Price`_ response object.
+    """
+
     trade_date: datetime.date = Field(..., alias="tradeDate")
     open: float = Field(..., alias="open")
     high: float = Field(..., alias="hiPx")
@@ -24,6 +34,11 @@ class DailyPrice(OratsResponse):
 
 
 class DividendHistory(OratsResponse):
+    """Dividend History definitions.
+
+    See corresponding `Dividend History`_ response object.
+    """
+
     ex_dividend_date: datetime.date = Field(..., alias="exDate")
     dividend_amount: float = Field(..., alias="divAmt")
     dividend_frequency: int = Field(..., alias="divFreq")
@@ -31,11 +46,21 @@ class DividendHistory(OratsResponse):
 
 
 class EarningsHistory(OratsResponse):
+    """Earnings history definitions.
+
+    See corresponding `Earnings History`_ response object.
+    """
+
     earnings_date: datetime.date = Field(..., alias="earnDate")
     time_of_day_announced: int = Field(..., alias="anncTod")
     updated_at: datetime.date = Field(..., alias="updatedAt")
 
 
 class StockSplitHistory(OratsResponse):
+    """Stock split history definitions.
+
+    See corresponding `Stock Split History`_ response object.
+    """
+
     split_date: datetime.date = Field(..., alias="splitDate")
     divisor: float
