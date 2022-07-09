@@ -1,5 +1,4 @@
-"""
-ORATS Data API.
+"""ORATS Data API.
 
 Primary features include
 

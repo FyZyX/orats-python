@@ -5,9 +5,14 @@ Welcome to the ORATS Python SDK documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: API
 
    apis/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Model
+
    model/index
 
 Indices and tables
