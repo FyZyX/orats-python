@@ -55,8 +55,8 @@ class DataApi:
         """
         self._token = token
 
-    def _url(self, path):
-        return "/".join((self._base_url, path))
+    def _url(self, path: str, historical: bool = False):
+        return "/".join((self._base_url, f"hist/{path}" if historical else path))
 
     def _update_params(self, params: Mapping[str, Any]):
         updated_params = dict(token=self._token)
@@ -66,9 +66,23 @@ class DataApi:
             updated_params[key] = param
         return updated_params
 
-    def _get(self, path: str, **params: Any):
+    def _get(
+        self,
+        path: str,
+        fields: Iterable[str] = None,
+        trade_date: datetime.date = None,
+        **params: Any,
+    ):
+        if trade_date is not None:
+            params.update(
+                tradeDate=trade_date,
+            )
+        if fields is not None:
+            params.update(
+                fields=",".join(fields),
+            )
         response = httpx.get(
-            url=self._url(path),
+            url=self._url(path, historical=trade_date is not None),
             params=self._update_params(params),
         )
         return response.json()["data"]
@@ -94,17 +108,21 @@ class DataApi:
     def strikes(
         self,
         *symbols: str,
+        trade_date: datetime.date = None,
         fields: Iterable[str] = None,
         days_to_expiration: Tuple[int, int] = None,
         delta: Tuple[float, float] = None,
     ) -> Sequence[Strike]:
         """Retrieves strikes data for the given asset(s).
 
-        See the corresponding `Strikes`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
 
         Args:
           symbols:
             List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
           fields:
             The subset of fields to retrieve.
           days_to_expiration:
@@ -122,50 +140,8 @@ class DataApi:
         data = self._get(
             "strikes",
             ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
-            dte=",".join([str(d) for d in days_to_expiration])
-            if days_to_expiration
-            else days_to_expiration,
-            delta=",".join([str(d) for d in delta]) if delta else delta,
-        )
-        return [Strike(**s) for s in data]
-
-    def strikes_history(
-        self,
-        *symbols: str,
-        trade_date: datetime.date,
-        fields: Iterable[str] = None,
-        days_to_expiration: Tuple[int, int] = None,
-        delta: Tuple[float, float] = None,
-    ) -> Sequence[Strike]:
-        """Retrieves end of day strikes data for the given asset(s).
-
-        See the corresponding `Strikes History`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-          days_to_expiration:
-            Filters results to a range of days to expiration.
-            Specified as a (min, max) range of integers.
-            Example: (30, 45)
-          delta:
-            Filters results to a range of delta values.
-            Specified as a (min, max) range of floating point numbers.
-            Example: (.30, .45)
-
-        Returns:
-          A list of strikes for each specified asset.
-        """
-        data = self._get(
-            "hist/strikes",
-            ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
             dte=",".join([str(d) for d in days_to_expiration])
             if days_to_expiration
             else days_to_expiration,
@@ -178,14 +154,19 @@ class DataApi:
         symbol: str,
         expiration_date: datetime.date,
         strike: float,
+        trade_date: datetime.date = None,
     ) -> Sequence[Strike]:
-        """Retrieves current strikes data by ticker, expiry, and strike.
+        """Retrieves strikes data by ticker, expiry, and strike.
 
-        See the corresponding `Strikes by Options`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Strikes by Options`_ and
+        `Strikes History by Options`_ endpoints.
 
         Args:
           symbol:
             The ticker symbol of the underlying asset.
+          trade_date:
+            The trade date to retrieve.
           expiration_date:
             The expiration date to retrieve.
           strike:
@@ -197,39 +178,7 @@ class DataApi:
         data = self._get(
             "strikes/options",
             ticker=symbol,
-            expirDate=expiration_date,
-            strike=strike,
-        )
-        return [Strike(**s) for s in data]
-
-    def strikes_history_by_options(
-        self,
-        symbol: str,
-        expiration_date: datetime.date,
-        strike: float,
-        trade_date: datetime.date = None,
-    ) -> Sequence[Strike]:
-        """Retrieves current strikes data by ticker, expiry, and strike.
-
-        See the corresponding `Strikes History by Options`_ endpoint.
-
-        Args:
-          symbol:
-            The ticker symbol of the underlying asset.
-          trade_date:
-            The trade date to retrieve.
-          expiration_date:
-            The expiration date to retrieve.
-          strike:
-            The strike price to retrieve.
-
-        Returns:
-          A list of strikes for each specified asset.
-        """
-        data = self._get(
-            "hist/strikes/options",
-            ticker=symbol,
-            tradeDate=trade_date,
+            trade_date=trade_date,
             expirDate=expiration_date,
             strike=strike,
         )
@@ -238,15 +187,19 @@ class DataApi:
     def monies_implied(
         self,
         *symbols: str,
+        trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyImplied]:
-        """Retrieves monthly implied data for monies.
+        """Retrieves end of day monthly implied history data for monies.
 
-        See the corresponding `Monies`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
           symbols:
             List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
           fields:
             The subset of fields to retrieve.
 
@@ -256,22 +209,27 @@ class DataApi:
         data = self._get(
             "monies/implied",
             ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
         return [MoneyImplied(**m) for m in data]
 
     def monies_forecast(
         self,
         *symbols: str,
+        trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[MoneyForecast]:
-        """Retrieves monthly forecast data for monies.
+        """Retrieves monthly forecast history data for monies.
 
-        See the corresponding `Monies`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
           symbols:
             List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
           fields:
             The subset of fields to retrieve.
 
@@ -281,102 +239,21 @@ class DataApi:
         data = self._get(
             "monies/forecast",
             ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
-        )
-        return [MoneyForecast(**m) for m in data]
-
-    def monies_implied_history(
-        self,
-        *symbols: str,
-        trade_date: datetime.date,
-        fields: Iterable[str] = None,
-    ) -> Sequence[MoneyImplied]:
-        """Retrieves end of day monthly implied history data for monies.
-
-        See the corresponding `Monies History`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of implied monies for each specified asset.
-        """
-        data = self._get(
-            "hist/monies/implied",
-            ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
-        )
-        return [MoneyImplied(**m) for m in data]
-
-    def monies_forecast_history(
-        self,
-        *symbols: str,
-        trade_date: datetime.date,
-        fields: Iterable[str] = None,
-    ) -> Sequence[MoneyForecast]:
-        """Retrieves monthly forecast history data for monies.
-
-        See the corresponding `Monies History`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of forecast monies for each specified asset.
-        """
-        data = self._get(
-            "hist/monies/forecast",
-            ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
         return [MoneyForecast(**m) for m in data]
 
     def summaries(
         self,
         *symbols: str,
-        fields: Iterable[str] = None,
-    ) -> Sequence[SmvSummary]:
-        """Retrieves SMV Summary data.
-
-        See the corresponding `Summaries`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of SMV summaries for each specified asset.
-        """
-        data = self._get(
-            "summaries",
-            ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
-        )
-        return [SmvSummary(**s) for s in data]
-
-    def summaries_history(
-        self,
-        *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[SmvSummary]:
         """Retrieves SMV Summary data.
 
-        See the corresponding `Summaries History`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
 
         Args:
           symbols:
@@ -391,47 +268,54 @@ class DataApi:
         """
         assert len(symbols) and trade_date is not None
         data = self._get(
-            "hist/summaries",
+            "summaries",
             ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
         return [SmvSummary(**m) for m in data]
 
     def core_data(
         self,
         *symbols: str,
+        trade_date: datetime.date = None,
         fields: Iterable[str] = None,
     ) -> Sequence[Core]:
-        """Retrieves Core data.
+        """Retrieves Core history data.
 
-        See the corresponding `Core Data`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
 
         Args:
           symbols:
             List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
           fields:
             The subset of fields to retrieve.
 
         Returns:
           A list of core data for each specified asset.
         """
+        assert len(symbols) and trade_date is not None
         data = self._get(
             "cores",
             ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
         return [Core(**c) for c in data]
 
-    def core_data_history(
+    def iv_rank(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[Core]:
-        """Retrieves end of day Core history data.
+    ) -> Sequence[IvRank]:
+        """Retrieves IV rank data.
 
-        See the corresponding `Core Data History`_ endpoint.
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
 
         Args:
           symbols:
@@ -442,46 +326,16 @@ class DataApi:
             The subset of fields to retrieve.
 
         Returns:
-          A list of core data for each specified asset.
+          A list of IV rank history data for each specified asset.
         """
         assert len(symbols) and trade_date is not None
         data = self._get(
-            "hist/cores",
+            "ivrank",
             ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
-        return [Core(**c) for c in data]
-
-    def daily_price(
-        self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[DailyPrice]:
-        """Retrieves end of day daily stock price data.
-
-        See the corresponding `Daily Price`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of daily price data for each specified asset.
-        """
-        assert len(symbols) and trade_date is not None
-        data = self._get(
-            "hist/dailies",
-            ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
-        )
-        return [DailyPrice(**p) for p in data]
+        return [IvRank(**e) for e in data]
 
     def historical_volatility(
         self,
@@ -506,12 +360,42 @@ class DataApi:
         """
         assert len(symbols) and trade_date is not None
         data = self._get(
-            "hist/hvs",
+            "hvs",
             ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
+            trade_date=trade_date,
+            fields=fields,
         )
         return [HistoricalVolatility(**hv) for hv in data]
+
+    def daily_price(
+        self,
+        *symbols: str,
+        trade_date: datetime.date = None,
+        fields: Iterable[str] = None,
+    ) -> Sequence[DailyPrice]:
+        """Retrieves end of day daily stock price data.
+
+        See the corresponding `Daily Price`_ endpoint.
+
+        Args:
+          symbols:
+            List of assets to retrieve.
+          trade_date:
+            The trade date to retrieve.
+          fields:
+            The subset of fields to retrieve.
+
+        Returns:
+          A list of daily price data for each specified asset.
+        """
+        assert len(symbols) and trade_date is not None
+        data = self._get(
+            "dailies",
+            ticker=",".join(symbols),
+            trade_date=trade_date,
+            fields=fields,
+        )
+        return [DailyPrice(**p) for p in data]
 
     def dividend_history(
         self,
@@ -575,58 +459,3 @@ class DataApi:
             ticker=",".join(symbols),
         )
         return [StockSplitHistory(**e) for e in data]
-
-    def iv_rank(
-        self,
-        *symbols: str,
-        fields: Iterable[str] = None,
-    ) -> Sequence[IvRank]:
-        """Retrieves current IV rank data.
-
-        See the corresponding `IV Rank`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of IV rank data for each specified asset.
-        """
-        data = self._get(
-            "ivrank",
-            ticker=",".join(symbols),
-            fields=",".join(fields) if fields else fields,
-        )
-        return [IvRank(**e) for e in data]
-
-    def iv_rank_history(
-        self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[IvRank]:
-        """Retrieves IV rank history data.
-
-        See the corresponding `IV Rank History`_ endpoint.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of IV rank history data for each specified asset.
-        """
-        assert len(symbols) and trade_date is not None
-        data = self._get(
-            "hist/ivrank",
-            ticker=",".join(symbols),
-            tradeDate=trade_date,
-            fields=",".join(fields) if fields else fields,
-        )
-        return [IvRank(**e) for e in data]
