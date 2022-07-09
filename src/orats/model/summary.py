@@ -10,7 +10,10 @@ from .response import OratsResponse
 
 class SmvSummary(OratsResponse):
     """SMV Summary data definitions.
+
+    See corresponding `Summaries`_ response object.
     """
+
     underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     underlying_price: float = Field(..., alias="stockPrice")

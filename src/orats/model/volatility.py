@@ -10,7 +10,10 @@ from .response import OratsResponse
 
 class HistoricalVolatility(OratsResponse):
     """Historical volatility definitions.
+
+    See corresponding `Historical Volatility`_ response object.
     """
+
     trade_date: datetime.date = Field(..., alias="tradeDate")
     hv_1_day: float = Field(..., alias="orHv1d")
     hv_5_day: float = Field(..., alias="orHv5d")
@@ -61,7 +64,10 @@ class HistoricalVolatility(OratsResponse):
 
 class IvRank(OratsResponse):
     """IV Rank definitions.
+
+    See corresponding `IV Rank`_ response object.
     """
+
     trade_date: datetime.date = Field(..., alias="tradeDate")
     iv: float = Field(..., alias="iv")
     iv_rank_1_month: float = Field(..., alias="ivRank1m")

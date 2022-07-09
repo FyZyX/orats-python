@@ -20,7 +20,7 @@ if you are not subscribed to the necessary services.
 ### Development Tooling
 
 - Source Control Management: [Git](https://git-scm.com/) + [GitHub](https://github.com/)
-- Documentation: [Sphinx](https://www.sphinx-doc.org/) + [GitHub Pages](https://pages.github.com/)
+- Documentation: [Sphinx](https://www.sphinx-doc.org/) + [Read the Docs](https://readthedocs.org/)
 - Dependencies and Packaging: [Poetry](https://python-poetry.org/)
 - CI/CD: [GitHub Actions](https://github.com/features/actions)
 - Code Style: [Black](https://pypi.org/project/black/)

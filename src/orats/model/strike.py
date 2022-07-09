@@ -10,7 +10,10 @@ from .response import OratsResponse
 
 class Strike(OratsResponse):
     """Verbose strike definitions.
+
+    See corresponding `Strikes`_ response object.
     """
+
     underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
