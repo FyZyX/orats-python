@@ -5,6 +5,7 @@ Data Structures
    :maxdepth: 2
 
    history
+   monies
    strikes
    core
    summaries
