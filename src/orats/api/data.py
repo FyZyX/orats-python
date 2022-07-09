@@ -19,6 +19,7 @@ from typing import Any, Iterable, Mapping, Sequence, Tuple
 
 import httpx
 
+from orats.errors import UnauthorizedUserError
 from orats.model.core import Core
 from orats.model.money import MoneyForecast, MoneyImplied
 from orats.model.strike import Strike
@@ -85,7 +86,12 @@ class DataApi:
             url=self._url(path, historical=trade_date is not None),
             params=self._update_params(params),
         )
-        return response.json()["data"]
+        body = response.json()
+        if response.status_code == 403:
+            raise UnauthorizedUserError
+        for x in body["data"]:
+            print(x["dte"])
+        return body["data"]
 
     def tickers(self, symbol: str = None) -> Sequence[Ticker]:
         """Retrieves the duration of available data for various assets.
@@ -127,12 +133,14 @@ class DataApi:
             The subset of fields to retrieve.
           days_to_expiration:
             Filters results to a range of days to expiration.
-            Specified as a (min, max) range of integers.
-            Example: (30, 45)
+            Specified as a ``(min, max)`` range of integers.
+            To ignore an upper/lower bound, use `...` as a placeholder.
+            Examples: ``(30, 45)``, ``(30, ...)``, ``(..., 45)``
           delta:
             Filters results to a range of delta values.
-            Specified as a (min, max) range of floating point numbers.
-            Example: (.30, .45)
+            Specified as a ``(min, max)`` range of floating point numbers.
+            To ignore an upper/lower bound, use ``...`` as a placeholder.
+            Examples: ``(.30, .45)``, ``(.30, ...)``, ``(..., .45)``
 
         Returns:
           A list of strikes for each specified asset.
