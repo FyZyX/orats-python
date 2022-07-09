@@ -1,3 +1,6 @@
+"""Strike specification.
+"""
+
 import datetime
 
 from pydantic import Field
@@ -6,6 +9,8 @@ from .response import OratsResponse
 
 
 class Strike(OratsResponse):
+    """Verbose strike definitions.
+    """
     underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
