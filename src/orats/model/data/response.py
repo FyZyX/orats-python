@@ -66,7 +66,7 @@ class StrikeResponse(DataApiResponse):
 class MoneyImpliedResponse(DataApiResponse):
     """Monthly implied money definitions.
 
-    See corresponding `Monies`_ response object.
+    See corresponding `Monies Implied`_ response object.
     """
 
     underlying_symbol: str = Field(..., alias="ticker")
@@ -115,7 +115,7 @@ class MoneyImpliedResponse(DataApiResponse):
 class MoneyForecastResponse(DataApiResponse):
     """Monthly forecast money definitions.
 
-    See corresponding `Monies`_ response object.
+    See corresponding `Monies Forecast`_ response object.
     """
 
     underlying_symbol: str = Field(..., alias="ticker")
