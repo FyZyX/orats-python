@@ -7,7 +7,7 @@ Welcome to the ORATS Python SDK documentation!
    :maxdepth: 2
    :caption: API
 
-   apis/index
+   endpoints/index
 
 .. toctree::
    :maxdepth: 2
