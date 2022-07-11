@@ -14,8 +14,7 @@ See the `product page`_ and `API docs`_.
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
 
-import datetime
-from typing import Any, Iterable, Mapping, Sequence, Tuple
+from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
@@ -40,41 +39,31 @@ class DataApiEndpoint:
         """
         self._token = token
 
-    def _url(self, path: str, historical: bool = False):
-        return "/".join((self._base_url, f"hist/{path}" if historical else path))
+    def _url(self, path: str):
+        return "/".join((self._base_url, path))
 
     def _update_params(self, params: Mapping[str, Any]):
         updated_params = dict(token=self._token)
         for key, param in params.items():
             if param is None:
                 continue
+            if isinstance(param, Iterable):
+                param = ",".join([str(v) for v in param])
             updated_params[key] = param
         return updated_params
 
     def _get(
         self,
         path: str,
-        fields: Iterable[str] = None,
-        trade_date: datetime.date = None,
         **params: Any,
     ):
-        if trade_date is not None:
-            params.update(
-                tradeDate=trade_date,
-            )
-        if fields is not None:
-            params.update(
-                fields=",".join(fields),
-            )
         response = httpx.get(
-            url=self._url(path, historical=trade_date is not None),
+            url=self._url(path),
             params=self._update_params(params),
         )
         body = response.json()
         if response.status_code == 403:
             raise UnauthorizedUserError
-        for x in body["data"]:
-            print(x["dte"])
         return body["data"]
 
 
@@ -111,19 +100,7 @@ class StrikesEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        # TODO: What's the deal with httpx and params when passed a list?
-        #  Perhaps we can avoid all of this formatting...
-        data = self._get(
-            "strikes",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-            dte=",".join([str(d) for d in request.expiration_range])
-            if request.expiration_range
-            else request.expiration_range,
-            delta=",".join([str(d) for d in request.delta_range])
-            if request.delta_range
-            else request.delta_range,
-        )
+        data = self._get("strikes", **request.dict(by_alias=True))
         return [res.StrikeResponse(**s) for s in data]
 
 
@@ -140,18 +117,7 @@ class StrikesHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        data = self._get(
-            "strikes",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-            dte=",".join([str(d) for d in request.expiration_range])
-            if request.expiration_range
-            else request.expiration_range,
-            delta=",".join([str(d) for d in request.delta_range])
-            if request.delta_range
-            else request.delta_range,
-        )
+        data = self._get("hist/strikes", **request.dict(by_alias=True))
         return [res.StrikeResponse(**s) for s in data]
 
 
@@ -574,24 +540,24 @@ class DataApi:
     responses in structured Python objects.
     """
 
-    tickers = TickersEndpoint
-    strikes = StrikesEndpoint
-    strikes_history = StrikesHistoryEndpoint
-    strikes_by_options = StrikesByOptionsEndpoint
-    strikes_history_by_options = StrikesHistoryByOptionsEndpoint
-    monies_implied = MoniesImpliedEndpoint
-    monies_implied_history = MoniesImpliedHistoryEndpoint
-    monies_forecast = MoniesForecastEndpoint
-    monies_forecast_history = MoniesForecastHistoryEndpoint
-    summaries = SummariesEndpoint
-    summaries_history = SummariesHistoryEndpoint
-    core_date = CoreDataEndpoint
-    core_data_history = CoreDataHistoryEndpoint
-    daily_price = DailyPriceEndpoint
-    historical_volatility = HistoricalVolatilityEndpoint
-    dividend_history = DividendHistoryEndpoint
-    earnings_history = EarningsHistoryEndpoint
-    stock_split_history = StockSplitHistoryEndpoint
-    iv_rank = IvRankEndpoint
-    iv_rank_history = IvRankHistoryEndpoint
-
+    def __init__(self, token: str):
+        self.tickers = TickersEndpoint(token)
+        self.strikes = StrikesEndpoint(token)
+        self.strikes_history = StrikesHistoryEndpoint(token)
+        self.strikes_by_options = StrikesByOptionsEndpoint(token)
+        self.strikes_history_by_options = StrikesHistoryByOptionsEndpoint(token)
+        self.monies_implied = MoniesImpliedEndpoint(token)
+        self.monies_implied_history = MoniesImpliedHistoryEndpoint(token)
+        self.monies_forecast = MoniesForecastEndpoint(token)
+        self.monies_forecast_history = MoniesForecastHistoryEndpoint(token)
+        self.summaries = SummariesEndpoint(token)
+        self.summaries_history = SummariesHistoryEndpoint(token)
+        self.core_date = CoreDataEndpoint(token)
+        self.core_data_history = CoreDataHistoryEndpoint(token)
+        self.daily_price = DailyPriceEndpoint(token)
+        self.historical_volatility = HistoricalVolatilityEndpoint(token)
+        self.dividend_history = DividendHistoryEndpoint(token)
+        self.earnings_history = EarningsHistoryEndpoint(token)
+        self.stock_split_history = StockSplitHistoryEndpoint(token)
+        self.iv_rank = IvRankEndpoint(token)
+        self.iv_rank_history = IvRankHistoryEndpoint(token)

@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence, Tuple, Iterable, Optional
+from typing import Sequence, Tuple, Iterable, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
@@ -11,7 +11,10 @@ def dependency_check(v, values):
 
 
 class DataApiRequest(BaseModel):
-    pass
+    class Config:
+        allow_population_by_field_name = True
+        # TODO: Kinda hacky way to use Ellipsis in DTE and delta range filters.
+        arbitrary_types_allowed = True
 
 
 class _SingleTickerTemplateRequest(DataApiRequest):
@@ -36,8 +39,12 @@ class TickersRequest(_SingleTickerTemplateRequest):
 class StrikesRequest(DataApiRequest):
     tickers: Sequence[str] = Field(..., alias="ticker")
     fields: Optional[Iterable[str]]
-    expiration_range: Optional[Tuple[float, float]] = Field(..., alias="dte")
-    delta_range: Optional[Tuple[int, int]] = Field(..., alias="delta")
+    expiration_range: Optional[
+        Tuple[Union[int, type(Ellipsis)], Union[int, type(Ellipsis)]]
+    ] = Field(..., alias="dte")
+    delta_range: Optional[
+        Tuple[Union[float, type(Ellipsis)], Union[float, type(Ellipsis)]]
+    ] = Field(..., alias="delta")
 
 
 class StrikesHistoryRequest(StrikesRequest):

@@ -4,7 +4,10 @@ from pydantic import BaseModel, Field
 
 
 class DataApiResponse(BaseModel):
-    pass
+    class Config:
+        allow_population_by_field_name = True
+        # TODO: Kinda hacky way to use Ellipsis in DTE and delta range filters.
+        arbitrary_types_allowed = True
 
 
 class TickerResponse(DataApiResponse):
