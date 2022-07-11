@@ -20,19 +20,13 @@ from typing import Any, Iterable, Mapping, Sequence, Tuple
 import httpx
 
 from orats.errors import UnauthorizedUserError
-from orats.model.core import Core
-from orats.model.money import MoneyForecast, MoneyImplied
-from orats.model.request import TickersRequest
-from orats.model.strike import Strike
-from orats.model.summary import SmvSummary
-from orats.model.underlying import (
-    Ticker,
-    DailyPrice,
-    DividendHistory,
-    EarningsHistory,
-    StockSplitHistory,
-)
-from orats.model.volatility import HistoricalVolatility, IvRank
+from orats.model.data import core
+from orats.model.data import money
+from orats.model.data import request
+from orats.model.data import strike
+from orats.model.data import summary
+from orats.model.data import underlying
+from orats.model.data import volatility
 
 
 class DataApiEndpoint:
