@@ -47,7 +47,7 @@ class DataApiEndpoint:
         for key, param in params.items():
             if param is None:
                 continue
-            if isinstance(param, Iterable):
+            if not isinstance(param, str) and isinstance(param, Iterable):
                 param = ",".join([str(v) for v in param])
             updated_params[key] = param
         return updated_params
@@ -68,7 +68,7 @@ class DataApiEndpoint:
 
 
 class TickersEndpoint(DataApiEndpoint):
-    def query(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
+    def __call__(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -83,12 +83,12 @@ class TickersEndpoint(DataApiEndpoint):
         Returns:
           A list of tickers with data durations.
         """
-        data = self._get("tickers", ticker=request.ticker)
+        data = self._get("tickers", **request.dict(by_alias=True))
         return [res.TickerResponse(**t) for t in data]
 
 
 class StrikesEndpoint(DataApiEndpoint):
-    def query(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
+    def __call__(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
         See the corresponding `Strikes`_ endpoint.
@@ -105,7 +105,8 @@ class StrikesEndpoint(DataApiEndpoint):
 
 
 class StrikesHistoryEndpoint(DataApiEndpoint):
-    def query(self, request: req.StrikesHistoryRequest) -> Sequence[res.StrikeResponse]:
+    def __call__(self, request: req.StrikesHistoryRequest) -> Sequence[
+        res.StrikeResponse]:
         """Retrieves historical strikes data for the given asset(s).
 
         See the corresponding `Strikes History`_ endpoints.
@@ -122,7 +123,7 @@ class StrikesHistoryEndpoint(DataApiEndpoint):
 
 
 class StrikesByOptionsEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.StrikesByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
@@ -147,7 +148,7 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
 
 
 class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.StrikesHistoryByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
@@ -173,7 +174,7 @@ class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
 
 
 class MoniesImpliedEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.MoniesRequest,
     ) -> Sequence[res.MoneyImpliedResponse]:
@@ -197,7 +198,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
 
 
 class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.MoniesHistoryRequest,
     ) -> Sequence[res.MoneyImpliedResponse]:
@@ -222,7 +223,7 @@ class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
 
 
 class MoniesForecastEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.MoniesRequest,
     ) -> Sequence[res.MoneyForecastResponse]:
@@ -246,7 +247,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
 
 
 class MoniesForecastHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.MoniesHistoryRequest,
     ) -> Sequence[res.MoneyForecastResponse]:
@@ -271,7 +272,7 @@ class MoniesForecastHistoryEndpoint(DataApiEndpoint):
 
 
 class SummariesEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.SummariesRequest,
     ) -> Sequence[res.SmvSummaryResponse]:
@@ -295,7 +296,7 @@ class SummariesEndpoint(DataApiEndpoint):
 
 
 class SummariesHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.SummariesHistoryRequest,
     ) -> Sequence[res.SmvSummaryResponse]:
@@ -320,7 +321,7 @@ class SummariesHistoryEndpoint(DataApiEndpoint):
 
 
 class CoreDataEndpoint(DataApiEndpoint):
-    def query(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
+    def __call__(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
         """Retrieves Core data.
 
         See the corresponding `Core Data`_ endpoint.
@@ -341,7 +342,7 @@ class CoreDataEndpoint(DataApiEndpoint):
 
 
 class CoreDataHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.CoreDataHistoryRequest,
     ) -> Sequence[res.CoreResponse]:
@@ -366,7 +367,7 @@ class CoreDataHistoryEndpoint(DataApiEndpoint):
 
 
 class DailyPriceEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.DailyPriceRequest,
     ) -> Sequence[res.DailyPriceResponse]:
@@ -391,7 +392,7 @@ class DailyPriceEndpoint(DataApiEndpoint):
 
 
 class HistoricalVolatilityEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.HistoricalVolatilityRequest,
     ) -> Sequence[res.HistoricalVolatilityResponse]:
@@ -416,7 +417,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.DividendHistoryRequest,
     ) -> Sequence[res.DividendHistoryResponse]:
@@ -439,7 +440,7 @@ class DividendHistoryEndpoint(DataApiEndpoint):
 
 
 class EarningsHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.EarningsHistoryRequest,
     ) -> Sequence[res.EarningsHistoryResponse]:
@@ -462,7 +463,7 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
 
 
 class StockSplitHistoryEndpoint(DataApiEndpoint):
-    def query(
+    def __call__(
         self,
         request: req.StockSplitHistoryRequest,
     ) -> Sequence[res.StockSplitHistoryResponse]:
@@ -485,7 +486,7 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
 
 
 class IvRankEndpoint(DataApiEndpoint):
-    def iv_rank(
+    def __call__(
         self,
         request: req.IvRankRequest,
     ) -> Sequence[res.IvRankResponse]:
@@ -509,7 +510,7 @@ class IvRankEndpoint(DataApiEndpoint):
 
 
 class IvRankHistoryEndpoint(DataApiEndpoint):
-    def iv_rank(
+    def __call__(
         self,
         request: req.IvRankHistoryRequest,
     ) -> Sequence[res.IvRankResponse]:
