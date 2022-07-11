@@ -79,7 +79,7 @@ class DataApiEndpoint:
 
 
 class TickersEndpoint(DataApiEndpoint):
-    def query(self, request: req.TickersRequest) -> Sequence[response.TickerResponse]:
+    def query(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -399,31 +399,6 @@ class CoreDataHistoryEndpoint(DataApiEndpoint):
         return [res.CoreResponse(**c) for c in data]
 
 
-class HistoricalVolatilityEndpoint(DataApiEndpoint):
-    def query(
-        self,
-        request: req.HistoricalVolatilityRequest,
-    ) -> Sequence[res.HistoricalVolatilityResponse]:
-        """Retrieves historical volatility data.
-
-        See the corresponding `Historical Volatility`_ endpoint.
-
-        Args:
-          request:
-            HistoricalVolatility request object.
-
-        Returns:
-          A list of historical volatility data for each specified asset.
-        """
-        data = self._get(
-            "hvs",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
-        return [res.HistoricalVolatilityResponse(**hv) for hv in data]
-
-
 class DailyPriceEndpoint(DataApiEndpoint):
     def query(
         self,
@@ -447,6 +422,31 @@ class DailyPriceEndpoint(DataApiEndpoint):
             fields=request.fields,
         )
         return [res.DailyPriceResponse(**p) for p in data]
+
+
+class HistoricalVolatilityEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.HistoricalVolatilityRequest,
+    ) -> Sequence[res.HistoricalVolatilityResponse]:
+        """Retrieves historical volatility data.
+
+        See the corresponding `Historical Volatility`_ endpoint.
+
+        Args:
+          request:
+            HistoricalVolatility request object.
+
+        Returns:
+          A list of historical volatility data for each specified asset.
+        """
+        data = self._get(
+            "hvs",
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
+        )
+        return [res.HistoricalVolatilityResponse(**hv) for hv in data]
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
@@ -573,3 +573,25 @@ class DataApi:
     A direct translation of the Data API that simply wraps the
     responses in structured Python objects.
     """
+
+    tickers = TickersEndpoint
+    strikes = StrikesEndpoint
+    strikes_history = StrikesHistoryEndpoint
+    strikes_by_options = StrikesByOptionsEndpoint
+    strikes_history_by_options = StrikesHistoryByOptionsEndpoint
+    monies_implied = MoniesImpliedEndpoint
+    monies_implied_history = MoniesImpliedHistoryEndpoint
+    monies_forecast = MoniesForecastEndpoint
+    monies_forecast_history = MoniesForecastHistoryEndpoint
+    summaries = SummariesEndpoint
+    summaries_history = SummariesHistoryEndpoint
+    core_date = CoreDataEndpoint
+    core_data_history = CoreDataHistoryEndpoint
+    daily_price = DailyPriceEndpoint
+    historical_volatility = HistoricalVolatilityEndpoint
+    dividend_history = DividendHistoryEndpoint
+    earnings_history = EarningsHistoryEndpoint
+    stock_split_history = StockSplitHistoryEndpoint
+    iv_rank = IvRankEndpoint
+    iv_rank_history = IvRankHistoryEndpoint
+
