@@ -34,13 +34,7 @@ from orats.model.underlying import (
 from orats.model.volatility import HistoricalVolatility, IvRank
 
 
-class DataApi:
-    """Low-level interface to the `Data API`_.
-
-    A direct translation of the Data API that simply wraps the
-    responses in structured Python objects.
-    """
-
+class DataApiEndpoint:
     _base_url = "https://api.orats.io/datav2"
 
     def __init__(self, token: str):
@@ -93,7 +87,9 @@ class DataApi:
             print(x["dte"])
         return body["data"]
 
-    def tickers(self, symbol: str = None) -> Sequence[Ticker]:
+
+class TickersEndpoint(DataApiEndpoint):
+    def query(self, symbol: str = None) -> Sequence[Ticker]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -111,13 +107,15 @@ class DataApi:
         data = self._get("tickers", ticker=symbol)
         return [Ticker(**t) for t in data]
 
-    def strikes(
+
+class StrikeSearchEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-        days_to_expiration: Tuple[int, int] = None,
-        delta: Tuple[float, float] = None,
+        expiration_range: Tuple[int, int] = None,
+        delta_range: Tuple[float, float] = None,
     ) -> Sequence[Strike]:
         """Retrieves strikes data for the given asset(s).
 
@@ -131,12 +129,12 @@ class DataApi:
             The trade date to retrieve.
           fields:
             The subset of fields to retrieve.
-          days_to_expiration:
+          expiration_range:
             Filters results to a range of days to expiration.
             Specified as a ``(min, max)`` range of integers.
             To ignore an upper/lower bound, use `...` as a placeholder.
             Examples: ``(30, 45)``, ``(30, ...)``, ``(..., 45)``
-          delta:
+          delta_range:
             Filters results to a range of delta values.
             Specified as a ``(min, max)`` range of floating point numbers.
             To ignore an upper/lower bound, use ``...`` as a placeholder.
@@ -150,14 +148,18 @@ class DataApi:
             ticker=",".join(symbols),
             trade_date=trade_date,
             fields=fields,
-            dte=",".join([str(d) for d in days_to_expiration])
-            if days_to_expiration
-            else days_to_expiration,
-            delta=",".join([str(d) for d in delta]) if delta else delta,
+            dte=",".join([str(d) for d in expiration_range])
+            if expiration_range
+            else expiration_range,
+            delta=",".join([str(d) for d in delta_range])
+            if delta_range
+            else delta_range,
         )
         return [Strike(**s) for s in data]
 
-    def strikes_by_options(
+
+class StrikeEndpoint(DataApiEndpoint):
+    def query(
         self,
         symbol: str,
         expiration_date: datetime.date,
@@ -192,7 +194,9 @@ class DataApi:
         )
         return [Strike(**s) for s in data]
 
-    def monies_implied(
+
+class MoniesImpliedEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -222,7 +226,9 @@ class DataApi:
         )
         return [MoneyImplied(**m) for m in data]
 
-    def monies_forecast(
+
+class MoniesForecastEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -252,7 +258,9 @@ class DataApi:
         )
         return [MoneyForecast(**m) for m in data]
 
-    def summaries(
+
+class SummariesEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -283,7 +291,9 @@ class DataApi:
         )
         return [SmvSummary(**m) for m in data]
 
-    def core_data(
+
+class CoreDataEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -314,6 +324,8 @@ class DataApi:
         )
         return [Core(**c) for c in data]
 
+
+class IvRankEndpoint(DataApiEndpoint):
     def iv_rank(
         self,
         *symbols: str,
@@ -345,7 +357,9 @@ class DataApi:
         )
         return [IvRank(**e) for e in data]
 
-    def historical_volatility(
+
+class HistoricalVolatilityEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -375,7 +389,9 @@ class DataApi:
         )
         return [HistoricalVolatility(**hv) for hv in data]
 
-    def daily_price(
+
+class DailyPriceEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
         trade_date: datetime.date = None,
@@ -405,7 +421,9 @@ class DataApi:
         )
         return [DailyPrice(**p) for p in data]
 
-    def dividend_history(
+
+class DividendHistoryEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
     ) -> Sequence[DividendHistory]:
@@ -426,7 +444,9 @@ class DataApi:
         )
         return [DividendHistory(**d) for d in data]
 
-    def earnings_history(
+
+class EarningsHistoryEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
     ) -> Sequence[EarningsHistory]:
@@ -447,7 +467,9 @@ class DataApi:
         )
         return [EarningsHistory(**e) for e in data]
 
-    def stock_split_history(
+
+class StockSplitHistoryEndpoint(DataApiEndpoint):
+    def query(
         self,
         *symbols: str,
     ) -> Sequence[StockSplitHistory]:
@@ -467,3 +489,11 @@ class DataApi:
             ticker=",".join(symbols),
         )
         return [StockSplitHistory(**e) for e in data]
+
+
+class DataApi:
+    """Low-level interface to the `Data API`_.
+
+    A direct translation of the Data API that simply wraps the
+    responses in structured Python objects.
+    """

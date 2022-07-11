@@ -1,6 +1,8 @@
 Data API
 ========
 
+A **Data API Endpoint** handles a **Data API Request** and relays the **Data API Response**.
+
 .. automodule:: orats.api.data
    :members:
 
