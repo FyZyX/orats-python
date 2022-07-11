@@ -99,11 +99,10 @@ class TickersEndpoint(DataApiEndpoint):
 
 
 class StrikesEndpoint(DataApiEndpoint):
-    def query(self, request: req.StrikesHistoryRequest) -> Sequence[res.StrikeResponse]:
+    def query(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
+        See the corresponding `Strikes`_ endpoint.
 
         Args:
           request:
@@ -114,6 +113,33 @@ class StrikesEndpoint(DataApiEndpoint):
         """
         # TODO: What's the deal with httpx and params when passed a list?
         #  Perhaps we can avoid all of this formatting...
+        data = self._get(
+            "strikes",
+            ticker=",".join(request.tickers),
+            fields=request.fields,
+            dte=",".join([str(d) for d in request.expiration_range])
+            if request.expiration_range
+            else request.expiration_range,
+            delta=",".join([str(d) for d in request.delta_range])
+            if request.delta_range
+            else request.delta_range,
+        )
+        return [res.StrikeResponse(**s) for s in data]
+
+
+class StrikesHistoryEndpoint(DataApiEndpoint):
+    def query(self, request: req.StrikesHistoryRequest) -> Sequence[res.StrikeResponse]:
+        """Retrieves historical strikes data for the given asset(s).
+
+        See the corresponding `Strikes History`_ endpoints.
+
+        Args:
+          request:
+            StrikesHistory request object.
+
+        Returns:
+          A list of strikes for each specified asset.
+        """
         data = self._get(
             "strikes",
             ticker=",".join(request.tickers),
@@ -132,17 +158,40 @@ class StrikesEndpoint(DataApiEndpoint):
 class StrikesByOptionsEndpoint(DataApiEndpoint):
     def query(
         self,
-        request: req.StrikesHistoryByOptionsRequest,
+        request: req.StrikesByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Strikes by Options`_ and
-        `Strikes History by Options`_ endpoints.
+        See the corresponding `Strikes by Options`_ endpoint.
 
         Args:
           request:
             StrikesByOption request object.
+
+        Returns:
+          A list of strikes for each specified asset.
+        """
+        data = self._get(
+            "strikes/options",
+            ticker=request.ticker,
+            expirDate=request.expiration_date,
+            strike=request.strike,
+        )
+        return [res.StrikeResponse(**s) for s in data]
+
+
+class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.StrikesHistoryByOptionsRequest,
+    ) -> Sequence[res.StrikeResponse]:
+        """Retrieves historical strikes data by ticker, expiry, and strike.
+
+        See the corresponding `Strikes History by Options`_ endpoint.
+
+        Args:
+          request:
+            StrikesHistoryByOption request object.
 
         Returns:
           A list of strikes for each specified asset.
@@ -160,16 +209,39 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
 class MoniesImpliedEndpoint(DataApiEndpoint):
     def query(
         self,
-        request: req.MoniesHistoryRequest,
+        request: req.MoniesRequest,
     ) -> Sequence[res.MoneyImpliedResponse]:
-        """Retrieves end of day monthly implied history data for monies.
+        """Retrieves monthly implied data for monies.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Monies`_ and `Monies History`_ endpoints.
+        See the corresponding `Monies`_ endpoint.
 
         Args:
           request:
             Monies request object.
+
+        Returns:
+          A list of implied monies for each specified asset.
+        """
+        data = self._get(
+            "monies/implied",
+            ticker=",".join(request.tickers),
+            fields=request.fields,
+        )
+        return [res.MoneyImpliedResponse(**m) for m in data]
+
+
+class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.MoniesHistoryRequest,
+    ) -> Sequence[res.MoneyImpliedResponse]:
+        """Retrieves historical monthly implied data for monies.
+
+        See the corresponding `Monies History`_ endpoint.
+
+        Args:
+          request:
+            MoniesHistory request object.
 
         Returns:
           A list of implied monies for each specified asset.
@@ -186,12 +258,11 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
 class MoniesForecastEndpoint(DataApiEndpoint):
     def query(
         self,
-        request: req.MoniesHistoryRequest,
+        request: req.MoniesRequest,
     ) -> Sequence[res.MoneyForecastResponse]:
-        """Retrieves monthly forecast history data for monies.
+        """Retrieves monthly forecast data for monies.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Monies`_ and `Monies History`_ endpoints.
+        See the corresponding `Monies`_ endpoint.
 
         Args:
           request:
@@ -203,6 +274,30 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         data = self._get(
             "monies/forecast",
             ticker=",".join(request.tickers),
+            fields=request.fields,
+        )
+        return [res.MoneyForecastResponse(**m) for m in data]
+
+
+class MoniesForecastHistoryEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.MoniesHistoryRequest,
+    ) -> Sequence[res.MoneyForecastResponse]:
+        """Retrieves historical monthly forecast data for monies.
+
+        See the corresponding `Monies History`_ endpoint.
+
+        Args:
+          request:
+            MoniesHistory request object.
+
+        Returns:
+          A list of forecast monies for each specified asset.
+        """
+        data = self._get(
+            "hist/monies/forecast",
+            ticker=",".join(request.tickers),
             trade_date=request.trade_date,
             fields=request.fields,
         )
@@ -212,12 +307,11 @@ class MoniesForecastEndpoint(DataApiEndpoint):
 class SummariesEndpoint(DataApiEndpoint):
     def query(
         self,
-        request: req.SummariesHistoryRequest,
+        request: req.SummariesRequest,
     ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves SMV Summary data.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
+        See the corresponding `Summaries`_ endpoint.
 
         Args:
           request:
@@ -229,6 +323,30 @@ class SummariesEndpoint(DataApiEndpoint):
         data = self._get(
             "summaries",
             ticker=",".join(request.tickers),
+            fields=request.fields,
+        )
+        return [res.SmvSummaryResponse(**m) for m in data]
+
+
+class SummariesHistoryEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.SummariesHistoryRequest,
+    ) -> Sequence[res.SmvSummaryResponse]:
+        """Retrieves historical SMV Summary data.
+
+        See the corresponding `Summaries History`_ endpoints.
+
+        Args:
+          request:
+            SummariesHistory request object.
+
+        Returns:
+          A list of SMV summaries for each specified asset.
+        """
+        data = self._get(
+            "hist/summaries",
+            ticker=",".join(request.tickers),
             trade_date=request.trade_date,
             fields=request.fields,
         )
@@ -236,11 +354,10 @@ class SummariesEndpoint(DataApiEndpoint):
 
 
 class CoreDataEndpoint(DataApiEndpoint):
-    def query(self, request: req.SummariesHistoryRequest) -> Sequence[res.CoreResponse]:
-        """Retrieves Core history data.
+    def query(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
+        """Retrieves Core data.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
+        See the corresponding `Core Data`_ endpoint.
 
         Args:
           request:
@@ -251,6 +368,30 @@ class CoreDataEndpoint(DataApiEndpoint):
         """
         data = self._get(
             "cores",
+            ticker=",".join(request.tickers),
+            fields=request.fields,
+        )
+        return [res.CoreResponse(**c) for c in data]
+
+
+class CoreDataHistoryEndpoint(DataApiEndpoint):
+    def query(
+        self,
+        request: req.CoreDataHistoryRequest,
+    ) -> Sequence[res.CoreResponse]:
+        """Retrieves historical Core data.
+
+        See the corresponding `Core Data History`_ endpoint.
+
+        Args:
+          request:
+            CoreDataHistory request object.
+
+        Returns:
+          A list of core data for each specified asset.
+        """
+        data = self._get(
+            "hist/cores",
             ticker=",".join(request.tickers),
             trade_date=request.trade_date,
             fields=request.fields,
@@ -380,12 +521,11 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
 class IvRankEndpoint(DataApiEndpoint):
     def iv_rank(
         self,
-        request: req.SummariesHistoryRequest,
+        request: req.IvRankRequest,
     ) -> Sequence[res.IvRankResponse]:
         """Retrieves IV rank data.
 
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
+        See the corresponding `IV Rank`_ endpoint.
 
         Args:
           request:
@@ -396,6 +536,30 @@ class IvRankEndpoint(DataApiEndpoint):
         """
         data = self._get(
             "ivrank",
+            ticker=",".join(request.tickers),
+            fields=request.fields,
+        )
+        return [res.IvRankResponse(**e) for e in data]
+
+
+class IvRankHistoryEndpoint(DataApiEndpoint):
+    def iv_rank(
+        self,
+        request: req.IvRankHistoryRequest,
+    ) -> Sequence[res.IvRankResponse]:
+        """Retrieves historical IV rank data.
+
+        See the corresponding `IV Rank History`_ endpoint.
+
+        Args:
+          request:
+            IvRankHistory request object.
+
+        Returns:
+          A list of IV rank history data for each specified asset.
+        """
+        data = self._get(
+            "hist/ivrank",
             ticker=",".join(request.tickers),
             trade_date=request.trade_date,
             fields=request.fields,
