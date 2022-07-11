@@ -20,13 +20,8 @@ from typing import Any, Iterable, Mapping, Sequence, Tuple
 import httpx
 
 from orats.errors import UnauthorizedUserError
-from orats.model.data import core
-from orats.model.data import money
-from orats.model.data import request
-from orats.model.data import strike
-from orats.model.data import summary
-from orats.model.data import underlying
-from orats.model.data import volatility
+from orats.model.data import request as req
+from orats.model.data import response as res
 
 
 class DataApiEndpoint:
@@ -84,7 +79,7 @@ class DataApiEndpoint:
 
 
 class TickersEndpoint(DataApiEndpoint):
-    def query(self, request: TickersRequest) -> Sequence[Ticker]:
+    def query(self, request: req.TickersRequest) -> Sequence[response.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -99,68 +94,46 @@ class TickersEndpoint(DataApiEndpoint):
         Returns:
           A list of tickers with data durations.
         """
-        data = self._get("tickers", ticker=symbol)
-        return [Ticker(**t) for t in data]
+        data = self._get("tickers", ticker=request.ticker)
+        return [res.TickerResponse(**t) for t in data]
 
 
-class StrikeSearchEndpoint(DataApiEndpoint):
-    def query(
-        self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-        expiration_range: Tuple[int, int] = None,
-        delta_range: Tuple[float, float] = None,
-    ) -> Sequence[Strike]:
+class StrikesEndpoint(DataApiEndpoint):
+    def query(self, request: req.StrikesHistoryRequest) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
         Specify a trade date to retrieve historical end of day values.
         See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-          expiration_range:
-            Filters results to a range of days to expiration.
-            Specified as a ``(min, max)`` range of integers.
-            To ignore an upper/lower bound, use `...` as a placeholder.
-            Examples: ``(30, 45)``, ``(30, ...)``, ``(..., 45)``
-          delta_range:
-            Filters results to a range of delta values.
-            Specified as a ``(min, max)`` range of floating point numbers.
-            To ignore an upper/lower bound, use ``...`` as a placeholder.
-            Examples: ``(.30, .45)``, ``(.30, ...)``, ``(..., .45)``
+          request:
+            Strikes request object.
 
         Returns:
           A list of strikes for each specified asset.
         """
+        # TODO: What's the deal with httpx and params when passed a list?
+        #  Perhaps we can avoid all of this formatting...
         data = self._get(
             "strikes",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
-            dte=",".join([str(d) for d in expiration_range])
-            if expiration_range
-            else expiration_range,
-            delta=",".join([str(d) for d in delta_range])
-            if delta_range
-            else delta_range,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
+            dte=",".join([str(d) for d in request.expiration_range])
+            if request.expiration_range
+            else request.expiration_range,
+            delta=",".join([str(d) for d in request.delta_range])
+            if request.delta_range
+            else request.delta_range,
         )
-        return [Strike(**s) for s in data]
+        return [res.StrikeResponse(**s) for s in data]
 
 
-class StrikeEndpoint(DataApiEndpoint):
+class StrikesByOptionsEndpoint(DataApiEndpoint):
     def query(
         self,
-        symbol: str,
-        expiration_date: datetime.date,
-        strike: float,
-        trade_date: datetime.date = None,
-    ) -> Sequence[Strike]:
+        request: req.StrikesHistoryByOptionsRequest,
+    ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
         Specify a trade date to retrieve historical end of day values.
@@ -168,322 +141,266 @@ class StrikeEndpoint(DataApiEndpoint):
         `Strikes History by Options`_ endpoints.
 
         Args:
-          symbol:
-            The ticker symbol of the underlying asset.
-          trade_date:
-            The trade date to retrieve.
-          expiration_date:
-            The expiration date to retrieve.
-          strike:
-            The strike price to retrieve.
+          request:
+            StrikesByOption request object.
 
         Returns:
           A list of strikes for each specified asset.
         """
         data = self._get(
             "strikes/options",
-            ticker=symbol,
-            trade_date=trade_date,
-            expirDate=expiration_date,
-            strike=strike,
+            ticker=request.ticker,
+            trade_date=request.trade_date,
+            expirDate=request.expiration_date,
+            strike=request.strike,
         )
-        return [Strike(**s) for s in data]
+        return [res.StrikeResponse(**s) for s in data]
 
 
 class MoniesImpliedEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[MoneyImplied]:
+        request: req.MoniesHistoryRequest,
+    ) -> Sequence[res.MoneyImpliedResponse]:
         """Retrieves end of day monthly implied history data for monies.
 
         Specify a trade date to retrieve historical end of day values.
         See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            Monies request object.
 
         Returns:
           A list of implied monies for each specified asset.
         """
         data = self._get(
             "monies/implied",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [MoneyImplied(**m) for m in data]
+        return [res.MoneyImpliedResponse(**m) for m in data]
 
 
 class MoniesForecastEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[MoneyForecast]:
+        request: req.MoniesHistoryRequest,
+    ) -> Sequence[res.MoneyForecastResponse]:
         """Retrieves monthly forecast history data for monies.
 
         Specify a trade date to retrieve historical end of day values.
         See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            Monies request object.
 
         Returns:
           A list of forecast monies for each specified asset.
         """
         data = self._get(
             "monies/forecast",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [MoneyForecast(**m) for m in data]
+        return [res.MoneyForecastResponse(**m) for m in data]
 
 
 class SummariesEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[SmvSummary]:
+        request: req.SummariesHistoryRequest,
+    ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves SMV Summary data.
 
         Specify a trade date to retrieve historical end of day values.
         See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            Summaries request object.
 
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        assert len(symbols) and trade_date is not None
         data = self._get(
             "summaries",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [SmvSummary(**m) for m in data]
+        return [res.SmvSummaryResponse(**m) for m in data]
 
 
 class CoreDataEndpoint(DataApiEndpoint):
-    def query(
-        self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[Core]:
+    def query(self, request: req.SummariesHistoryRequest) -> Sequence[res.CoreResponse]:
         """Retrieves Core history data.
 
         Specify a trade date to retrieve historical end of day values.
         See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            CoreData request object.
 
         Returns:
           A list of core data for each specified asset.
         """
-        assert len(symbols) and trade_date is not None
         data = self._get(
             "cores",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [Core(**c) for c in data]
-
-
-class IvRankEndpoint(DataApiEndpoint):
-    def iv_rank(
-        self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[IvRank]:
-        """Retrieves IV rank data.
-
-        Specify a trade date to retrieve historical end of day values.
-        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
-
-        Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
-
-        Returns:
-          A list of IV rank history data for each specified asset.
-        """
-        assert len(symbols) and trade_date is not None
-        data = self._get(
-            "ivrank",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
-        )
-        return [IvRank(**e) for e in data]
+        return [res.CoreResponse(**c) for c in data]
 
 
 class HistoricalVolatilityEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[HistoricalVolatility]:
+        request: req.HistoricalVolatilityRequest,
+    ) -> Sequence[res.HistoricalVolatilityResponse]:
         """Retrieves historical volatility data.
 
         See the corresponding `Historical Volatility`_ endpoint.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            HistoricalVolatility request object.
 
         Returns:
           A list of historical volatility data for each specified asset.
         """
-        assert len(symbols) and trade_date is not None
         data = self._get(
             "hvs",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [HistoricalVolatility(**hv) for hv in data]
+        return [res.HistoricalVolatilityResponse(**hv) for hv in data]
 
 
 class DailyPriceEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-        trade_date: datetime.date = None,
-        fields: Iterable[str] = None,
-    ) -> Sequence[DailyPrice]:
+        request: req.DailyPriceRequest,
+    ) -> Sequence[res.DailyPriceResponse]:
         """Retrieves end of day daily stock price data.
 
         See the corresponding `Daily Price`_ endpoint.
 
         Args:
-          symbols:
-            List of assets to retrieve.
-          trade_date:
-            The trade date to retrieve.
-          fields:
-            The subset of fields to retrieve.
+          request:
+            DailyPrice request object.
 
         Returns:
           A list of daily price data for each specified asset.
         """
-        assert len(symbols) and trade_date is not None
         data = self._get(
             "dailies",
-            ticker=",".join(symbols),
-            trade_date=trade_date,
-            fields=fields,
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
         )
-        return [DailyPrice(**p) for p in data]
+        return [res.DailyPriceResponse(**p) for p in data]
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-    ) -> Sequence[DividendHistory]:
+        request: req.DividendHistoryRequest,
+    ) -> Sequence[res.DividendHistoryResponse]:
         """Retrieves dividend history data.
 
         See the corresponding `Dividend History`_ endpoint.
 
         Args:
-          symbols:
-            List of assets to retrieve.
+          request:
+            DividendHistory request object.
 
         Returns:
           A list of dividend history data for each specified asset.
         """
         data = self._get(
             "hist/divs",
-            ticker=",".join(symbols),
+            ticker=",".join(request.ticker),
         )
-        return [DividendHistory(**d) for d in data]
+        return [res.DividendHistoryResponse(**d) for d in data]
 
 
 class EarningsHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-    ) -> Sequence[EarningsHistory]:
+        request: req.EarningsHistoryRequest,
+    ) -> Sequence[res.EarningsHistoryResponse]:
         """Retrieves earnings history data.
 
         See the corresponding `Earnings History`_ endpoint.
 
         Args:
-          symbols:
-            List of assets to retrieve.
+          request:
+            EarningsHistory request object.
 
         Returns:
           A list of earnings history data for each specified asset.
         """
         data = self._get(
             "hist/earnings",
-            ticker=",".join(symbols),
+            ticker=",".join(request.ticker),
         )
-        return [EarningsHistory(**e) for e in data]
+        return [res.EarningsHistoryResponse(**e) for e in data]
 
 
 class StockSplitHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
-        *symbols: str,
-    ) -> Sequence[StockSplitHistory]:
+        request: req.StockSplitHistoryRequest,
+    ) -> Sequence[res.StockSplitHistoryResponse]:
         """Retrieves stock split history data.
 
         See the corresponding `Stock Split History`_ endpoint.
 
         Args:
-          symbols:
-            List of assets to retrieve.
+          request:
+            StockSplitHistory request object.
 
         Returns:
           A list of stock split history data for each specified asset.
         """
         data = self._get(
             "hist/splits",
-            ticker=",".join(symbols),
+            ticker=",".join(request.ticker),
         )
-        return [StockSplitHistory(**e) for e in data]
+        return [res.StockSplitHistoryResponse(**e) for e in data]
+
+
+class IvRankEndpoint(DataApiEndpoint):
+    def iv_rank(
+        self,
+        request: req.SummariesHistoryRequest,
+    ) -> Sequence[res.IvRankResponse]:
+        """Retrieves IV rank data.
+
+        Specify a trade date to retrieve historical end of day values.
+        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
+
+        Args:
+          request:
+            IvRank request object.
+
+        Returns:
+          A list of IV rank history data for each specified asset.
+        """
+        data = self._get(
+            "ivrank",
+            ticker=",".join(request.tickers),
+            trade_date=request.trade_date,
+            fields=request.fields,
+        )
+        return [res.IvRankResponse(**e) for e in data]
 
 
 class DataApi:
