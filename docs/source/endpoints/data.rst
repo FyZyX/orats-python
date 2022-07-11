@@ -3,7 +3,7 @@ Data API
 
 A **Data API Endpoint** handles a **Data API Request** and relays the **Data API Response**.
 
-.. automodule:: orats.api.data
+.. automodule:: orats.endpoints.data
    :members:
 
 .. _Data API: https://docs.orats.io/datav2-api-guide/data.html#data-api
