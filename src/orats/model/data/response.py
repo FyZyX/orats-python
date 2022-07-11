@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
 
 
-class OratsResponse(BaseModel):
+class DataApiResponse(BaseModel):
     underlying_symbol: str = Field(..., alias="ticker")

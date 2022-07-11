@@ -22,6 +22,7 @@ import httpx
 from orats.errors import UnauthorizedUserError
 from orats.model.core import Core
 from orats.model.money import MoneyForecast, MoneyImplied
+from orats.model.request import TickersRequest
 from orats.model.strike import Strike
 from orats.model.summary import SmvSummary
 from orats.model.underlying import (
@@ -89,7 +90,7 @@ class DataApiEndpoint:
 
 
 class TickersEndpoint(DataApiEndpoint):
-    def query(self, symbol: str = None) -> Sequence[Ticker]:
+    def query(self, request: TickersRequest) -> Sequence[Ticker]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -98,8 +99,8 @@ class TickersEndpoint(DataApiEndpoint):
         See the corresponding `Tickers`_ endpoint.
 
         Args:
-          symbol:
-            The ticker symbol of the underlying asset.
+          request:
+            Tickers request object.
 
         Returns:
           A list of tickers with data durations.

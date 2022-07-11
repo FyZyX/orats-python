@@ -10,10 +10,6 @@ def dependency_check(v, values):
     return v
 
 
-class OratsRequest(BaseModel):
-    pass
-
-
 class DataApiRequest(BaseModel):
     pass
 
