@@ -53,6 +53,80 @@ class MyDataApi(unittest.TestCase):
         for strike in strikes:
             self.assertIsInstance(strike, res.StrikeResponse)
 
+    def test_monies_implied(self):
+        request = req.MoniesRequest(
+            tickers=("IBM",),
+        )
+        monies = self._api.monies_implied(request)
+        for money in monies:
+            self.assertIsInstance(money, res.MoneyImpliedResponse)
+
+    def test_monies_forecast(self):
+        request = req.MoniesRequest(
+            tickers=("IBM",),
+        )
+        monies = self._api.monies_forecast(request)
+        for money in monies:
+            self.assertIsInstance(money, res.MoneyForecastResponse)
+
+    def test_summaries(self):
+        request = req.SummariesRequest(
+            tickers=("IBM",),
+        )
+        summaries = self._api.summaries(request)
+        for summary in summaries:
+            self.assertIsInstance(summary, res.SmvSummaryResponse)
+
+    def test_core_date(self):
+        request = req.CoreDataRequest(
+            tickers=("IBM",),
+        )
+        core_data = self._api.core_date(request)
+        for core in core_data:
+            self.assertIsInstance(core, res.CoreResponse)
+
+    def test_daily_price(self):
+        request = req.DailyPriceRequest(
+            tickers=("IBM",),
+        )
+        daily_price = self._api.daily_price(request)
+        for price in daily_price:
+            self.assertIsInstance(price, res.DailyPriceResponse)
+
+    def test_historical_volatility(self):
+        request = req.HistoricalVolatilityRequest(
+            tickers=("IBM",),
+        )
+        historical_volatility = self._api.historical_volatility(request)
+        for vol in historical_volatility:
+            self.assertIsInstance(vol, res.HistoricalVolatilityResponse)
+
+    def test_dividend_history(self):
+        request = req.DividendHistoryRequest(ticker="IBM")
+        dividend_history = self._api.dividend_history(request)
+        for dividend in dividend_history:
+            self.assertIsInstance(dividend, res.DividendHistoryResponse)
+
+    def test_earnings_history(self):
+        request = req.EarningsHistoryRequest(ticker="IBM")
+        earnings_history = self._api.earnings_history(request)
+        for earnings in earnings_history:
+            self.assertIsInstance(earnings, res.EarningsHistoryResponse)
+
+    def test_stock_split_history(self):
+        request = req.StockSplitHistoryRequest(ticker="IBM")
+        stock_split_history = self._api.stock_split_history(request)
+        for stock_split in stock_split_history:
+            self.assertIsInstance(stock_split, res.StockSplitHistoryResponse)
+
+    def test_iv_rank(self):
+        request = req.IvRankRequest(
+            tickers=("IBM",),
+        )
+        iv_rank = self._api.iv_rank(request)
+        for iv in iv_rank:
+            self.assertIsInstance(iv, res.IvRankResponse)
+
 
 if __name__ == "__main__":
     unittest.main()
