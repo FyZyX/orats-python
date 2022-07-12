@@ -10,7 +10,7 @@ from tests.fixtures import load_fixture
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(DataApiEndpoint, "__call__", load_fixture)
+    monkeypatch.setattr(DataApiEndpoint, "_get", load_fixture)
 
 
 class TestDataApi:
