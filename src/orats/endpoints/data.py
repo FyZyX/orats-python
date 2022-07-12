@@ -37,9 +37,7 @@ class DataApiEndpoint:
         self._resource = resource
         self._token = token
 
-    def __call__(
-            self, request: req.DataApiRequest
-    ) -> Sequence[Mapping[str, Any]]:
+    def __call__(self, request: req.DataApiRequest) -> Sequence[Mapping[str, Any]]:
         params = request.dict(by_alias=True)
         response = httpx.get(
             url=self._url(),

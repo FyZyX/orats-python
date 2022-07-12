@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from orats.endpoints.data import DataApi
+from orats.endpoints.data import DataApi, DataApiEndpoint
 from orats.model.data import request as req
 from orats.model.data import response as res
 from tests.fixtures import load_fixture
@@ -10,7 +10,7 @@ from tests.fixtures import load_fixture
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(DataApi, "_get", load_fixture)
+    monkeypatch.setattr(DataApiEndpoint, "__call__", load_fixture)
 
 
 class TestDataApi:
