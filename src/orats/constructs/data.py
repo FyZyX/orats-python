@@ -3,20 +3,25 @@
 import datetime
 from typing import Iterable, Sequence, Tuple, Collection
 
+import orats.endpoints.data as endpoints
+from orats.model.data import request as req
 from orats.model.data import response as res
 
 
 class Asset:
     """Represents the underlying asset of an option contract."""
 
-    def __init__(self, ticker: str):
+    def __init__(self, ticker: str, token: str = None):
         """Initializes an asset object.
 
         Args:
           ticker:
             The ticker symbol of the underlying asset.
+          token:
+            API token.
         """
         self._ticker = ticker
+        self._token = token
 
     def historical_data_range(self) -> (datetime.date, datetime.date):
         """The duration of available historical data.
@@ -24,7 +29,11 @@ class Asset:
         Returns:
           The minimum and maximum dates of available data.
         """
-        pass
+        endpoint = endpoints.TickersEndpoint(self._token)
+        request = req.TickersRequest(ticker=self._ticker)
+        response = endpoint(request)
+        ticker = response[0]
+        return ticker.min_date, ticker.max_date
 
 
 class Universe:
@@ -47,26 +56,6 @@ class PutOption:
 
 class OptionChain:
     pass
-
-
-class TickersEndpoint:
-    def query(self, symbol: str = None) -> Sequence[res.TickerResponse]:
-        """Retrieves the duration of available data for various assets.
-
-        If no underlying asset is specified, the result will be a list
-        of all available ticker symbols. Each symbol is accompanied by
-        a start (min) and end (max) date for which data is available.
-        See the corresponding `Tickers`_ endpoint.
-
-        Args:
-          symbol:
-            The ticker symbol of the underlying asset.
-
-        Returns:
-          A list of tickers with data durations.
-        """
-        data = self._get("tickers", ticker=symbol)
-        return [res.TickerResponse(**t) for t in data]
 
 
 class StrikeSearchEndpoint:
