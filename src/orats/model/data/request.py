@@ -1,7 +1,12 @@
 import datetime
-from typing import Sequence, Tuple, Iterable, Optional, Union, Type, TypeAlias, Any
+import sys
+from typing import Any, Iterable, Optional, Sequence, Tuple, Type, Union
 
 from pydantic import BaseModel, Field, validator
+
+EllipsisType = Type[Any]
+if sys.version_info.major == 3 and sys.version_info.minor >= 10:
+    from types import EllipsisType
 
 
 def dependency_check(v, values):
@@ -39,18 +44,11 @@ class TickersRequest(_SingleTickerTemplateRequest):
 class StrikesRequest(DataApiRequest):
     tickers: Sequence[str] = Field(..., alias="ticker")
     fields: Optional[Iterable[str]]
-    # TODO: These ranges should not use `Any`, but rather
-    #  denote that Ellipsis a valid value. `Any` is the only
-    #  way to get both tests and static type checking to pass.
-    #  However, this implementation is hacky in that the
-    #  Ellipsis is actually rendered in the API URL, but
-    #  the API appears to handle the cases of non-integers
-    #  by ignoring the value, which is the desired functionality
     expiration_range: Optional[
-        Tuple[Union[int, Any], Union[int, Any]]
+        Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
     ] = Field(None, alias="dte")
     delta_range: Optional[
-        Tuple[Union[int, Any], Union[int, Any]]
+        Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
     ] = Field(None, alias="delta")
 
 
