@@ -2,7 +2,6 @@ import datetime
 import json
 import os.path
 import unittest
-from unittest import skip
 
 from orats.endpoints.data import DataApi
 from orats.model.data import request as req
@@ -41,7 +40,6 @@ class MyDataApi(unittest.TestCase):
         for strike in strikes:
             self.assertIsInstance(strike, res.StrikeResponse)
 
-    @skip
     def test_strikes_history(self):
         request = req.StrikesHistoryRequest(
             tickers=("IBM", "AAPL"),
@@ -63,11 +61,31 @@ class MyDataApi(unittest.TestCase):
         for strike in strikes:
             self.assertIsInstance(strike, res.StrikeResponse)
 
+    def test_strikes_history_by_options(self):
+        request = req.StrikesHistoryByOptionsRequest(
+            ticker="IBM",
+            trade_date=datetime.date(2022, 6, 6),
+            expiration_date=datetime.date(2022, 6, 17),
+            strike=140,
+        )
+        strikes = self._api.strikes_history_by_options(request)
+        for strike in strikes:
+            self.assertIsInstance(strike, res.StrikeResponse)
+
     def test_monies_implied(self):
         request = req.MoniesRequest(
             tickers=("IBM",),
         )
         monies = self._api.monies_implied(request)
+        for money in monies:
+            self.assertIsInstance(money, res.MoneyImpliedResponse)
+
+    def test_monies_implied_history(self):
+        request = req.MoniesHistoryRequest(
+            tickers=("IBM",),
+            trade_date=datetime.date(2022, 7, 5),
+        )
+        monies = self._api.monies_implied_history(request)
         for money in monies:
             self.assertIsInstance(money, res.MoneyImpliedResponse)
 
@@ -79,6 +97,15 @@ class MyDataApi(unittest.TestCase):
         for money in monies:
             self.assertIsInstance(money, res.MoneyForecastResponse)
 
+    def test_monies_forecast_history(self):
+        request = req.MoniesHistoryRequest(
+            tickers=("IBM",),
+            trade_date=datetime.date(2022, 7, 5),
+        )
+        monies = self._api.monies_forecast_history(request)
+        for money in monies:
+            self.assertIsInstance(money, res.MoneyForecastResponse)
+
     def test_summaries(self):
         request = req.SummariesRequest(
             tickers=("IBM",),
@@ -87,11 +114,29 @@ class MyDataApi(unittest.TestCase):
         for summary in summaries:
             self.assertIsInstance(summary, res.SmvSummaryResponse)
 
-    def test_core_date(self):
+    def test_summaries_history(self):
+        request = req.SummariesHistoryRequest(
+            tickers=("IBM",),
+            trade_date=datetime.date(2022, 7, 5),
+        )
+        summaries = self._api.summaries_history(request)
+        for summary in summaries:
+            self.assertIsInstance(summary, res.SmvSummaryResponse)
+
+    def test_core_data(self):
         request = req.CoreDataRequest(
             tickers=("IBM",),
         )
-        core_data = self._api.core_date(request)
+        core_data = self._api.core_data(request)
+        for core in core_data:
+            self.assertIsInstance(core, res.CoreResponse)
+
+    def test_core_data_history(self):
+        request = req.CoreDataHistoryRequest(
+            tickers=("IBM",),
+            trade_date=datetime.date(2022, 7, 5),
+        )
+        core_data = self._api.core_data_history(request)
         for core in core_data:
             self.assertIsInstance(core, res.CoreResponse)
 
@@ -134,6 +179,15 @@ class MyDataApi(unittest.TestCase):
             tickers=("IBM",),
         )
         iv_rank = self._api.iv_rank(request)
+        for iv in iv_rank:
+            self.assertIsInstance(iv, res.IvRankResponse)
+
+    def test_iv_rank_history(self):
+        request = req.IvRankHistoryRequest(
+            tickers=("IBM",),
+            trade_date=datetime.date(2022, 7, 5),
+        )
+        iv_rank = self._api.iv_rank_history(request)
         for iv in iv_rank:
             self.assertIsInstance(iv, res.IvRankResponse)
 
