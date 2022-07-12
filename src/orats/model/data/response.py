@@ -1,6 +1,11 @@
 import datetime
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+
+
+def parse_date(dt: datetime.date):
+    return dt.strftime("%Y/%m/%d")
 
 
 class DataApiResponse(BaseModel):
@@ -390,7 +395,7 @@ class CoreResponse(DataApiResponse):
     dividend_growth: float = Field(..., alias="divGrwth")
     next_dividend_date: datetime.date = Field(..., alias="divDate")
     dividend_amount: float = Field(..., alias="divAmt")
-    next_earnings_date: datetime.date = Field(..., alias="nextErn")
+    next_earnings_date: Optional[datetime.date] = Field(..., alias="nextErn")
     last_earnings_date: datetime.date = Field(..., alias="lastErn")
     last_earnings_time_of_day: int = Field(..., alias="lastErnTod")
     average_earnings_move: float = Field(..., alias="absAvgErnMv")
@@ -571,6 +576,30 @@ class CoreResponse(DataApiResponse):
     iv_ex_earnings_interpolated_365_day: float = Field(..., alias="exErnIv1yr")
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
+    @validator(
+        "earnings_date_1",
+        "earnings_date_2",
+        "earnings_date_3",
+        "earnings_date_4",
+        "earnings_date_5",
+        "earnings_date_6",
+        "earnings_date_7",
+        "earnings_date_8",
+        "earnings_date_9",
+        "earnings_date_10",
+        "earnings_date_11",
+        "earnings_date_12",
+        pre=True,
+    )
+    def normalize_dates(cls, value):
+        return datetime.datetime.strptime(value, "%m/%d/%Y").date()
+
+    @validator("next_earnings_date", pre=True)
+    def ensure_valid_date(cls, value):
+        if value == "0000-00-00":
+            return None
+        return value
+
 
 class DailyPriceResponse(DataApiResponse):
     """Daily price definitions.
@@ -668,7 +697,7 @@ class EarningsHistoryResponse(DataApiResponse):
     underlying_symbol: str = Field(..., alias="ticker")
     earnings_date: datetime.date = Field(..., alias="earnDate")
     time_of_day_announced: int = Field(..., alias="anncTod")
-    updated_at: datetime.date = Field(..., alias="updatedAt")
+    updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
 class StockSplitHistoryResponse(DataApiResponse):
