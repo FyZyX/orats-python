@@ -105,8 +105,9 @@ class StrikesEndpoint(DataApiEndpoint):
 
 
 class StrikesHistoryEndpoint(DataApiEndpoint):
-    def __call__(self, request: req.StrikesHistoryRequest) -> Sequence[
-        res.StrikeResponse]:
+    def __call__(
+        self, request: req.StrikesHistoryRequest
+    ) -> Sequence[res.StrikeResponse]:
         """Retrieves historical strikes data for the given asset(s).
 
         See the corresponding `Strikes History`_ endpoints.
@@ -138,12 +139,7 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        data = self._get(
-            "strikes/options",
-            ticker=request.ticker,
-            expirDate=request.expiration_date,
-            strike=request.strike,
-        )
+        data = self._get("strikes/options", **request.dict(by_alias=True))
         return [res.StrikeResponse(**s) for s in data]
 
 
@@ -163,13 +159,7 @@ class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        data = self._get(
-            "strikes/options",
-            ticker=request.ticker,
-            trade_date=request.trade_date,
-            expirDate=request.expiration_date,
-            strike=request.strike,
-        )
+        data = self._get("hist/strikes/options", **request.dict(by_alias=True))
         return [res.StrikeResponse(**s) for s in data]
 
 
@@ -189,11 +179,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
         Returns:
           A list of implied monies for each specified asset.
         """
-        data = self._get(
-            "monies/implied",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-        )
+        data = self._get("monies/implied", **request.dict(by_alias=True))
         return [res.MoneyImpliedResponse(**m) for m in data]
 
 
@@ -213,12 +199,7 @@ class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of implied monies for each specified asset.
         """
-        data = self._get(
-            "monies/implied",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/monies/implied", **request.dict(by_alias=True))
         return [res.MoneyImpliedResponse(**m) for m in data]
 
 
@@ -238,11 +219,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         Returns:
           A list of forecast monies for each specified asset.
         """
-        data = self._get(
-            "monies/forecast",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-        )
+        data = self._get("monies/forecast", **request.dict(by_alias=True))
         return [res.MoneyForecastResponse(**m) for m in data]
 
 
@@ -262,12 +239,7 @@ class MoniesForecastHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of forecast monies for each specified asset.
         """
-        data = self._get(
-            "hist/monies/forecast",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/monies/forecast", **request.dict(by_alias=True))
         return [res.MoneyForecastResponse(**m) for m in data]
 
 
@@ -287,11 +259,7 @@ class SummariesEndpoint(DataApiEndpoint):
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        data = self._get(
-            "summaries",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-        )
+        data = self._get("summaries", **request.dict(by_alias=True))
         return [res.SmvSummaryResponse(**m) for m in data]
 
 
@@ -311,12 +279,7 @@ class SummariesHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        data = self._get(
-            "hist/summaries",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/summaries", **request.dict(by_alias=True))
         return [res.SmvSummaryResponse(**m) for m in data]
 
 
@@ -333,11 +296,7 @@ class CoreDataEndpoint(DataApiEndpoint):
         Returns:
           A list of core data for each specified asset.
         """
-        data = self._get(
-            "cores",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-        )
+        data = self._get("cores", **request.dict(by_alias=True))
         return [res.CoreResponse(**c) for c in data]
 
 
@@ -357,12 +316,7 @@ class CoreDataHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of core data for each specified asset.
         """
-        data = self._get(
-            "hist/cores",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/cores", **request.dict(by_alias=True))
         return [res.CoreResponse(**c) for c in data]
 
 
@@ -382,12 +336,7 @@ class DailyPriceEndpoint(DataApiEndpoint):
         Returns:
           A list of daily price data for each specified asset.
         """
-        data = self._get(
-            "dailies",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/dailies", **request.dict(by_alias=True))
         return [res.DailyPriceResponse(**p) for p in data]
 
 
@@ -407,12 +356,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
         Returns:
           A list of historical volatility data for each specified asset.
         """
-        data = self._get(
-            "hvs",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/hvs", **request.dict(by_alias=True))
         return [res.HistoricalVolatilityResponse(**hv) for hv in data]
 
 
@@ -432,10 +376,7 @@ class DividendHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of dividend history data for each specified asset.
         """
-        data = self._get(
-            "hist/divs",
-            ticker=",".join(request.ticker),
-        )
+        data = self._get("hist/divs", **request.dict(by_alias=True))
         return [res.DividendHistoryResponse(**d) for d in data]
 
 
@@ -455,10 +396,7 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of earnings history data for each specified asset.
         """
-        data = self._get(
-            "hist/earnings",
-            ticker=",".join(request.ticker),
-        )
+        data = self._get("hist/earnings", **request.dict(by_alias=True))
         return [res.EarningsHistoryResponse(**e) for e in data]
 
 
@@ -478,10 +416,7 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of stock split history data for each specified asset.
         """
-        data = self._get(
-            "hist/splits",
-            ticker=",".join(request.ticker),
-        )
+        data = self._get("hist/splits", **request.dict(by_alias=True))
         return [res.StockSplitHistoryResponse(**e) for e in data]
 
 
@@ -501,11 +436,7 @@ class IvRankEndpoint(DataApiEndpoint):
         Returns:
           A list of IV rank history data for each specified asset.
         """
-        data = self._get(
-            "ivrank",
-            ticker=",".join(request.tickers),
-            fields=request.fields,
-        )
+        data = self._get("ivrank", **request.dict(by_alias=True))
         return [res.IvRankResponse(**e) for e in data]
 
 
@@ -525,12 +456,7 @@ class IvRankHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of IV rank history data for each specified asset.
         """
-        data = self._get(
-            "hist/ivrank",
-            ticker=",".join(request.tickers),
-            trade_date=request.trade_date,
-            fields=request.fields,
-        )
+        data = self._get("hist/ivrank", **request.dict(by_alias=True))
         return [res.IvRankResponse(**e) for e in data]
 
 

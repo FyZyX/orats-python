@@ -19,7 +19,7 @@ from typing import Any, Iterable, Mapping, Sequence, Tuple
 
 import httpx
 
-from orats.errors import UnauthorizedUserError
+from orats.errors import InsufficientPermissionsError
 from orats.model.core import Core
 from orats.model.money import MoneyForecast, MoneyImplied
 from orats.model.strike import Strike
@@ -82,7 +82,7 @@ class DataApiEndpoint:
         )
         body = response.json()
         if response.status_code == 403:
-            raise UnauthorizedUserError
+            raise InsufficientPermissionsError
         for x in body["data"]:
             print(x["dte"])
         return body["data"]
