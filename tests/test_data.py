@@ -53,6 +53,16 @@ class MyDataApi(unittest.TestCase):
         for strike in strikes:
             self.assertIsInstance(strike, res.StrikeResponse)
 
+    def test_strikes_by_options(self):
+        request = req.StrikesByOptionsRequest(
+            ticker="IBM",
+            expiration_date=datetime.date(2022, 6, 17),
+            strike=50,
+        )
+        strikes = self._api.strikes_by_options(request)
+        for strike in strikes:
+            self.assertIsInstance(strike, res.StrikeResponse)
+
     def test_monies_implied(self):
         request = req.MoniesRequest(
             tickers=("IBM",),
