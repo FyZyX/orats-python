@@ -1,13 +1,25 @@
 import datetime
 import sys
-from typing import Any, Iterable, Optional, Sequence, Tuple, Type, TypeAlias, Union
+from numbers import Number
+from typing import (
+    Any,
+    Iterable,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    TypeAlias,
+    Union,
+    TypeVar,
+)
 
 from pydantic import BaseModel, Field, validator
 
 EllipsisType = Type[Any]
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from types import EllipsisType
-BoundedRange: TypeAlias = Tuple[Union[int, EllipsisType], Union[int, EllipsisType]]
+A = TypeVar("A", bound=Number)
+BoundedRange: TypeAlias = Tuple[Union[A, EllipsisType], Union[A, EllipsisType]]
 
 
 def dependency_check(v, values):
@@ -45,8 +57,8 @@ class TickersRequest(_SingleTickerTemplateRequest):
 class StrikesRequest(DataApiRequest):
     tickers: Sequence[str] = Field(..., alias="ticker")
     fields: Optional[Iterable[str]]
-    expiration_range: Optional[BoundedRange] = Field(None, alias="dte")
-    delta_range: Optional[BoundedRange] = Field(None, alias="delta")
+    expiration_range: Optional[BoundedRange[int]] = Field(None, alias="dte")
+    delta_range: Optional[BoundedRange[float]] = Field(None, alias="delta")
 
 
 class StrikesHistoryRequest(StrikesRequest):
