@@ -1,18 +1,4 @@
-"""ORATS Data API.
-
-Primary features include
-
-* historical options data
-* historical volatilities
-* greeks
-* bid/ask quotes
-* 100+ indicators
-
-See the `product page`_ and `API docs`_.
-
-.. _product page: https://orats.com/data-api/
-.. _API docs: https://docs.orats.io/datav2-api-guide/
-"""
+"""Higher level constructs built on top of base API."""
 
 import datetime
 from typing import Iterable, Sequence, Tuple, Collection
