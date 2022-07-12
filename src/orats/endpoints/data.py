@@ -13,7 +13,6 @@ See the `product page`_ and `API docs`_.
 .. _product page: https://orats.com/data-api/
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
-import abc
 from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
@@ -23,9 +22,14 @@ from orats.model.data import request as req
 from orats.model.data import response as res
 
 
-class DataApiEndpoint(abc.ABC):
+class DataApi:
+    """Low-level interface to the `Data API`_.
+
+    A direct translation of the Data API that simply wraps the
+    responses in structured Python objects.
+    """
+
     _base_url = "https://api.orats.io/datav2"
-    _endpoint: str = ...
 
     def __init__(self, token: str):
         """Initializes an API interface from configuration.
@@ -40,12 +44,8 @@ class DataApiEndpoint(abc.ABC):
         """
         self._token = token
 
-    @abc.abstractmethod
-    def __call__(self, request: req.DataApiRequest) -> Sequence[res.DataApiResponse]:
-        ...
-
-    def _url(self) -> str:
-        return "/".join((self._base_url, self._endpoint))
+    def _url(self, endpoint: str) -> str:
+        return "/".join((self._base_url, endpoint))
 
     def _update_params(self, params: Mapping[str, Any]) -> Mapping[str, Any]:
         updated_params = dict(token=self._token)
@@ -57,10 +57,12 @@ class DataApiEndpoint(abc.ABC):
             updated_params[key] = param
         return updated_params
 
-    def _get(self, request: req.DataApiRequest) -> Sequence[Mapping[str, Any]]:
+    def _get(
+            self, endpoint: str, request: req.DataApiRequest
+    ) -> Sequence[Mapping[str, Any]]:
         params = request.dict(by_alias=True)
         response = httpx.get(
-            url=self._url(),
+            url=self._url(endpoint),
             params=self._update_params(params),
         )
         body = response.json()
@@ -68,11 +70,7 @@ class DataApiEndpoint(abc.ABC):
             raise InsufficientPermissionsError
         return body["data"]
 
-
-class TickersEndpoint(DataApiEndpoint):
-    _endpoint = "tickers"
-
-    def __call__(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
+    def tickers(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -87,13 +85,10 @@ class TickersEndpoint(DataApiEndpoint):
         Returns:
           A list of tickers with data durations.
         """
-        return [res.TickerResponse(**v) for v in self._get(request)]
+        data = self._get("tickers", request)
+        return [res.TickerResponse(**v) for v in data]
 
-
-class StrikesEndpoint(DataApiEndpoint):
-    _endpoint = "strikes"
-
-    def __call__(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
+    def strikes(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
         See the corresponding `Strikes`_ endpoint.
@@ -105,14 +100,11 @@ class StrikesEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        data = self._get("strikes", request)
+        return [res.StrikeResponse(**v) for v in data]
 
-
-class StrikesHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/strikes"
-
-    def __call__(
-        self, request: req.StrikesHistoryRequest
+    def strikes_history(
+            self, request: req.StrikesHistoryRequest
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves historical strikes data for the given asset(s).
 
@@ -125,15 +117,12 @@ class StrikesHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        data = self._get("hist/strikes", request)
+        return [res.StrikeResponse(**v) for v in data]
 
-
-class StrikesByOptionsEndpoint(DataApiEndpoint):
-    _endpoint = "strikes/options"
-
-    def __call__(
-        self,
-        request: req.StrikesByOptionsRequest,
+    def strikes_by_options(
+            self,
+            request: req.StrikesByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
@@ -146,15 +135,12 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        data = self._get("strikes/options", request)
+        return [res.StrikeResponse(**v) for v in data]
 
-
-class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
-    _endpoint = "hist/strikes/options"
-
-    def __call__(
-        self,
-        request: req.StrikesHistoryByOptionsRequest,
+    def strikes_history_by_options(
+            self,
+            request: req.StrikesHistoryByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves historical strikes data by ticker, expiry, and strike.
 
@@ -167,15 +153,12 @@ class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        data = self._get("hist/strikes/options", request)
+        return [res.StrikeResponse(**v) for v in data]
 
-
-class MoniesImpliedEndpoint(DataApiEndpoint):
-    _endpoint = "monies/implied"
-
-    def __call__(
-        self,
-        request: req.MoniesRequest,
+    def monies_implied(
+            self,
+            request: req.MoniesRequest,
     ) -> Sequence[res.MoneyImpliedResponse]:
         """Retrieves monthly implied data for monies.
 
@@ -188,15 +171,12 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
         Returns:
           A list of implied monies for each specified asset.
         """
-        return [res.MoneyImpliedResponse(**v) for v in self._get(request)]
+        data = self._get("monies/implied", request)
+        return [res.MoneyImpliedResponse(**v) for v in data]
 
-
-class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/monies/implied"
-
-    def __call__(
-        self,
-        request: req.MoniesHistoryRequest,
+    def monies_implied_history(
+            self,
+            request: req.MoniesHistoryRequest,
     ) -> Sequence[res.MoneyImpliedResponse]:
         """Retrieves historical monthly implied data for monies.
 
@@ -209,15 +189,12 @@ class MoniesImpliedHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of implied monies for each specified asset.
         """
-        return [res.MoneyImpliedResponse(**v) for v in self._get(request)]
+        data = self._get("hist/monies/implied", request)
+        return [res.MoneyImpliedResponse(**v) for v in data]
 
-
-class MoniesForecastEndpoint(DataApiEndpoint):
-    _endpoint = "monies/forecast"
-
-    def __call__(
-        self,
-        request: req.MoniesRequest,
+    def monies_forecast(
+            self,
+            request: req.MoniesRequest,
     ) -> Sequence[res.MoneyForecastResponse]:
         """Retrieves monthly forecast data for monies.
 
@@ -230,15 +207,12 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         Returns:
           A list of forecast monies for each specified asset.
         """
-        return [res.MoneyForecastResponse(**v) for v in self._get(request)]
+        data = self._get("monies/forecast", request)
+        return [res.MoneyForecastResponse(**v) for v in data]
 
-
-class MoniesForecastHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/monies/forecast"
-
-    def __call__(
-        self,
-        request: req.MoniesHistoryRequest,
+    def monies_forecast_history(
+            self,
+            request: req.MoniesHistoryRequest,
     ) -> Sequence[res.MoneyForecastResponse]:
         """Retrieves historical monthly forecast data for monies.
 
@@ -251,15 +225,12 @@ class MoniesForecastHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of forecast monies for each specified asset.
         """
-        return [res.MoneyForecastResponse(**v) for v in self._get(request)]
+        data = self._get("hist/monies/forecast", request)
+        return [res.MoneyForecastResponse(**v) for v in data]
 
-
-class SummariesEndpoint(DataApiEndpoint):
-    _endpoint = "summaries"
-
-    def __call__(
-        self,
-        request: req.SummariesRequest,
+    def summaries(
+            self,
+            request: req.SummariesRequest,
     ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves SMV Summary data.
 
@@ -272,15 +243,12 @@ class SummariesEndpoint(DataApiEndpoint):
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        return [res.SmvSummaryResponse(**v) for v in self._get(request)]
+        data = self._get("summaries", request)
+        return [res.SmvSummaryResponse(**v) for v in data]
 
-
-class SummariesHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/summaries"
-
-    def __call__(
-        self,
-        request: req.SummariesHistoryRequest,
+    def summaries_history(
+            self,
+            request: req.SummariesHistoryRequest,
     ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves historical SMV Summary data.
 
@@ -293,13 +261,10 @@ class SummariesHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        return [res.SmvSummaryResponse(**v) for v in self._get(request)]
+        data = self._get("hist/summaries", request)
+        return [res.SmvSummaryResponse(**v) for v in data]
 
-
-class CoreDataEndpoint(DataApiEndpoint):
-    _endpoint = "cores"
-
-    def __call__(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
+    def core_data(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
         """Retrieves Core data.
 
         See the corresponding `Core Data`_ endpoint.
@@ -311,15 +276,12 @@ class CoreDataEndpoint(DataApiEndpoint):
         Returns:
           A list of core data for each specified asset.
         """
-        return [res.CoreResponse(**v) for v in self._get(request)]
+        data = self._get("cores", request)
+        return [res.CoreResponse(**v) for v in data]
 
-
-class CoreDataHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/cores"
-
-    def __call__(
-        self,
-        request: req.CoreDataHistoryRequest,
+    def core_data_history(
+            self,
+            request: req.CoreDataHistoryRequest,
     ) -> Sequence[res.CoreResponse]:
         """Retrieves historical Core data.
 
@@ -332,15 +294,12 @@ class CoreDataHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of core data for each specified asset.
         """
-        return [res.CoreResponse(**v) for v in self._get(request)]
+        data = self._get("hist/cores", request)
+        return [res.CoreResponse(**v) for v in data]
 
-
-class DailyPriceEndpoint(DataApiEndpoint):
-    _endpoint = "hist/dailies"
-
-    def __call__(
-        self,
-        request: req.DailyPriceRequest,
+    def daily_price(
+            self,
+            request: req.DailyPriceRequest,
     ) -> Sequence[res.DailyPriceResponse]:
         """Retrieves end of day daily stock price data.
 
@@ -353,15 +312,12 @@ class DailyPriceEndpoint(DataApiEndpoint):
         Returns:
           A list of daily price data for each specified asset.
         """
-        return [res.DailyPriceResponse(**v) for v in self._get(request)]
+        data = self._get("hist/dailies", request)
+        return [res.DailyPriceResponse(**v) for v in data]
 
-
-class HistoricalVolatilityEndpoint(DataApiEndpoint):
-    _endpoint = "hist/hvs"
-
-    def __call__(
-        self,
-        request: req.HistoricalVolatilityRequest,
+    def historical_volatility(
+            self,
+            request: req.HistoricalVolatilityRequest,
     ) -> Sequence[res.HistoricalVolatilityResponse]:
         """Retrieves historical volatility data.
 
@@ -374,15 +330,12 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
         Returns:
           A list of historical volatility data for each specified asset.
         """
-        return [res.HistoricalVolatilityResponse(**v) for v in self._get(request)]
+        data = self._get("hist/hvs", request)
+        return [res.HistoricalVolatilityResponse(**v) for v in data]
 
-
-class DividendHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/divs"
-
-    def __call__(
-        self,
-        request: req.DividendHistoryRequest,
+    def dividend_history(
+            self,
+            request: req.DividendHistoryRequest,
     ) -> Sequence[res.DividendHistoryResponse]:
         """Retrieves dividend history data.
 
@@ -395,15 +348,12 @@ class DividendHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of dividend history data for each specified asset.
         """
-        return [res.DividendHistoryResponse(**v) for v in self._get(request)]
+        data = self._get("hist/divs", request)
+        return [res.DividendHistoryResponse(**v) for v in data]
 
-
-class EarningsHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/earnings"
-
-    def __call__(
-        self,
-        request: req.EarningsHistoryRequest,
+    def earnings_history(
+            self,
+            request: req.EarningsHistoryRequest,
     ) -> Sequence[res.EarningsHistoryResponse]:
         """Retrieves earnings history data.
 
@@ -416,15 +366,12 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of earnings history data for each specified asset.
         """
-        return [res.EarningsHistoryResponse(**v) for v in self._get(request)]
+        data = self._get("hist/earnings", request)
+        return [res.EarningsHistoryResponse(**v) for v in data]
 
-
-class StockSplitHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/splits"
-
-    def __call__(
-        self,
-        request: req.StockSplitHistoryRequest,
+    def stock_split_history(
+            self,
+            request: req.StockSplitHistoryRequest,
     ) -> Sequence[res.StockSplitHistoryResponse]:
         """Retrieves stock split history data.
 
@@ -437,15 +384,12 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of stock split history data for each specified asset.
         """
-        return [res.StockSplitHistoryResponse(**v) for v in self._get(request)]
+        data = self._get("hist/splits", request)
+        return [res.StockSplitHistoryResponse(**v) for v in data]
 
-
-class IvRankEndpoint(DataApiEndpoint):
-    _endpoint = "ivrank"
-
-    def __call__(
-        self,
-        request: req.IvRankRequest,
+    def iv_rank(
+            self,
+            request: req.IvRankRequest,
     ) -> Sequence[res.IvRankResponse]:
         """Retrieves IV rank data.
 
@@ -458,15 +402,12 @@ class IvRankEndpoint(DataApiEndpoint):
         Returns:
           A list of IV rank history data for each specified asset.
         """
-        return [res.IvRankResponse(**v) for v in self._get(request)]
+        data = self._get("ivrank", request)
+        return [res.IvRankResponse(**v) for v in data]
 
-
-class IvRankHistoryEndpoint(DataApiEndpoint):
-    _endpoint = "hist/ivrank"
-
-    def __call__(
-        self,
-        request: req.IvRankHistoryRequest,
+    def iv_rank_history(
+            self,
+            request: req.IvRankHistoryRequest,
     ) -> Sequence[res.IvRankResponse]:
         """Retrieves historical IV rank data.
 
@@ -479,34 +420,5 @@ class IvRankHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of IV rank history data for each specified asset.
         """
-        return [res.IvRankResponse(**v) for v in self._get(request)]
-
-
-class DataApi:
-    """Low-level interface to the `Data API`_.
-
-    A direct translation of the Data API that simply wraps the
-    responses in structured Python objects.
-    """
-
-    def __init__(self, token: str):
-        self.tickers = TickersEndpoint(token)
-        self.strikes = StrikesEndpoint(token)
-        self.strikes_history = StrikesHistoryEndpoint(token)
-        self.strikes_by_options = StrikesByOptionsEndpoint(token)
-        self.strikes_history_by_options = StrikesHistoryByOptionsEndpoint(token)
-        self.monies_implied = MoniesImpliedEndpoint(token)
-        self.monies_implied_history = MoniesImpliedHistoryEndpoint(token)
-        self.monies_forecast = MoniesForecastEndpoint(token)
-        self.monies_forecast_history = MoniesForecastHistoryEndpoint(token)
-        self.summaries = SummariesEndpoint(token)
-        self.summaries_history = SummariesHistoryEndpoint(token)
-        self.core_date = CoreDataEndpoint(token)
-        self.core_data_history = CoreDataHistoryEndpoint(token)
-        self.daily_price = DailyPriceEndpoint(token)
-        self.historical_volatility = HistoricalVolatilityEndpoint(token)
-        self.dividend_history = DividendHistoryEndpoint(token)
-        self.earnings_history = EarningsHistoryEndpoint(token)
-        self.stock_split_history = StockSplitHistoryEndpoint(token)
-        self.iv_rank = IvRankEndpoint(token)
-        self.iv_rank_history = IvRankHistoryEndpoint(token)
+        data = self._get("hist/ivrank", request)
+        return [res.IvRankResponse(**v) for v in data]
