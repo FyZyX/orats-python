@@ -15,69 +15,55 @@ See the `product page`_ and `API docs`_.
 """
 
 import datetime
-from typing import Any, Iterable, Mapping, Sequence, Tuple
+from typing import Iterable, Sequence, Tuple, Collection
 
-import httpx
-
-from orats.errors import InsufficientPermissionsError
 from orats.model.data import response as res
 
 
-class DataApiEndpoint:
-    _base_url = "https://api.orats.io/datav2"
+class Asset:
+    """Represents the underlying asset of an option contract."""
 
-    def __init__(self, token: str):
-        """Initializes an API interface from configuration.
-
-        Each API call requires a token for authentication.
-        This token is supplied to the instance to facilitate
-        the use of multiple instances utilizing different tokens.
+    def __init__(self, ticker: str):
+        """Initializes an asset object.
 
         Args:
-          token:
-            The authentication token provided to the user.
+          ticker:
+            The ticker symbol of the underlying asset.
         """
-        self._token = token
+        self._ticker = ticker
 
-    def _url(self, path: str, historical: bool = False):
-        return "/".join((self._base_url, f"hist/{path}" if historical else path))
+    def historical_data_range(self) -> (datetime.date, datetime.date):
+        """The duration of available historical data.
 
-    def _update_params(self, params: Mapping[str, Any]):
-        updated_params = dict(token=self._token)
-        for key, param in params.items():
-            if param is None:
-                continue
-            updated_params[key] = param
-        return updated_params
-
-    def _get(
-        self,
-        path: str,
-        fields: Iterable[str] = None,
-        trade_date: datetime.date = None,
-        **params: Any,
-    ):
-        if trade_date is not None:
-            params.update(
-                tradeDate=trade_date,
-            )
-        if fields is not None:
-            params.update(
-                fields=",".join(fields),
-            )
-        response = httpx.get(
-            url=self._url(path, historical=trade_date is not None),
-            params=self._update_params(params),
-        )
-        body = response.json()
-        if response.status_code == 403:
-            raise InsufficientPermissionsError
-        for x in body["data"]:
-            print(x["dte"])
-        return body["data"]
+        Returns:
+          The minimum and maximum dates of available data.
+        """
+        pass
 
 
-class TickersEndpoint(DataApiEndpoint):
+class Universe:
+
+    def __init__(self, tickers: Collection):
+        self._assets: Collection[Asset] = {Asset(ticker) for ticker in tickers}
+
+
+class Option:
+    pass
+
+
+class CallOption:
+    pass
+
+
+class PutOption:
+    pass
+
+
+class OptionChain:
+    pass
+
+
+class TickersEndpoint:
     def query(self, symbol: str = None) -> Sequence[res.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
@@ -97,7 +83,7 @@ class TickersEndpoint(DataApiEndpoint):
         return [res.TickerResponse(**t) for t in data]
 
 
-class StrikeSearchEndpoint(DataApiEndpoint):
+class StrikeSearchEndpoint:
     def query(
         self,
         *symbols: str,
@@ -147,7 +133,7 @@ class StrikeSearchEndpoint(DataApiEndpoint):
         return [res.StrikeResponse(**s) for s in data]
 
 
-class StrikeEndpoint(DataApiEndpoint):
+class StrikeEndpoint:
     def query(
         self,
         symbol: str,
@@ -184,7 +170,7 @@ class StrikeEndpoint(DataApiEndpoint):
         return [res.StrikeResponse(**s) for s in data]
 
 
-class MoniesImpliedEndpoint(DataApiEndpoint):
+class MoniesImpliedEndpoint:
     def query(
         self,
         *symbols: str,
@@ -216,7 +202,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
         return [res.MoneyImpliedResponse(**m) for m in data]
 
 
-class MoniesForecastEndpoint(DataApiEndpoint):
+class MoniesForecastEndpoint:
     def query(
         self,
         *symbols: str,
@@ -248,7 +234,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         return [res.MoneyForecastResponse(**m) for m in data]
 
 
-class SummariesEndpoint(DataApiEndpoint):
+class SummariesEndpoint:
     def query(
         self,
         *symbols: str,
@@ -281,7 +267,7 @@ class SummariesEndpoint(DataApiEndpoint):
         return [res.SmvSummaryResponse(**m) for m in data]
 
 
-class CoreDataEndpoint(DataApiEndpoint):
+class CoreDataEndpoint:
     def query(
         self,
         *symbols: str,
@@ -314,7 +300,7 @@ class CoreDataEndpoint(DataApiEndpoint):
         return [res.CoreResponse(**c) for c in data]
 
 
-class IvRankEndpoint(DataApiEndpoint):
+class IvRankEndpoint:
     def iv_rank(
         self,
         *symbols: str,
@@ -347,7 +333,7 @@ class IvRankEndpoint(DataApiEndpoint):
         return [res.IvRankResponse(**e) for e in data]
 
 
-class HistoricalVolatilityEndpoint(DataApiEndpoint):
+class HistoricalVolatilityEndpoint:
     def query(
         self,
         *symbols: str,
@@ -379,7 +365,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
         return [res.HistoricalVolatilityResponse(**hv) for hv in data]
 
 
-class DailyPriceEndpoint(DataApiEndpoint):
+class DailyPriceEndpoint:
     def query(
         self,
         *symbols: str,
@@ -411,7 +397,7 @@ class DailyPriceEndpoint(DataApiEndpoint):
         return [res.DailyPriceResponse(**p) for p in data]
 
 
-class DividendHistoryEndpoint(DataApiEndpoint):
+class DividendHistoryEndpoint:
     def query(
         self,
         *symbols: str,
@@ -434,7 +420,7 @@ class DividendHistoryEndpoint(DataApiEndpoint):
         return [res.DividendHistoryResponse(**d) for d in data]
 
 
-class EarningsHistoryEndpoint(DataApiEndpoint):
+class EarningsHistoryEndpoint:
     def query(
         self,
         *symbols: str,
@@ -457,7 +443,7 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
         return [res.EarningsHistoryResponse(**e) for e in data]
 
 
-class StockSplitHistoryEndpoint(DataApiEndpoint):
+class StockSplitHistoryEndpoint:
     def query(
         self,
         *symbols: str,
@@ -478,11 +464,3 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
             ticker=",".join(symbols),
         )
         return [res.StockSplitHistoryResponse(**e) for e in data]
-
-
-class DataApi:
-    """Low-level interface to the `Data API`_.
-
-    A direct translation of the Data API that simply wraps the
-    responses in structured Python objects.
-    """
