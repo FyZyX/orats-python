@@ -18,7 +18,7 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
-from orats.errors import UnauthorizedUserError
+from orats.errors import InsufficientPermissionsError
 from orats.model.data import request as req
 from orats.model.data import response as res
 
@@ -63,7 +63,7 @@ class DataApiEndpoint:
         )
         body = response.json()
         if response.status_code == 403:
-            raise UnauthorizedUserError
+            raise InsufficientPermissionsError
         return body["data"]
 
 
