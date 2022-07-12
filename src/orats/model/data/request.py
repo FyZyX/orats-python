@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence, Tuple, Iterable, Optional, Union
+from typing import Sequence, Tuple, Iterable, Optional, Union, Type, TypeAlias, Any
 
 from pydantic import BaseModel, Field, validator
 
@@ -39,11 +39,18 @@ class TickersRequest(_SingleTickerTemplateRequest):
 class StrikesRequest(DataApiRequest):
     tickers: Sequence[str] = Field(..., alias="ticker")
     fields: Optional[Iterable[str]]
+    # TODO: These ranges should not use `Any`, but rather
+    #  denote that Ellipsis a valid value. `Any` is the only
+    #  way to get both tests and static type checking to pass.
+    #  However, this implementation is hacky in that the
+    #  Ellipsis is actually rendered in the API URL, but
+    #  the API appears to handle the cases of non-integers
+    #  by ignoring the value, which is the desired functionality
     expiration_range: Optional[
-        Tuple[Union[int, type(Ellipsis)], Union[int, type(Ellipsis)]]
+        Tuple[Union[int, Any], Union[int, Any]]
     ] = Field(None, alias="dte")
     delta_range: Optional[
-        Tuple[Union[float, type(Ellipsis)], Union[float, type(Ellipsis)]]
+        Tuple[Union[int, Any], Union[int, Any]]
     ] = Field(None, alias="delta")
 
 
