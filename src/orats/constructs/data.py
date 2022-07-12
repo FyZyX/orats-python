@@ -20,18 +20,7 @@ from typing import Any, Iterable, Mapping, Sequence, Tuple
 import httpx
 
 from orats.errors import InsufficientPermissionsError
-from orats.model.core import Core
-from orats.model.money import MoneyForecast, MoneyImplied
-from orats.model.strike import Strike
-from orats.model.summary import SmvSummary
-from orats.model.underlying import (
-    Ticker,
-    DailyPrice,
-    DividendHistory,
-    EarningsHistory,
-    StockSplitHistory,
-)
-from orats.model.volatility import HistoricalVolatility, IvRank
+from orats.model.data import response as res
 
 
 class DataApiEndpoint:
@@ -89,7 +78,7 @@ class DataApiEndpoint:
 
 
 class TickersEndpoint(DataApiEndpoint):
-    def query(self, symbol: str = None) -> Sequence[Ticker]:
+    def query(self, symbol: str = None) -> Sequence[res.TickerResponse]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -105,7 +94,7 @@ class TickersEndpoint(DataApiEndpoint):
           A list of tickers with data durations.
         """
         data = self._get("tickers", ticker=symbol)
-        return [Ticker(**t) for t in data]
+        return [res.TickerResponse(**t) for t in data]
 
 
 class StrikeSearchEndpoint(DataApiEndpoint):
@@ -116,7 +105,7 @@ class StrikeSearchEndpoint(DataApiEndpoint):
         fields: Iterable[str] = None,
         expiration_range: Tuple[int, int] = None,
         delta_range: Tuple[float, float] = None,
-    ) -> Sequence[Strike]:
+    ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
         Specify a trade date to retrieve historical end of day values.
@@ -155,7 +144,7 @@ class StrikeSearchEndpoint(DataApiEndpoint):
             if delta_range
             else delta_range,
         )
-        return [Strike(**s) for s in data]
+        return [res.StrikeResponse(**s) for s in data]
 
 
 class StrikeEndpoint(DataApiEndpoint):
@@ -165,7 +154,7 @@ class StrikeEndpoint(DataApiEndpoint):
         expiration_date: datetime.date,
         strike: float,
         trade_date: datetime.date = None,
-    ) -> Sequence[Strike]:
+    ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
         Specify a trade date to retrieve historical end of day values.
@@ -192,7 +181,7 @@ class StrikeEndpoint(DataApiEndpoint):
             expirDate=expiration_date,
             strike=strike,
         )
-        return [Strike(**s) for s in data]
+        return [res.StrikeResponse(**s) for s in data]
 
 
 class MoniesImpliedEndpoint(DataApiEndpoint):
@@ -201,7 +190,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[MoneyImplied]:
+    ) -> Sequence[res.MoneyImpliedResponse]:
         """Retrieves end of day monthly implied history data for monies.
 
         Specify a trade date to retrieve historical end of day values.
@@ -224,7 +213,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [MoneyImplied(**m) for m in data]
+        return [res.MoneyImpliedResponse(**m) for m in data]
 
 
 class MoniesForecastEndpoint(DataApiEndpoint):
@@ -233,7 +222,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[MoneyForecast]:
+    ) -> Sequence[res.MoneyForecastResponse]:
         """Retrieves monthly forecast history data for monies.
 
         Specify a trade date to retrieve historical end of day values.
@@ -256,7 +245,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [MoneyForecast(**m) for m in data]
+        return [res.MoneyForecastResponse(**m) for m in data]
 
 
 class SummariesEndpoint(DataApiEndpoint):
@@ -265,7 +254,7 @@ class SummariesEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[SmvSummary]:
+    ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves SMV Summary data.
 
         Specify a trade date to retrieve historical end of day values.
@@ -289,7 +278,7 @@ class SummariesEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [SmvSummary(**m) for m in data]
+        return [res.SmvSummaryResponse(**m) for m in data]
 
 
 class CoreDataEndpoint(DataApiEndpoint):
@@ -298,7 +287,7 @@ class CoreDataEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[Core]:
+    ) -> Sequence[res.CoreResponse]:
         """Retrieves Core history data.
 
         Specify a trade date to retrieve historical end of day values.
@@ -322,7 +311,7 @@ class CoreDataEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [Core(**c) for c in data]
+        return [res.CoreResponse(**c) for c in data]
 
 
 class IvRankEndpoint(DataApiEndpoint):
@@ -331,7 +320,7 @@ class IvRankEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[IvRank]:
+    ) -> Sequence[res.IvRankResponse]:
         """Retrieves IV rank data.
 
         Specify a trade date to retrieve historical end of day values.
@@ -355,7 +344,7 @@ class IvRankEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [IvRank(**e) for e in data]
+        return [res.IvRankResponse(**e) for e in data]
 
 
 class HistoricalVolatilityEndpoint(DataApiEndpoint):
@@ -364,7 +353,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[HistoricalVolatility]:
+    ) -> Sequence[res.HistoricalVolatilityResponse]:
         """Retrieves historical volatility data.
 
         See the corresponding `Historical Volatility`_ endpoint.
@@ -387,7 +376,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [HistoricalVolatility(**hv) for hv in data]
+        return [res.HistoricalVolatilityResponse(**hv) for hv in data]
 
 
 class DailyPriceEndpoint(DataApiEndpoint):
@@ -396,7 +385,7 @@ class DailyPriceEndpoint(DataApiEndpoint):
         *symbols: str,
         trade_date: datetime.date = None,
         fields: Iterable[str] = None,
-    ) -> Sequence[DailyPrice]:
+    ) -> Sequence[res.DailyPriceResponse]:
         """Retrieves end of day daily stock price data.
 
         See the corresponding `Daily Price`_ endpoint.
@@ -419,14 +408,14 @@ class DailyPriceEndpoint(DataApiEndpoint):
             trade_date=trade_date,
             fields=fields,
         )
-        return [DailyPrice(**p) for p in data]
+        return [res.DailyPriceResponse(**p) for p in data]
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
         *symbols: str,
-    ) -> Sequence[DividendHistory]:
+    ) -> Sequence[res.DividendHistoryResponse]:
         """Retrieves dividend history data.
 
         See the corresponding `Dividend History`_ endpoint.
@@ -442,14 +431,14 @@ class DividendHistoryEndpoint(DataApiEndpoint):
             "hist/divs",
             ticker=",".join(symbols),
         )
-        return [DividendHistory(**d) for d in data]
+        return [res.DividendHistoryResponse(**d) for d in data]
 
 
 class EarningsHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
         *symbols: str,
-    ) -> Sequence[EarningsHistory]:
+    ) -> Sequence[res.EarningsHistoryResponse]:
         """Retrieves earnings history data.
 
         See the corresponding `Earnings History`_ endpoint.
@@ -465,14 +454,14 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
             "hist/earnings",
             ticker=",".join(symbols),
         )
-        return [EarningsHistory(**e) for e in data]
+        return [res.EarningsHistoryResponse(**e) for e in data]
 
 
 class StockSplitHistoryEndpoint(DataApiEndpoint):
     def query(
         self,
         *symbols: str,
-    ) -> Sequence[StockSplitHistory]:
+    ) -> Sequence[res.StockSplitHistoryResponse]:
         """Retrieves stock split history data.
 
         See the corresponding `Stock Split History`_ endpoint.
@@ -488,7 +477,7 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
             "hist/splits",
             ticker=",".join(symbols),
         )
-        return [StockSplitHistory(**e) for e in data]
+        return [res.StockSplitHistoryResponse(**e) for e in data]
 
 
 class DataApi:
