@@ -22,12 +22,12 @@ class _SingleTickerTemplateRequest(DataApiRequest):
 
 
 class _MultipleTickersTemplateRequest(DataApiRequest):
-    tickers: Optional[Sequence[str]] = Field(..., alias="ticker")
+    tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
     fields: Optional[Iterable[str]]
 
 
 class _MultipleTickersHistoryTemplateRequest(_MultipleTickersTemplateRequest):
-    trade_date: Optional[datetime.date] = Field(..., alias="tradeDate")
+    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
@@ -41,10 +41,10 @@ class StrikesRequest(DataApiRequest):
     fields: Optional[Iterable[str]]
     expiration_range: Optional[
         Tuple[Union[int, type(Ellipsis)], Union[int, type(Ellipsis)]]
-    ] = Field(..., alias="dte")
+    ] = Field(None, alias="dte")
     delta_range: Optional[
         Tuple[Union[float, type(Ellipsis)], Union[float, type(Ellipsis)]]
-    ] = Field(..., alias="delta")
+    ] = Field(None, alias="delta")
 
 
 class StrikesHistoryRequest(StrikesRequest):
