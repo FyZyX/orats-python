@@ -1,11 +1,23 @@
 """Higher level constructs built on top of base API."""
 
 import datetime
-from typing import Iterable, Sequence, Tuple, Collection
+from typing import Iterable, Sequence, Tuple, Collection, Union
 
 import orats.endpoints.data as endpoints
 from orats.model.data import request as req
 from orats.model.data import response as res
+
+
+def _bounded_range(lower_bound, upper_bound):
+    if lower_bound < 0 and upper_bound < 0:
+        return None
+    elif lower_bound < 0:
+        l, u = ..., upper_bound
+    elif upper_bound < 0:
+        l, u = lower_bound, ...
+    else:
+        l, u = lower_bound, upper_bound
+    return req.BoundedRange(l, u)
 
 
 class Asset:
@@ -22,6 +34,16 @@ class Asset:
         """
         self._ticker = ticker
         self._token = token
+        self._response = None
+
+    def _get_ticker(self):
+        if self._response:
+            return self._response
+        endpoint = endpoints.TickersEndpoint(self._token)
+        request = req.TickersRequest(ticker=self._ticker)
+        # TODO: Error handling
+        self._response = endpoint(request)[0]
+        return self._response
 
     def historical_data_range(self) -> (datetime.date, datetime.date):
         """The duration of available historical data.
@@ -29,15 +51,11 @@ class Asset:
         Returns:
           The minimum and maximum dates of available data.
         """
-        endpoint = endpoints.TickersEndpoint(self._token)
-        request = req.TickersRequest(ticker=self._ticker)
-        response = endpoint(request)
-        ticker = response[0]
+        ticker = self._get_ticker()
         return ticker.min_date, ticker.max_date
 
 
 class Universe:
-
     def __init__(self, tickers: Collection):
         self._assets: Collection[Asset] = {Asset(ticker) for ticker in tickers}
 
@@ -55,7 +73,61 @@ class PutOption:
 
 
 class OptionChain:
-    pass
+    def __init__(self, ticker: str, token: str = None):
+        """Initializes an asset object.
+
+        Args:
+          ticker:
+            The ticker symbol of the underlying asset.
+          token:
+            API token.
+        """
+        self._ticker = ticker
+        self._token = token
+        self._expiration_range = None
+        self._delta_range = None
+        self._response = None
+
+    def _get_strikes(self, trade_date: datetime.date = None):
+        if self._response:
+            return self._response
+
+        if trade_date:
+            endpoint = endpoints.StrikesHistoryEndpoint(self._token)
+            request = req.StrikesHistoryRequest(
+                tickers=self._ticker,
+                trade_date=trade_date,
+                expiration_range=self._expiration_range,
+                delta_range=self._delta_range,
+            )
+        else:
+            endpoint = endpoints.StrikesEndpoint(self._token)
+            request = req.StrikesRequest(
+                tickers=self._ticker,
+                expiration_range=self._expiration_range,
+                delta_range=self._delta_range,
+            )
+
+        # TODO: Error handling
+        self._response = endpoint(request)[0]
+        return self._response
+
+    def filter_by_days_to_expiration(
+        self,
+        lower_bound: int = -1,
+        upper_bound: int = -1,
+    ):
+        self._expiration_range = _bounded_range(lower_bound, upper_bound)
+
+    def filter_by_delta(
+        self,
+        lower_bound: float = -1,
+        upper_bound: float = -1,
+    ):
+        self._expiration_range = _bounded_range(lower_bound, upper_bound)
+
+    def table(self, trade_date: datetime.date = None):
+        return self._get_strikes(trade_date)
 
 
 class StrikeSearchEndpoint:
