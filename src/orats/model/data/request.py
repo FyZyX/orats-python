@@ -15,8 +15,6 @@ from typing import (
 
 from pydantic import BaseModel, Field, validator
 
-# TODO: This is kind of a hacky way to use Ellipsis in DTE and delta range filters.
-#  for version of python less than 3.10
 EllipsisType = Type[Any]
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from types import EllipsisType
@@ -33,6 +31,9 @@ def dependency_check(v, values):
 class DataApiRequest(BaseModel):
     class Config:
         allow_population_by_field_name = True
+        # TODO: This is kind of a hacky way to use Ellipsis
+        #  in DTE and delta range filters.
+        arbitrary_types_allowed = True
 
 
 class _SingleTickerTemplateRequest(DataApiRequest):
@@ -67,11 +68,7 @@ class TickersRequest(_SingleTickerTemplateRequest):
 
 
 class StrikesRequest(DataApiRequest):
-    """Retrieves strikes data for the given asset(s).
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
-    """
+    """Retrieves strikes data for the given asset(s)."""
 
     tickers: Sequence[str] = Field(
         ...,
@@ -101,11 +98,7 @@ class StrikesRequest(DataApiRequest):
 
 
 class StrikesHistoryRequest(StrikesRequest):
-    """Retrieves strikes data for the given asset(s).
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
-    """
+    """Retrieves strikes data for the given asset(s)."""
 
     trade_date: datetime.date = Field(
         ...,
@@ -115,12 +108,7 @@ class StrikesHistoryRequest(StrikesRequest):
 
 
 class StrikesByOptionsRequest(DataApiRequest):
-    """Retrieves strikes data by ticker, expiry, and strike.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Strikes by Options`_ and
-    `Strikes History by Options`_ endpoints.
-    """
+    """Retrieves strikes data by ticker, expiry, and strike."""
 
     ticker: str = Field(
         ...,
@@ -139,12 +127,7 @@ class StrikesByOptionsRequest(DataApiRequest):
 
 
 class StrikesHistoryByOptionsRequest(StrikesByOptionsRequest):
-    """Retrieves strikes data by ticker, expiry, and strike.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Strikes by Options`_ and
-    `Strikes History by Options`_ endpoints.
-    """
+    """Retrieves strikes data by ticker, expiry, and strike."""
 
     trade_date: datetime.date = Field(
         ...,
@@ -154,16 +137,7 @@ class StrikesHistoryByOptionsRequest(StrikesByOptionsRequest):
 
 
 class MoniesRequest(DataApiRequest):
-    """Retrieves end of day monthly implied history data for monies.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Monies`_ and `Monies History`_ endpoints.
-
-    Retrieves monthly forecast history data for monies.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Monies`_ and `Monies History`_ endpoints.
-    """
+    """Retrieves end of day monthly implied/forecast history data for monies."""
 
     tickers: Sequence[str] = Field(
         ...,
@@ -177,11 +151,7 @@ class MoniesRequest(DataApiRequest):
 
 
 class MoniesHistoryRequest(MoniesRequest):
-    """Retrieves end of day monthly implied history data for monies.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Monies`_ and `Monies History`_ endpoints.
-    """
+    """Retrieves end of day monthly implied history data for monies."""
 
     trade_date: datetime.date = Field(
         ...,
@@ -191,83 +161,44 @@ class MoniesHistoryRequest(MoniesRequest):
 
 
 class SummariesRequest(_MultipleTickersTemplateRequest):
-    """Retrieves SMV Summary data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
-    """
+    """Retrieves SMV Summary data."""
 
 
 class SummariesHistoryRequest(_MultipleTickersHistoryTemplateRequest):
-    """Retrieves SMV Summary data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
-    """
+    """Retrieves SMV Summary data."""
 
 
 class CoreDataRequest(_MultipleTickersTemplateRequest):
-    """Retrieves Core history data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
-    """
+    """Retrieves Core history data."""
 
 
 class CoreDataHistoryRequest(_MultipleTickersHistoryTemplateRequest):
-    """Retrieves Core history data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
-    """
+    """Retrieves Core history data."""
 
 
 class DailyPriceRequest(_MultipleTickersHistoryTemplateRequest):
-    """Retrieves end of day daily stock price data.
-
-    See the corresponding `Daily Price`_ endpoint.
-    """
+    """Retrieves end of day daily stock price data."""
 
 
 class HistoricalVolatilityRequest(_MultipleTickersHistoryTemplateRequest):
-    """Retrieves historical volatility data.
-
-    See the corresponding `Historical Volatility`_ endpoint.
-    """
+    """Retrieves historical volatility data."""
 
 
 class DividendHistoryRequest(_SingleTickerTemplateRequest):
-    """Retrieves dividend history data.
-
-    See the corresponding `Dividend History`_ endpoint.
-    """
+    """Retrieves dividend history data."""
 
 
 class EarningsHistoryRequest(_SingleTickerTemplateRequest):
-    """Retrieves earnings history data.
-
-    See the corresponding `Earnings History`_ endpoint.
-    """
+    """Retrieves earnings history data."""
 
 
 class StockSplitHistoryRequest(_SingleTickerTemplateRequest):
-    """Retrieves stock split history data.
-
-    See the corresponding `Stock Split History`_ endpoint.
-    """
+    """Retrieves stock split history data."""
 
 
 class IvRankRequest(_MultipleTickersTemplateRequest):
-    """Retrieves IV rank data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
-    """
+    """Retrieves IV rank data."""
 
 
 class IvRankHistoryRequest(_MultipleTickersHistoryTemplateRequest):
-    """Retrieves IV rank data.
-
-    Specify a trade date to retrieve historical end of day values.
-    See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
-    """
+    """Retrieves IV rank data."""
