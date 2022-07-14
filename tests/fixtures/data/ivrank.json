@@ -1,0 +1,14 @@
+{
+  "data": [
+    {
+      "ticker": "IBM",
+      "tradeDate": "2022-07-11",
+      "iv": 25.801,
+      "ivRank1m": 49.44,
+      "ivPct1m": 75,
+      "ivRank1y": 68.76,
+      "ivPct1y": 85.66,
+      "updatedAt": "2022-07-11T20:47:18Z"
+    }
+  ]
+}
