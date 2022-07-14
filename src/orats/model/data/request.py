@@ -1,25 +1,11 @@
 import datetime
-import sys
-from numbers import Number
 from typing import (
-    Any,
     Iterable,
     Optional,
     Sequence,
-    Tuple,
-    Type,
-    TypeAlias,
-    Union,
-    TypeVar,
 )
 
 from pydantic import BaseModel, Field, validator
-
-EllipsisType = Type[Any]
-if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-    from types import EllipsisType
-A = TypeVar("A", bound=Number)
-BoundedRange: TypeAlias = Tuple[Union[A, EllipsisType], Union[A, EllipsisType]]
 
 
 def dependency_check(v, values):
@@ -31,9 +17,6 @@ def dependency_check(v, values):
 class DataApiRequest(BaseModel):
     class Config:
         allow_population_by_field_name = True
-        # TODO: This is kind of a hacky way to use Ellipsis
-        #  in DTE and delta range filters.
-        arbitrary_types_allowed = True
 
 
 class _SingleTickerTemplateRequest(DataApiRequest):
@@ -79,21 +62,21 @@ class StrikesRequest(DataApiRequest):
         None,
         description="The subset of fields to retrieve.",
     )
-    expiration_range: Optional[BoundedRange[int]] = Field(
+    expiration_range: Optional[str] = Field(
         None,
         alias="dte",
         description="Filters results to a range of days to expiration."
-        "Specified as a ``(min, max)`` range of integers."
-        "To ignore an upper/lower bound, use `...` as a placeholder."
-        "Examples: ``(30, 45)``, ``(30, ...)``, ``(..., 45)``",
+        "Specified as a comma separated pair of integers."
+        "To ignore an upper/lower bound, leave the value blank."
+        "Examples: ``30,45``, ``30,`` == ``30``, ``,45``",
     )
-    delta_range: Optional[BoundedRange[float]] = Field(
+    delta_range: Optional[str] = Field(
         None,
         alias="delta",
         description="Filters results to a range of delta values."
-        "Specified as a ``(min, max)`` range of floating point numbers."
-        "To ignore an upper/lower bound, use ``...`` as a placeholder."
-        "Examples: ``(.30, .45)``, ``(.30, ...)``, ``(..., .45)``",
+        "Specified as a comma separated pair of floating point numbers."
+        "To ignore an upper/lower bound, leave the value blank."
+        "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
     )
 
 

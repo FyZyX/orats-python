@@ -29,8 +29,8 @@ class TestDataApi:
     def test_strikes(self):
         request = req.StrikesRequest(
             tickers=("IBM",),
-            expiration_range=(30, ...),
-            delta_range=(0.30, 0.45),
+            expiration_range="30,",
+            delta_range="0.30,0.45",
         )
         strikes = self._api.strikes(request)
         for strike in strikes:
@@ -40,8 +40,8 @@ class TestDataApi:
         request = req.StrikesHistoryRequest(
             tickers=("IBM", "AAPL"),
             trade_date=datetime.date(2022, 7, 5),
-            expiration_range=(30, ...),
-            delta_range=(0.30, 0.45),
+            expiration_range="30,",
+            delta_range="0.30,0.45",
         )
         strikes = self._api.strikes_history(request)
         for strike in strikes:

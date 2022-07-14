@@ -10,18 +10,6 @@ from orats.model.data import request as req
 from orats.model.data import response as res
 
 
-def _bounded_range(lower_bound, upper_bound):
-    if lower_bound < 0 and upper_bound < 0:
-        return None
-    elif lower_bound < 0:
-        l, u = ..., upper_bound
-    elif upper_bound < 0:
-        l, u = lower_bound, ...
-    else:
-        l, u = lower_bound, upper_bound
-    return req.BoundedRange(l, u)
-
-
 class Asset:
     """Represents the underlying asset of an option contract."""
 
@@ -141,8 +129,8 @@ class OptionChain:
 
     def filter_by_days_to_expiration(
         self,
-        lower_bound: int = -1,
-        upper_bound: int = -1,
+        lower_bound: int = None,
+        upper_bound: int = None,
     ):
         """Keep only those options within the specified range of days to expiration.
 
@@ -157,14 +145,14 @@ class OptionChain:
         Returns:
           A list of strikes for each specified asset.
         """
-        self._expiration_range = _bounded_range(lower_bound, upper_bound)
+        self._expiration_range = ",".join(map(str, (lower_bound, upper_bound)))
 
     def filter_by_delta(
         self,
-        lower_bound: float = -1,
-        upper_bound: float = -1,
+        lower_bound: float = None,
+        upper_bound: float = None,
     ):
-        self._expiration_range = _bounded_range(lower_bound, upper_bound)
+        self._delta_range = ",".join(map(str, (lower_bound, upper_bound)))
 
     def options(self, trade_date: datetime.date = None):
         # https://blog.orats.com/option-greeks-are-the-same-for-calls-and-puts
