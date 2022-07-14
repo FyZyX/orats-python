@@ -15,6 +15,8 @@ from typing import (
 
 from pydantic import BaseModel, Field, validator
 
+# TODO: This is kind of a hacky way to use Ellipsis in DTE and delta range filters.
+#  for version of python less than 3.10
 EllipsisType = Type[Any]
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
     from types import EllipsisType
@@ -31,21 +33,31 @@ def dependency_check(v, values):
 class DataApiRequest(BaseModel):
     class Config:
         allow_population_by_field_name = True
-        # TODO: Kinda hacky way to use Ellipsis in DTE and delta range filters.
-        arbitrary_types_allowed = True
 
 
 class _SingleTickerTemplateRequest(DataApiRequest):
-    ticker: str = Field(..., alias="ticker")
+    ticker: str = Field(
+        ...,
+        alias="ticker",
+        description="The ticker symbol of the underlying asset.",
+    )
 
 
 class _MultipleTickersTemplateRequest(DataApiRequest):
-    tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
+    tickers: Optional[Sequence[str]] = Field(
+        None,
+        alias="ticker",
+        description="List of assets to retrieve.",
+    )
     fields: Optional[Iterable[str]]
 
 
 class _MultipleTickersHistoryTemplateRequest(_MultipleTickersTemplateRequest):
-    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
+    trade_date: Optional[datetime.date] = Field(
+        None,
+        alias="tradeDate",
+        description="The trade date to retrieve.",
+    )
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
@@ -95,7 +107,11 @@ class StrikesHistoryRequest(StrikesRequest):
     See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
     """
 
-    trade_date: datetime.date = Field(..., alias="tradeDate")
+    trade_date: datetime.date = Field(
+        ...,
+        alias="tradeDate",
+        description="The trade date to retrieve.",
+    )
 
 
 class StrikesByOptionsRequest(DataApiRequest):
