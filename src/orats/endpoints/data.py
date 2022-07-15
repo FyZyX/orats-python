@@ -182,7 +182,7 @@ class StrikesHistoryByOptionsEndpoint(StrikesByOptionsEndpoint):
 
     def __call__(
         self,
-        *requests: req.StrikesHistoryByOptionsRequest,
+        *requests: req.StrikesByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves historical strikes data by ticker, expiry, and strike.
 
