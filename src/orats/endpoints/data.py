@@ -174,9 +174,7 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
         self, requests: Sequence[req.StrikesByOptionsRequest]
     ) -> Sequence[Mapping[str, Any]]:
         body = [json.loads(request.json(by_alias=True)) for request in requests]
-        return _post(
-            url=self._url(), body=body, params=self._update_params({})
-        )
+        return _post(url=self._url(), body=body, params=self._update_params({}))
 
 
 class StrikesHistoryByOptionsEndpoint(StrikesByOptionsEndpoint):
