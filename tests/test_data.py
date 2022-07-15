@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from orats.endpoints.data import DataApi, DataApiEndpoint
+from orats.endpoints import data
 from orats.model.data import request as req
 from orats.model.data import response as res
 from tests.fixtures import load_fixture
@@ -10,11 +10,12 @@ from tests.fixtures import load_fixture
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(DataApiEndpoint, "_get", load_fixture)
+    monkeypatch.setattr(data, "_get", load_fixture)
+    monkeypatch.setattr(data, "_post", load_fixture)
 
 
 class TestDataApi:
-    _api = DataApi("demo")
+    _api = data.DataApi("demo")
 
     def test_tickers(self):
         request = req.TickersRequest(ticker="IBM")
