@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from orats.endpoints.data import DataApi, DataApiEndpoint
+from orats.endpoints import data
 from orats.model.data import request as req
 from orats.model.data import response as res
 from tests.fixtures import load_fixture
@@ -10,11 +10,12 @@ from tests.fixtures import load_fixture
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(DataApiEndpoint, "_get", load_fixture)
+    monkeypatch.setattr(data, "_get", load_fixture)
+    monkeypatch.setattr(data, "_post", load_fixture)
 
 
 class TestDataApi:
-    _api = DataApi("demo")
+    _api = data.DataApi("demo")
 
     def test_tickers(self):
         request = req.TickersRequest(ticker="IBM")
@@ -48,23 +49,45 @@ class TestDataApi:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_by_options(self):
-        request = req.StrikesByOptionsRequest(
-            ticker="IBM",
-            expiration_date=datetime.date(2022, 6, 17),
-            strike=50,
-        )
-        strikes = self._api.strikes_by_options(request)
+        requests = [
+            req.StrikesByOptionsRequest(
+                ticker="IBM",
+                expiration_date=datetime.date(2022, 6, 17),
+                strike=50,
+            ),
+            req.StrikesByOptionsRequest(
+                ticker="IBM",
+                expiration_date=datetime.date(2022, 6, 17),
+                strike=55,
+            ),
+        ]
+        strikes = self._api.strikes_by_options(*requests[:-1])
+        for strike in strikes:
+            assert isinstance(strike, res.StrikeResponse)
+        strikes = self._api.strikes_by_options(*requests)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_history_by_options(self):
-        request = req.StrikesHistoryByOptionsRequest(
-            ticker="IBM",
-            trade_date=datetime.date(2022, 6, 6),
-            expiration_date=datetime.date(2022, 6, 17),
-            strike=140,
-        )
-        strikes = self._api.strikes_history_by_options(request)
+
+        requests = [
+            req.StrikesHistoryByOptionsRequest(
+                ticker="IBM",
+                trade_date=datetime.date(2022, 6, 6),
+                expiration_date=datetime.date(2022, 6, 17),
+                strike=50,
+            ),
+            req.StrikesHistoryByOptionsRequest(
+                ticker="IBM",
+                trade_date=datetime.date(2022, 6, 6),
+                expiration_date=datetime.date(2022, 6, 17),
+                strike=55,
+            ),
+        ]
+        strikes = self._api.strikes_by_options(*requests[:-1])
+        for strike in strikes:
+            assert isinstance(strike, res.StrikeResponse)
+        strikes = self._api.strikes_by_options(*requests)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
