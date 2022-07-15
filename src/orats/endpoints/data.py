@@ -14,6 +14,7 @@ See the `product page`_ and `API docs`_.
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
 import abc
+import json
 from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
@@ -21,6 +22,29 @@ import httpx
 from orats.errors import InsufficientPermissionsError
 from orats.model.data import request as req
 from orats.model.data import response as res
+
+
+def _get(url, params) -> Sequence[Mapping[str, Any]]:
+    response = httpx.get(
+        url=url,
+        params=params,
+    )
+    body = response.json()
+    if response.status_code == 403:
+        raise InsufficientPermissionsError
+    return body["data"]
+
+
+def _post(url, params, body) -> Sequence[Mapping[str, Any]]:
+    response = httpx.post(
+        url=url,
+        json=body,
+        params=params,
+    )
+    if response.status_code == 403:
+        raise InsufficientPermissionsError
+    body = response.json()
+    return body["data"]
 
 
 class DataApiEndpoint(abc.ABC):
@@ -54,15 +78,11 @@ class DataApiEndpoint(abc.ABC):
         return updated_params
 
     def _get(self, request: req.DataApiRequest) -> Sequence[Mapping[str, Any]]:
-        params = request.dict(by_alias=True)
-        response = httpx.get(
+        params = self._update_params(request.dict(by_alias=True))
+        return _get(
             url=self._url(),
-            params=self._update_params(params),
+            params=params,
         )
-        body = response.json()
-        if response.status_code == 403:
-            raise InsufficientPermissionsError
-        return body["data"]
 
 
 class TickersEndpoint(DataApiEndpoint):
@@ -129,28 +149,42 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
 
     def __call__(
         self,
-        request: req.StrikesByOptionsRequest,
+        *requests: req.StrikesByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
         See the corresponding `Strikes by Options`_ endpoint.
 
         Args:
-          request:
-            StrikesByOption request object.
+          requests:
+            StrikesByOption request object. Passing a single request will
+            use the GET request, while passing a sequence will use the POST
+            request method.
 
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        if len(requests) == 1:
+            response = self._get(requests[0])
+        else:
+            response = self._post(requests)
+        return [res.StrikeResponse(**v) for v in response]
+
+    def _post(
+        self, requests: Sequence[req.StrikesByOptionsRequest]
+    ) -> Sequence[Mapping[str, Any]]:
+        body = [json.loads(request.json(by_alias=True)) for request in requests]
+        return _post(
+            url=self._url(), body=body, params=self._update_params({})
+        )
 
 
-class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
+class StrikesHistoryByOptionsEndpoint(StrikesByOptionsEndpoint):
     _resource = "hist/strikes/options"
 
     def __call__(
         self,
-        request: req.StrikesHistoryByOptionsRequest,
+        *requests: req.StrikesHistoryByOptionsRequest,
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves historical strikes data by ticker, expiry, and strike.
 
@@ -163,7 +197,7 @@ class StrikesHistoryByOptionsEndpoint(DataApiEndpoint):
         Returns:
           A list of historical strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+        return super().__call__(*requests)
 
 
 class MoniesImpliedEndpoint(DataApiEndpoint):
