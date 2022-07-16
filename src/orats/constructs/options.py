@@ -1,7 +1,7 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Optional
+from typing import Optional, Sequence
 
 from pydantic import BaseModel
 
@@ -63,7 +63,7 @@ class OptionChain:
         self._token = token or _get_token()
         self._expiration_range: Optional[str] = None
         self._delta_range: Optional[str] = None
-        self._response: Optional[res.DataApiResponse] = None
+        self._response: Optional[Sequence[res.Strike]] = None
 
     def _get_strikes(self, trade_date: datetime.date = None):
         if self._response:

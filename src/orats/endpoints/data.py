@@ -127,8 +127,8 @@ class TickersEndpoint(DataApiEndpoint):
         Returns:
           A list of tickers with data durations.
         """
-        api_response = res.DataApiResponse[res.Ticker](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.Ticker](**self._get(request))
+        return response.data or ()
 
 
 class StrikesEndpoint(DataApiEndpoint):
@@ -147,8 +147,8 @@ class StrikesEndpoint(DataApiEndpoint):
           A list of strikes for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.Strike](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.Strike](**self._get(request))
+        return response.data or ()
 
 
 class StrikesByOptionsEndpoint(DataApiEndpoint):
@@ -173,12 +173,12 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
           A list of strikes for each specified asset.
         """
         if len(requests) == 1:
-            response = self._get(requests[0])
+            data = self._get(requests[0])
         else:
-            response = self._post(requests)
+            data = self._post(requests)
 
-        api_response = res.DataApiResponse[res.Strike](**response)
-        return api_response.data or ()
+        response = res.DataApiResponse[res.Strike](**data)
+        return response.data or ()
 
     def _post(
         self, requests: Sequence[req.StrikesByOptionsRequest]
@@ -206,8 +206,8 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
           A list of implied monies for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.MoneyImplied](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.MoneyImplied](**self._get(request))
+        return response.data or ()
 
 
 class MoniesForecastEndpoint(DataApiEndpoint):
@@ -229,8 +229,8 @@ class MoniesForecastEndpoint(DataApiEndpoint):
           A list of forecast monies for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.MoneyForecast](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.MoneyForecast](**self._get(request))
+        return response.data or ()
 
 
 class SummariesEndpoint(DataApiEndpoint):
@@ -252,8 +252,8 @@ class SummariesEndpoint(DataApiEndpoint):
           A list of SMV summaries for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.SmvSummary](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.SmvSummary](**self._get(request))
+        return response.data or ()
 
 
 class CoreDataEndpoint(DataApiEndpoint):
@@ -272,8 +272,8 @@ class CoreDataEndpoint(DataApiEndpoint):
           A list of core data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.Core](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.Core](**self._get(request))
+        return response.data or ()
 
 
 class DailyPriceEndpoint(DataApiEndpoint):
@@ -296,8 +296,8 @@ class DailyPriceEndpoint(DataApiEndpoint):
           A list of daily price data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.DailyPrice](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.DailyPrice](**self._get(request))
+        return response.data or ()
 
 
 class HistoricalVolatilityEndpoint(DataApiEndpoint):
@@ -320,10 +320,8 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
           A list of historical volatility data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.HistoricalVolatility](
-            **self._get(request)
-        )
-        return api_response.data or ()
+        response = res.DataApiResponse[res.HistoricalVolatility](**self._get(request))
+        return response.data or ()
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
@@ -346,8 +344,8 @@ class DividendHistoryEndpoint(DataApiEndpoint):
           A list of dividend history data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.DividendHistory](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.DividendHistory](**self._get(request))
+        return response.data or ()
 
 
 class EarningsHistoryEndpoint(DataApiEndpoint):
@@ -370,8 +368,8 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
           A list of earnings history data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.EarningsHistory](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.EarningsHistory](**self._get(request))
+        return response.data or ()
 
 
 class StockSplitHistoryEndpoint(DataApiEndpoint):
@@ -394,8 +392,8 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
           A list of stock split history data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.StockSplitHistory](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.StockSplitHistory](**self._get(request))
+        return response.data or ()
 
 
 class IvRankEndpoint(DataApiEndpoint):
@@ -417,8 +415,8 @@ class IvRankEndpoint(DataApiEndpoint):
           A list of IV rank data for each specified asset.
         """
 
-        api_response = res.DataApiResponse[res.IvRank](**self._get(request))
-        return api_response.data or ()
+        response = res.DataApiResponse[res.IvRank](**self._get(request))
+        return response.data or ()
 
 
 class DataApi:
