@@ -39,13 +39,18 @@ class _SingleTickerTemplateRequest(DataApiRequest):
     ticker: str = Field(..., alias="ticker")
 
 
-class _MultipleTickersTemplateRequest(DataApiRequest):
-    tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
+class DataHistoryApiRequest(DataApiRequest):
+    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
+
+
+class _MultipleTickersTemplateRequest(DataHistoryApiRequest):
+    tickers: Sequence[str] = Field(None, alias="ticker")
     fields: Optional[Iterable[str]]
 
 
-class _MultipleTickersHistoryTemplateRequest(_MultipleTickersTemplateRequest):
-    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
+class _MultipleTickersDependentTemplateRequest(DataHistoryApiRequest):
+    tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
+    fields: Optional[Iterable[str]]
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
@@ -54,57 +59,34 @@ class TickersRequest(_SingleTickerTemplateRequest):
     pass
 
 
-class StrikesRequest(DataApiRequest):
-    tickers: Sequence[str] = Field(..., alias="ticker")
-    fields: Optional[Iterable[str]]
+class StrikesRequest(_MultipleTickersTemplateRequest):
     expiration_range: Optional[BoundedRange[int]] = Field(None, alias="dte")
     delta_range: Optional[BoundedRange[float]] = Field(None, alias="delta")
 
 
-class StrikesHistoryRequest(StrikesRequest):
-    trade_date: datetime.date = Field(..., alias="tradeDate")
-
-
-class StrikesByOptionsRequest(DataApiRequest):
-    ticker: str = Field(..., alias="ticker")
+class StrikesByOptionsRequest(_SingleTickerTemplateRequest):
+    trade_date: datetime.date = Field(None, alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     strike: float
 
 
-class StrikesHistoryByOptionsRequest(StrikesByOptionsRequest):
-    trade_date: datetime.date = Field(..., alias="tradeDate")
-
-
-class MoniesRequest(DataApiRequest):
-    tickers: Sequence[str] = Field(..., alias="ticker")
-    fields: Optional[Iterable[str]]
-
-
-class MoniesHistoryRequest(MoniesRequest):
-    trade_date: datetime.date = Field(..., alias="tradeDate")
-
-
-class SummariesRequest(_MultipleTickersTemplateRequest):
+class MoniesRequest(_MultipleTickersTemplateRequest):
     pass
 
 
-class SummariesHistoryRequest(_MultipleTickersHistoryTemplateRequest):
+class SummariesRequest(_MultipleTickersDependentTemplateRequest):
     pass
 
 
-class CoreDataRequest(_MultipleTickersTemplateRequest):
+class CoreDataRequest(_MultipleTickersDependentTemplateRequest):
     pass
 
 
-class CoreDataHistoryRequest(_MultipleTickersHistoryTemplateRequest):
+class DailyPriceRequest(_MultipleTickersDependentTemplateRequest):
     pass
 
 
-class DailyPriceRequest(_MultipleTickersHistoryTemplateRequest):
-    pass
-
-
-class HistoricalVolatilityRequest(_MultipleTickersHistoryTemplateRequest):
+class HistoricalVolatilityRequest(_MultipleTickersDependentTemplateRequest):
     pass
 
 
@@ -120,9 +102,5 @@ class StockSplitHistoryRequest(_SingleTickerTemplateRequest):
     pass
 
 
-class IvRankRequest(_MultipleTickersTemplateRequest):
-    pass
-
-
-class IvRankHistoryRequest(_MultipleTickersHistoryTemplateRequest):
+class IvRankRequest(_MultipleTickersDependentTemplateRequest):
     pass
