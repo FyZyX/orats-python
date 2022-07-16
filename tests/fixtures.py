@@ -11,11 +11,15 @@ def persist_fixture(resource, fixture, prefix="data"):
 
 
 def _resource(url):
-    return "-".join(url.split("://")[1].split("/")[2:])
+    return "/".join(url.split("://")[1].split("/")[2:])
 
 
 def load_fixture(url, *args, **kwargs):
     return _endpoints[_resource(url)]
+
+
+def ticker() -> Dict[str, Any]:
+    return {"ticker": "IBM", "min": "2007-01-03", "max": "2022-07-11"}
 
 
 def strike() -> Dict[str, Any]:
@@ -705,12 +709,7 @@ def earnings_history() -> Dict[str, Any]:
 
 
 def stock_split_history() -> Dict[str, Any]:
-    return {
-        "ticker": "IBM",
-        "earnDate": "1980-03-31",
-        "anncTod": "1630",
-        "updatedAt": "2019-05-15T12:57:23Z",
-    }
+    return {"ticker": "UVXY", "splitDate": "2012-03-08", "divisor": 0.167}
 
 
 def endpoint(resource, count=1):
@@ -719,20 +718,24 @@ def endpoint(resource, count=1):
 
 # TODO: Use mapping of Request types to Response types
 _endpoints = {
-    "strikes": strike,
-    "hist/strikes": strike,
-    "strikes/options": strike,
-    "hist/strikes/options": strike,
-    "monies/implied": money,
-    "hist/monies/implied": money,
-    "hist/monies/forecast": money,
-    "summaries": summary,
-    "hist/summaries": summary,
-    "cores": core,
-    "hist/cores": core,
-    "hist/dailies": daily_price,
-    "hist/hvs": historical_volatility,
-    "hist/divs": dividend_history,
-    "hist/earnings": earnings_history,
-    "hist/splits": stock_split_history,
+    "tickers": endpoint(ticker),
+    "strikes": endpoint(strike),
+    "hist/strikes": endpoint(strike),
+    "strikes/options": endpoint(strike),
+    "hist/strikes/options": endpoint(strike),
+    "monies/implied": endpoint(money),
+    "monies/forecast": endpoint(money),
+    "hist/monies/implied": endpoint(money),
+    "hist/monies/forecast": endpoint(money),
+    "summaries": endpoint(summary),
+    "hist/summaries": endpoint(summary),
+    "cores": endpoint(core),
+    "hist/cores": endpoint(core),
+    "hist/dailies": endpoint(daily_price),
+    "hist/hvs": endpoint(historical_volatility),
+    "hist/divs": endpoint(dividend_history),
+    "hist/earnings": endpoint(earnings_history),
+    "hist/splits": endpoint(stock_split_history),
+    "ivrank": endpoint(iv_rank),
+    "hist/ivrank": endpoint(iv_rank),
 }
