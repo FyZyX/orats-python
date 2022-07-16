@@ -4,6 +4,12 @@ Welcome to the ORATS Python SDK documentation!
 .. warning:: This project is **unstable** and in early stages of development!
 
 .. toctree::
+   :maxdepth: 3
+   :caption: Constructs
+
+   constructs/index
+
+.. toctree::
    :maxdepth: 2
    :caption: API
 
@@ -11,9 +17,9 @@ Welcome to the ORATS Python SDK documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Model
+   :caption: Contributing
 
-   model/index
+   contributing/index
 
 Indices and tables
 ==================
