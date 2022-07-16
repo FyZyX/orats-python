@@ -19,7 +19,7 @@ Welcome to the ORATS Python SDK documentation!
    :maxdepth: 2
    :caption: Model
 
-   model/index
+   constructs/index
 
 Indices and tables
 ==================
