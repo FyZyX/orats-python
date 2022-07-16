@@ -48,7 +48,7 @@ class _MultipleTickersTemplateRequest(DataHistoryApiRequest):
     fields: Optional[Iterable[str]]
 
 
-class _MultipleTickersDependentTemplateRequest(DataApiRequest):
+class _MultipleTickersDependentTemplateRequest(DataHistoryApiRequest):
     tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
     fields: Optional[Iterable[str]]
 
