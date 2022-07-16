@@ -50,6 +50,7 @@ def _post(url, params, body) -> Sequence[Mapping[str, Any]]:
 class DataApiEndpoint(abc.ABC):
     _base_url = "https://api.orats.io/datav2"
     _resource: str
+    # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
 
     def __init__(self, token: str):
@@ -92,7 +93,7 @@ class DataApiEndpoint(abc.ABC):
         #  and hinders readability, it dramatically reduces the
         #  amount of source code needed to cover all endpoints.
         is_historical = self._is_historical
-        if not is_historical and hasattr(request, 'trade_date'):
+        if not is_historical and hasattr(request, "trade_date"):
             is_historical = request.trade_date is not None
 
         params = self._update_params(request.dict(by_alias=True))
@@ -129,8 +130,7 @@ class StrikesEndpoint(DataApiEndpoint):
     def __call__(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data for the given asset(s).
 
-        See the corresponding `Strikes`_ endpoint.
-        See the corresponding `Strikes History`_ endpoints.
+        See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
 
         Args:
           request:
@@ -151,8 +151,8 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
     ) -> Sequence[res.StrikeResponse]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
-        See the corresponding `Strikes by Options`_ endpoint.
-        See the corresponding `Strikes History by Options`_ endpoint.
+        See the corresponding `Strikes by Options`_ and
+        `Strikes History by Options`_ endpoints.
 
         Args:
           requests:
@@ -185,7 +185,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
     ) -> Sequence[res.MoneyImpliedResponse]:
         """Retrieves monthly implied data for monies.
 
-        See the corresponding `Monies`_ endpoint.
+        See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
           request:
@@ -206,7 +206,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
     ) -> Sequence[res.MoneyForecastResponse]:
         """Retrieves monthly forecast data for monies.
 
-        See the corresponding `Monies`_ endpoint.
+        See the corresponding `Monies`_ and `Monies History`_ endpoints.
 
         Args:
           request:
@@ -227,7 +227,7 @@ class SummariesEndpoint(DataApiEndpoint):
     ) -> Sequence[res.SmvSummaryResponse]:
         """Retrieves SMV Summary data.
 
-        See the corresponding `Summaries`_ endpoint.
+        See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
 
         Args:
           request:
@@ -245,7 +245,7 @@ class CoreDataEndpoint(DataApiEndpoint):
     def __call__(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
         """Retrieves Core data.
 
-        See the corresponding `Core Data`_ endpoint.
+        See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
 
         Args:
           request:
@@ -376,7 +376,7 @@ class IvRankEndpoint(DataApiEndpoint):
     ) -> Sequence[res.IvRankResponse]:
         """Retrieves IV rank data.
 
-        See the corresponding `IV Rank`_ endpoint.
+        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
 
         Args:
           request:
