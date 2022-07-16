@@ -53,16 +53,7 @@ class TickersRequest(_SingleTickerTemplateRequest):
 class StrikesRequest(DataApiRequest):
     """Retrieves strikes data for the given asset(s)."""
 
-    tickers: Sequence[str] = Field(
-        ...,
-        alias="ticker",
-        description="List of assets to retrieve.",
-    )
-    fields: Optional[Iterable[str]] = Field(
-        None,
-        description="The subset of fields to retrieve.",
-    )
-    expiration_range: Optional[str] = Field(
+    expiration_range: Optional[BoundedRange[int]] = Field(
         None,
         alias="dte",
         description="Filters results to a range of days to expiration."
@@ -74,19 +65,9 @@ class StrikesRequest(DataApiRequest):
         None,
         alias="delta",
         description="Filters results to a range of delta values."
-        "Specified as a comma separated pair of floating point numbers."
-        "To ignore an upper/lower bound, leave the value blank."
-        "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
-    )
-
-
-class StrikesHistoryRequest(StrikesRequest):
-    """Retrieves strikes data for the given asset(s)."""
-
-    trade_date: datetime.date = Field(
-        ...,
-        alias="tradeDate",
-        description="The trade date to retrieve.",
+                    "Specified as a comma separated pair of floating point numbers."
+                    "To ignore an upper/lower bound, leave the value blank."
+                    "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
     )
 
 
@@ -109,16 +90,6 @@ class StrikesByOptionsRequest(DataApiRequest):
     )
 
 
-class StrikesHistoryByOptionsRequest(StrikesByOptionsRequest):
-    """Retrieves strikes data by ticker, expiry, and strike."""
-
-    trade_date: datetime.date = Field(
-        ...,
-        alias="tradeDate",
-        description="The trade date to retrieve.",
-    )
-
-
 class MoniesRequest(DataApiRequest):
     """Retrieves end of day monthly implied/forecast history data for monies."""
 
@@ -133,21 +104,7 @@ class MoniesRequest(DataApiRequest):
     )
 
 
-class MoniesHistoryRequest(MoniesRequest):
-    """Retrieves end of day monthly implied history data for monies."""
-
-    trade_date: datetime.date = Field(
-        ...,
-        alias="tradeDate",
-        description="The trade date to retrieve.",
-    )
-
-
 class SummariesRequest(_MultipleTickersTemplateRequest):
-    """Retrieves SMV Summary data."""
-
-
-class SummariesHistoryRequest(_MultipleTickersHistoryTemplateRequest):
     """Retrieves SMV Summary data."""
 
 
@@ -180,8 +137,4 @@ class StockSplitHistoryRequest(_SingleTickerTemplateRequest):
 
 
 class IvRankRequest(_MultipleTickersTemplateRequest):
-    """Retrieves IV rank data."""
-
-
-class IvRankHistoryRequest(_MultipleTickersHistoryTemplateRequest):
     """Retrieves IV rank data."""
