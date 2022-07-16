@@ -84,6 +84,11 @@ class StrikesRequest(_MultipleTickersTemplateRequest):
 class StrikesByOptionsRequest(_SingleTickerTemplateRequest):
     """Retrieves strikes data by ticker, expiry, and strike."""
 
+    trade_date: Optional[datetime.date] = Field(
+        None,
+        alias="tradeDate",
+        description="The trade date to retrieve.",
+    )
     expiration_date: datetime.date = Field(
         ...,
         alias="expirDate",
