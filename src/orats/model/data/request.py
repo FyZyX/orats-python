@@ -27,8 +27,17 @@ class _SingleTickerTemplateRequest(DataApiRequest):
     )
 
 
-class _MultipleTickersTemplateRequest(DataApiRequest):
-    tickers: Optional[Sequence[str]] = Field(
+class DataHistoryApiRequest(BaseModel):
+    trade_date: Optional[datetime.date] = Field(
+        None,
+        alias="tradeDate",
+        description="The trade date to retrieve.",
+    )
+    fields: Optional[Iterable[str]]
+
+
+class _MultipleTickersTemplateRequest(DataHistoryApiRequest):
+    tickers: Sequence[str] = Field(
         None,
         alias="ticker",
         description="List of assets to retrieve.",
@@ -36,12 +45,13 @@ class _MultipleTickersTemplateRequest(DataApiRequest):
     fields: Optional[Iterable[str]]
 
 
-class _MultipleTickersHistoryTemplateRequest(_MultipleTickersTemplateRequest):
-    trade_date: Optional[datetime.date] = Field(
+class _MultipleTickersDependentTemplateRequest(DataHistoryApiRequest):
+    tickers: Optional[Sequence[str]] = Field(
         None,
-        alias="tradeDate",
-        description="The trade date to retrieve.",
+        alias="ticker",
+        description="List of assets to retrieve.",
     )
+    fields: Optional[Iterable[str]]
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
@@ -50,7 +60,7 @@ class TickersRequest(_SingleTickerTemplateRequest):
     """Request duration of historical data for tickers."""
 
 
-class StrikesRequest(_MultipleTickersHistoryTemplateRequest):
+class StrikesRequest(_MultipleTickersTemplateRequest):
     """Retrieves strikes data for the given asset(s)."""
 
     expiration_range: Optional[str] = Field(
@@ -85,27 +95,27 @@ class StrikesByOptionsRequest(_SingleTickerTemplateRequest):
     )
 
 
-class MoniesRequest(_MultipleTickersHistoryTemplateRequest):
+class MoniesRequest(_MultipleTickersTemplateRequest):
     """Retrieves end of day monthly implied/forecast history data for monies."""
 
 
-class SummariesRequest(_MultipleTickersTemplateRequest):
+class SummariesRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves SMV Summary data."""
 
 
-class CoreDataRequest(_MultipleTickersTemplateRequest):
+class CoreDataRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves Core history data."""
 
 
-class CoreDataHistoryRequest(_MultipleTickersHistoryTemplateRequest):
+class CoreDataHistoryRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves Core history data."""
 
 
-class DailyPriceRequest(_MultipleTickersHistoryTemplateRequest):
+class DailyPriceRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves end of day daily stock price data."""
 
 
-class HistoricalVolatilityRequest(_MultipleTickersHistoryTemplateRequest):
+class HistoricalVolatilityRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves historical volatility data."""
 
 
@@ -121,5 +131,5 @@ class StockSplitHistoryRequest(_SingleTickerTemplateRequest):
     """Retrieves stock split history data."""
 
 
-class IvRankRequest(_MultipleTickersTemplateRequest):
+class IvRankRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves IV rank data."""
