@@ -1,25 +1,11 @@
 import datetime
-import sys
-from numbers import Number
 from typing import (
-    Any,
     Iterable,
     Optional,
     Sequence,
-    Tuple,
-    Type,
-    TypeAlias,
-    Union,
-    TypeVar,
 )
 
 from pydantic import BaseModel, Field, validator
-
-EllipsisType = Type[Any]
-if sys.version_info.major == 3 and sys.version_info.minor >= 10:
-    from types import EllipsisType
-A = TypeVar("A", bound=Number)
-BoundedRange: TypeAlias = Tuple[Union[A, EllipsisType], Union[A, EllipsisType]]
 
 
 def dependency_check(v, values):
@@ -31,76 +17,119 @@ def dependency_check(v, values):
 class DataApiRequest(BaseModel):
     class Config:
         allow_population_by_field_name = True
-        # TODO: Kinda hacky way to use Ellipsis in DTE and delta range filters.
-        arbitrary_types_allowed = True
 
 
 class _SingleTickerTemplateRequest(DataApiRequest):
-    ticker: str = Field(..., alias="ticker")
+    ticker: str = Field(
+        ...,
+        alias="ticker",
+        description="The ticker symbol of the underlying asset.",
+    )
 
 
 class DataHistoryApiRequest(DataApiRequest):
-    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
+    trade_date: Optional[datetime.date] = Field(
+        None,
+        alias="tradeDate",
+        description="The trade date to retrieve.",
+    )
+    fields: Optional[Iterable[str]]
 
 
 class _MultipleTickersTemplateRequest(DataHistoryApiRequest):
-    tickers: Sequence[str] = Field(None, alias="ticker")
+    tickers: Sequence[str] = Field(
+        None,
+        alias="ticker",
+        description="List of assets to retrieve.",
+    )
     fields: Optional[Iterable[str]]
 
 
 class _MultipleTickersDependentTemplateRequest(DataHistoryApiRequest):
-    tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
+    tickers: Optional[Sequence[str]] = Field(
+        None,
+        alias="ticker",
+        description="List of assets to retrieve.",
+    )
     fields: Optional[Iterable[str]]
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
 
 class TickersRequest(_SingleTickerTemplateRequest):
-    pass
+    """Request duration of historical data for tickers."""
 
 
 class StrikesRequest(_MultipleTickersTemplateRequest):
-    expiration_range: Optional[BoundedRange[int]] = Field(None, alias="dte")
-    delta_range: Optional[BoundedRange[float]] = Field(None, alias="delta")
+    """Retrieves strikes data for the given asset(s)."""
+
+    expiration_range: Optional[str] = Field(
+        None,
+        alias="dte",
+        description="Filters results to a range of days to expiration."
+        "Specified as a comma separated pair of integers."
+        "To ignore an upper/lower bound, leave the value blank."
+        "Examples: ``30,45``, ``30,`` == ``30``, ``,45``",
+    )
+    delta_range: Optional[str] = Field(
+        None,
+        alias="delta",
+        description="Filters results to a range of delta values."
+        "Specified as a comma separated pair of floating point numbers."
+        "To ignore an upper/lower bound, leave the value blank."
+        "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
+    )
 
 
 class StrikesByOptionsRequest(_SingleTickerTemplateRequest):
-    trade_date: datetime.date = Field(None, alias="tradeDate")
-    expiration_date: datetime.date = Field(..., alias="expirDate")
-    strike: float
+    """Retrieves strikes data by ticker, expiry, and strike."""
+
+    expiration_date: datetime.date = Field(
+        ...,
+        alias="expirDate",
+        description="The expiration date to retrieve.",
+    )
+    strike: float = Field(
+        ...,
+        description="The strike price to retrieve.",
+    )
 
 
 class MoniesRequest(_MultipleTickersTemplateRequest):
-    pass
+    """Retrieves end of day monthly implied/forecast history data for monies."""
 
 
 class SummariesRequest(_MultipleTickersDependentTemplateRequest):
-    pass
+    """Retrieves SMV Summary data."""
 
 
 class CoreDataRequest(_MultipleTickersDependentTemplateRequest):
-    pass
+    """Retrieves Core history data."""
+
+
+class CoreDataHistoryRequest(_MultipleTickersDependentTemplateRequest):
+    """Retrieves Core history data."""
 
 
 class DailyPriceRequest(_MultipleTickersDependentTemplateRequest):
-    pass
+    """Retrieves end of day daily stock price data."""
 
 
 class HistoricalVolatilityRequest(_MultipleTickersDependentTemplateRequest):
-    pass
+    """Retrieves historical volatility data."""
 
 
 class DividendHistoryRequest(_SingleTickerTemplateRequest):
-    pass
+    """Retrieves dividend history data."""
 
 
 class EarningsHistoryRequest(_SingleTickerTemplateRequest):
-    pass
+    """Retrieves earnings history data."""
 
 
 class StockSplitHistoryRequest(_SingleTickerTemplateRequest):
-    pass
+    """Retrieves stock split history data."""
 
 
 class IvRankRequest(_MultipleTickersDependentTemplateRequest):
-    pass
+    """Retrieves IV rank data."""

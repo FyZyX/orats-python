@@ -48,6 +48,8 @@ def _post(url, params, body) -> Sequence[Mapping[str, Any]]:
 
 
 class DataApiEndpoint(abc.ABC):
+    """An **Endpoint** handles a **Request** and relays the **Response**."""
+
     _base_url = "https://api.orats.io/datav2"
     _resource: str
     # Set this to true in subclasses that always use the historical prefix
@@ -64,6 +66,15 @@ class DataApiEndpoint(abc.ABC):
 
     @abc.abstractmethod
     def __call__(self, request) -> Sequence:
+        """Handles a request and relays the response.
+
+        Args:
+          request:
+            Data API request object.
+
+        Returns:
+          One or more Data API response objects.
+        """
         ...
 
     def _url(self, historical: bool = False) -> str:
