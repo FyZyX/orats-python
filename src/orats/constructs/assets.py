@@ -1,34 +1,28 @@
 """Higher level constructs for underlying assets."""
 
 import datetime
-from typing import Tuple, Collection
+from typing import Tuple, Collection, Optional
+
+from pydantic import BaseModel, Field
 
 import orats.endpoints.data as endpoints
 from orats.constructs.common import _get_token
 from orats.model.data import request as req
+from orats.model.data import response as res
 
 
-class Asset:
+class Asset(BaseModel):
     """Represents the underlying asset of an option contract."""
 
-    def __init__(self, ticker: str, token: str = None):
-        """Initializes an asset object.
-
-        Args:
-          ticker:
-            The ticker symbol of the underlying asset.
-          token:
-            API token.
-        """
-        self._ticker = ticker
-        self._token = token or _get_token()
-        self._response = None
+    ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
+    token: str = Field(_get_token(), description="API token.")
+    _response: Optional[res.TickerResponse] = None
 
     def _get_ticker(self):
         if self._response:
             return self._response
-        endpoint = endpoints.TickersEndpoint(self._token)
-        request = req.TickersRequest(ticker=self._ticker)
+        endpoint = endpoints.TickersEndpoint(self.token)
+        request = req.TickersRequest(ticker=self.ticker)
         self._response = endpoint(request)[0]
         return self._response
 
@@ -44,4 +38,4 @@ class Asset:
 
 class Universe:
     def __init__(self, tickers: Collection):
-        self._assets: Collection[Asset] = {Asset(ticker) for ticker in tickers}
+        self._assets: Collection[Asset] = {Asset(ticker=ticker) for ticker in tickers}
