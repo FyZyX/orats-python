@@ -27,7 +27,7 @@ class _SingleTickerTemplateRequest(DataApiRequest):
     )
 
 
-class DataHistoryApiRequest(BaseModel):
+class DataHistoryApiRequest(DataApiRequest):
     trade_date: Optional[datetime.date] = Field(
         None,
         alias="tradeDate",

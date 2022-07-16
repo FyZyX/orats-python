@@ -1,13 +1,18 @@
 """Higher level constructs built on top of base API."""
 
 import datetime
-from typing import Iterable, Sequence, Tuple, Collection, Union
+import os
+from typing import Iterable, Sequence, Tuple, Collection, Union, Optional
 
 from pydantic import BaseModel
 
 import orats.endpoints.data as endpoints
 from orats.model.data import request as req
 from orats.model.data import response as res
+
+
+def _get_token() -> str:
+    return os.environ.get("ORATS_API_TOKEN", "demo")
 
 
 class Asset:
@@ -35,7 +40,7 @@ class Asset:
         self._response = endpoint(request)[0]
         return self._response
 
-    def historical_data_range(self) -> (datetime.date, datetime.date):
+    def historical_data_range(self) -> Tuple[datetime.date, datetime.date]:
         """The duration of available historical data.
 
         Returns:
@@ -53,7 +58,7 @@ class Universe:
 class Quote(BaseModel):
     price: float
     size: float
-    iv: float = None
+    iv: Optional[float] = None
 
 
 class Greeks(BaseModel):
@@ -69,14 +74,14 @@ class Option(BaseModel):
     underlying: Asset
     expiration: datetime.date
     strike: float
-    price: float = None
-    spot: float = None
-    volume: int = None
-    open_interest: int = None
-    iv: float = None
-    greeks: Greeks = None
-    bid: Quote = None
-    offer: Quote = None
+    price: Optional[float] = None
+    spot: Optional[float] = None
+    volume: Optional[int] = None
+    open_interest: Optional[int] = None
+    iv: Optional[float] = None
+    greeks: Optional[Greeks] = None
+    bid: Optional[Quote] = None
+    offer: Optional[Quote] = None
 
 
 class CallOption(Option):
@@ -98,10 +103,10 @@ class OptionChain:
             API token.
         """
         self._ticker = ticker
-        self._token = token
-        self._expiration_range = None
-        self._delta_range = None
-        self._response = None
+        self._token = token or _get_token()
+        self._expiration_range: Optional[str] = None
+        self._delta_range: Optional[str] = None
+        self._response: Optional[res.DataApiResponse] = None
 
     def _get_strikes(self, trade_date: datetime.date = None):
         if self._response:
@@ -115,7 +120,7 @@ class OptionChain:
             delta_range=self._delta_range,
         )
 
-        self._response = endpoint(request)
+        self._response = endpoint(request)[0]
         return self._response
 
     def filter_by_days_to_expiration(
