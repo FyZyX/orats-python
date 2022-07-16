@@ -65,9 +65,9 @@ class StrikesRequest(DataApiRequest):
         None,
         alias="delta",
         description="Filters results to a range of delta values."
-                    "Specified as a comma separated pair of floating point numbers."
-                    "To ignore an upper/lower bound, leave the value blank."
-                    "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
+        "Specified as a comma separated pair of floating point numbers."
+        "To ignore an upper/lower bound, leave the value blank."
+        "Examples: ``.30,.45``, ``.30,`` == ``.30``, ``,.45``",
     )
 
 
