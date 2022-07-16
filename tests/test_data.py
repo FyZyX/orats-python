@@ -38,13 +38,13 @@ class TestDataApi:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_history(self):
-        request = req.StrikesHistoryRequest(
+        request = req.StrikesRequest(
             tickers=("IBM", "AAPL"),
             trade_date=datetime.date(2022, 7, 5),
             expiration_range=(30, ...),
             delta_range=(0.30, 0.45),
         )
-        strikes = self._api.strikes_history(request)
+        strikes = self._api.strikes(request)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
@@ -71,13 +71,13 @@ class TestDataApi:
     def test_strikes_history_by_options(self):
 
         requests = [
-            req.StrikesHistoryByOptionsRequest(
+            req.StrikesByOptionsRequest(
                 ticker="IBM",
                 trade_date=datetime.date(2022, 6, 6),
                 expiration_date=datetime.date(2022, 6, 17),
                 strike=50,
             ),
-            req.StrikesHistoryByOptionsRequest(
+            req.StrikesByOptionsRequest(
                 ticker="IBM",
                 trade_date=datetime.date(2022, 6, 6),
                 expiration_date=datetime.date(2022, 6, 17),
@@ -100,11 +100,11 @@ class TestDataApi:
             assert isinstance(money, res.MoneyImpliedResponse)
 
     def test_monies_implied_history(self):
-        request = req.MoniesHistoryRequest(
+        request = req.MoniesRequest(
             tickers=("IBM",),
             trade_date=datetime.date(2022, 7, 5),
         )
-        monies = self._api.monies_implied_history(request)
+        monies = self._api.monies_implied(request)
         for money in monies:
             assert isinstance(money, res.MoneyImpliedResponse)
 
@@ -117,11 +117,11 @@ class TestDataApi:
             assert isinstance(money, res.MoneyForecastResponse)
 
     def test_monies_forecast_history(self):
-        request = req.MoniesHistoryRequest(
+        request = req.MoniesRequest(
             tickers=("IBM",),
             trade_date=datetime.date(2022, 7, 5),
         )
-        monies = self._api.monies_forecast_history(request)
+        monies = self._api.monies_forecast(request)
         for money in monies:
             assert isinstance(money, res.MoneyForecastResponse)
 
@@ -134,11 +134,11 @@ class TestDataApi:
             assert isinstance(summary, res.SmvSummaryResponse)
 
     def test_summaries_history(self):
-        request = req.SummariesHistoryRequest(
+        request = req.SummariesRequest(
             tickers=("IBM",),
             trade_date=datetime.date(2022, 7, 5),
         )
-        summaries = self._api.summaries_history(request)
+        summaries = self._api.summaries(request)
         for summary in summaries:
             assert isinstance(summary, res.SmvSummaryResponse)
 
@@ -151,11 +151,11 @@ class TestDataApi:
             assert isinstance(core, res.CoreResponse)
 
     def test_core_data_history(self):
-        request = req.CoreDataHistoryRequest(
+        request = req.CoreDataRequest(
             tickers=("IBM",),
             trade_date=datetime.date(2022, 7, 5),
         )
-        core_data = self._api.core_data_history(request)
+        core_data = self._api.core_data(request)
         for core in core_data:
             assert isinstance(core, res.CoreResponse)
 
@@ -202,10 +202,10 @@ class TestDataApi:
             assert isinstance(iv, res.IvRankResponse)
 
     def test_iv_rank_history(self):
-        request = req.IvRankHistoryRequest(
+        request = req.IvRankRequest(
             tickers=("IBM",),
             trade_date=datetime.date(2022, 7, 5),
         )
-        iv_rank = self._api.iv_rank_history(request)
+        iv_rank = self._api.iv_rank(request)
         for iv in iv_rank:
             assert isinstance(iv, res.IvRankResponse)
