@@ -15,7 +15,7 @@ See the `product page`_ and `API docs`_.
 """
 import abc
 import json
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Mapping, Sequence, Union
 
 import httpx
 
@@ -85,7 +85,7 @@ class DataApiEndpoint(abc.ABC):
 
     def _get(
         self,
-        request: req.DataApiRequest,
+        request: Union[req.DataApiRequest, req.DataHistoryApiRequest],
     ) -> Sequence[Mapping[str, Any]]:
         # Dynamically determine if the resource is historical.
         #  This helps avoid duplication of endpoint objects
@@ -93,7 +93,7 @@ class DataApiEndpoint(abc.ABC):
         #  and hinders readability, it dramatically reduces the
         #  amount of source code needed to cover all endpoints.
         is_historical = self._is_historical
-        if not is_historical and hasattr(request, "trade_date"):
+        if not is_historical and isinstance(request, req.DataHistoryApiRequest):
             is_historical = request.trade_date is not None
 
         params = self._update_params(request.dict(by_alias=True))

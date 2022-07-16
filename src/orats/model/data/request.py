@@ -39,15 +39,17 @@ class _SingleTickerTemplateRequest(DataApiRequest):
     ticker: str = Field(..., alias="ticker")
 
 
-class _MultipleTickersTemplateRequest(DataApiRequest):
-    tickers: Sequence[str] = Field(None, alias="ticker")
+class DataHistoryApiRequest(DataApiRequest):
     trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
+
+
+class _MultipleTickersTemplateRequest(DataHistoryApiRequest):
+    tickers: Sequence[str] = Field(None, alias="ticker")
     fields: Optional[Iterable[str]]
 
 
 class _MultipleTickersDependentTemplateRequest(DataApiRequest):
     tickers: Optional[Sequence[str]] = Field(None, alias="ticker")
-    trade_date: Optional[datetime.date] = Field(None, alias="tradeDate")
     fields: Optional[Iterable[str]]
 
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
