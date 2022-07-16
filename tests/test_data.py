@@ -3,8 +3,8 @@ import datetime
 import pytest
 
 from orats.endpoints import data
-from orats.model.data import request as req
-from orats.model.data import response as res
+from orats.constructs.api.data import request as req
+from orats.constructs.api.data import response as res
 from tests.fixtures import load_fixture
 
 

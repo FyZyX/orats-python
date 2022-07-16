@@ -6,10 +6,10 @@ from typing import Optional, Sequence
 from pydantic import BaseModel
 
 import orats.endpoints.data as endpoints
-from orats.constructs.assets import Asset
-from orats.constructs.common import _get_token
-from orats.model.data import request as req
-from orats.model.data import response as res
+from orats.constructs.api.data import request as req
+from orats.constructs.api.data import response as res
+from orats.constructs.industry.assets import Asset
+from orats.constructs.industry.common import _get_token
 
 
 class Quote(BaseModel):

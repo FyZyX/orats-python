@@ -1,7 +1,7 @@
 Data API Responses
 ==================
 
-.. automodule:: orats.model.data.response
+.. automodule:: orats.constructs.api.data.response
    :members:
 
 .. _Strikes: https://docs.orats.io/datav2-api-guide/definitions.html#strikes

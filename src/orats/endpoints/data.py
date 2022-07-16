@@ -20,8 +20,8 @@ from typing import Any, Iterable, Mapping, Sequence
 import httpx
 
 from orats.errors import InsufficientPermissionsError
-from orats.model.data import request as req
-from orats.model.data import response as res
+from orats.constructs.api.data import request as req
+from orats.constructs.api.data import response as res
 
 
 def _handle_response(response: httpx.Response) -> Mapping[str, Any]:

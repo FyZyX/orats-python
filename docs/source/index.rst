@@ -4,22 +4,16 @@ Welcome to the ORATS Python SDK documentation!
 .. warning:: This project is **unstable** and in early stages of development!
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Model
+   :maxdepth: 3
+   :caption: Constructs
 
-   model/index
+   constructs/index
 
 .. toctree::
    :maxdepth: 2
    :caption: API
 
    endpoints/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Constructs
-
-   constructs/index
 
 .. toctree::
    :maxdepth: 2

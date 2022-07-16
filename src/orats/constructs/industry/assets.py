@@ -6,9 +6,9 @@ from typing import Tuple, Collection, Optional
 from pydantic import BaseModel, Field
 
 import orats.endpoints.data as endpoints
-from orats.constructs.common import _get_token
-from orats.model.data import request as req
-from orats.model.data import response as res
+from orats.constructs.api.data import request as req
+from orats.constructs.api.data import response as res
+from orats.constructs.industry.common import _get_token
 
 
 class Asset(BaseModel):
