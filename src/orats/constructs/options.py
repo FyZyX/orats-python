@@ -77,7 +77,7 @@ class OptionChain:
             delta_range=self._delta_range,
         )
 
-        self._response = endpoint(request)[0]
+        self._response = endpoint(request)
         return self._response
 
     def filter_by_days_to_expiration(
@@ -114,7 +114,7 @@ class OptionChain:
     def calls(self, trade_date: datetime.date = None):
         return [
             CallOption(
-                underlying=Asset(strike.underlying_symbol),
+                underlying=Asset(ticker=strike.underlying_symbol),
                 expiration=strike.expiration_date,
                 strike=strike.strike,
                 price=strike.call_value,
@@ -147,7 +147,7 @@ class OptionChain:
     def puts(self, trade_date: datetime.date = None):
         return [
             PutOption(
-                underlying=Asset(strike.underlying_symbol),
+                underlying=Asset(ticker=strike.underlying_symbol),
                 expiration=strike.expiration_date,
                 strike=strike.strike,
                 price=strike.put_value,

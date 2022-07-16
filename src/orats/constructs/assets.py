@@ -16,7 +16,7 @@ class Asset(BaseModel):
 
     ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
     token: str = Field(_get_token(), description="API token.")
-    _response: Optional[res.TickerResponse] = None
+    _response: Optional[res.Ticker] = None
 
     def _get_ticker(self):
         if self._response:

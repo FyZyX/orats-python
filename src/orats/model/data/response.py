@@ -1,21 +1,37 @@
 import datetime
-from typing import Optional
+from typing import Generic, Optional, Sequence, TypeVar
 
 from pydantic import BaseModel, Field, validator
+from pydantic.generics import GenericModel
+
+from orats.errors import OratsError
 
 
 def parse_date(dt: datetime.date):
     return dt.strftime("%Y/%m/%d")
 
 
-class DataApiResponse(BaseModel):
+class DataFieldDefinition(BaseModel):
     class Config:
         allow_population_by_field_name = True
-        # TODO: Kinda hacky way to use Ellipsis in DTE and delta range filters.
-        arbitrary_types_allowed = True
 
 
-class TickerResponse(DataApiResponse):
+T = TypeVar("T", bound=DataFieldDefinition)
+
+
+class DataApiResponse(GenericModel, Generic[T]):
+    data: Optional[Sequence[T]]
+    message: Optional[str]
+    error: Optional[str]
+
+    @validator("error", "message")
+    def check_failures(cls, v):
+        if v is not None:
+            raise OratsError(v)
+        return v
+
+
+class Ticker(DataFieldDefinition):
     """Ticker symbol data duration definitions."""
 
     underlying_symbol: str = Field(..., alias="ticker")
@@ -23,7 +39,7 @@ class TickerResponse(DataApiResponse):
     max_date: datetime.date = Field(..., alias="max")
 
 
-class StrikeResponse(DataApiResponse):
+class Strike(DataFieldDefinition):
     """Verbose strike definitions.
 
     See corresponding `Strikes`_ response object.
@@ -71,7 +87,7 @@ class StrikeResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyImpliedResponse(DataApiResponse):
+class MoneyImplied(DataFieldDefinition):
     """Monthly implied money definitions.
 
     See corresponding `Monies Implied`_ response object.
@@ -120,7 +136,7 @@ class MoneyImpliedResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyForecastResponse(DataApiResponse):
+class MoneyForecast(DataFieldDefinition):
     """Monthly forecast money definitions.
 
     See corresponding `Monies Forecast`_ response object.
@@ -155,7 +171,7 @@ class MoneyForecastResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class SmvSummaryResponse(DataApiResponse):
+class SmvSummary(DataFieldDefinition):
     """SMV Summary data definitions.
 
     See corresponding `Summaries`_ response object.
@@ -303,7 +319,7 @@ class SmvSummaryResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class CoreResponse(DataApiResponse):
+class Core(DataFieldDefinition):
     """Core definitions.
 
     See corresponding `Core`_ response object.
@@ -601,7 +617,7 @@ class CoreResponse(DataApiResponse):
         return value
 
 
-class DailyPriceResponse(DataApiResponse):
+class DailyPrice(DataFieldDefinition):
     """Daily price definitions.
 
     See corresponding `Daily Price`_ response object.
@@ -620,7 +636,7 @@ class DailyPriceResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class HistoricalVolatilityResponse(DataApiResponse):
+class HistoricalVolatility(DataFieldDefinition):
     """Historical volatility definitions.
 
     See corresponding `Historical Volatility`_ response object.
@@ -675,7 +691,7 @@ class HistoricalVolatilityResponse(DataApiResponse):
     close_to_close_hv_ex_earnings_252_day: float = Field(..., alias="clsHvXern1000d")
 
 
-class DividendHistoryResponse(DataApiResponse):
+class DividendHistory(DataFieldDefinition):
     """Dividend History definitions.
 
     See corresponding `Dividend History`_ response object.
@@ -688,7 +704,7 @@ class DividendHistoryResponse(DataApiResponse):
     declared_date: datetime.date = Field(..., alias="declaredDate")
 
 
-class EarningsHistoryResponse(DataApiResponse):
+class EarningsHistory(DataFieldDefinition):
     """Earnings history definitions.
 
     See corresponding `Earnings History`_ response object.
@@ -700,7 +716,7 @@ class EarningsHistoryResponse(DataApiResponse):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class StockSplitHistoryResponse(DataApiResponse):
+class StockSplitHistory(DataFieldDefinition):
     """Stock split history definitions.
 
     See corresponding `Stock Split History`_ response object.
@@ -711,7 +727,7 @@ class StockSplitHistoryResponse(DataApiResponse):
     divisor: float
 
 
-class IvRankResponse(DataApiResponse):
+class IvRank(DataFieldDefinition):
     """IV Rank definitions.
 
     See corresponding `IV Rank`_ response object.

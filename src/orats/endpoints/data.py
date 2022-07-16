@@ -15,7 +15,7 @@ See the `product page`_ and `API docs`_.
 """
 import abc
 import json
-from typing import Any, Iterable, Mapping, Sequence, Union
+from typing import Any, Iterable, Mapping, Sequence
 
 import httpx
 
@@ -24,27 +24,27 @@ from orats.model.data import request as req
 from orats.model.data import response as res
 
 
-def _get(url, params) -> Sequence[Mapping[str, Any]]:
+def _handle_response(response: httpx.Response) -> Mapping[str, Any]:
+    if response.status_code == 403:
+        raise InsufficientPermissionsError
+    return response.json()
+
+
+def _get(url, params) -> Mapping[str, Any]:
     response = httpx.get(
         url=url,
         params=params,
     )
-    body = response.json()
-    if response.status_code == 403:
-        raise InsufficientPermissionsError
-    return body["data"]
+    return _handle_response(response)
 
 
-def _post(url, params, body) -> Sequence[Mapping[str, Any]]:
+def _post(url, params, body) -> Mapping[str, Any]:
     response = httpx.post(
         url=url,
         json=body,
         params=params,
     )
-    if response.status_code == 403:
-        raise InsufficientPermissionsError
-    body = response.json()
-    return body["data"]
+    return _handle_response(response)
 
 
 class DataApiEndpoint(abc.ABC):
@@ -96,8 +96,8 @@ class DataApiEndpoint(abc.ABC):
 
     def _get(
         self,
-        request: Union[req.DataApiRequest, req.DataHistoryApiRequest],
-    ) -> Sequence[Mapping[str, Any]]:
+        request: req.DataApiRequest,
+    ) -> Mapping[str, Any]:
         is_historical = self._is_historical
         if not is_historical and isinstance(request, req.DataHistoryApiRequest):
             is_historical = request.trade_date is not None
@@ -112,7 +112,7 @@ class DataApiEndpoint(abc.ABC):
 class TickersEndpoint(DataApiEndpoint):
     _resource = "tickers"
 
-    def __call__(self, request: req.TickersRequest) -> Sequence[res.TickerResponse]:
+    def __call__(self, request: req.TickersRequest) -> Sequence[res.Ticker]:
         """Retrieves the duration of available data for various assets.
 
         If no underlying asset is specified, the result will be a list
@@ -127,13 +127,14 @@ class TickersEndpoint(DataApiEndpoint):
         Returns:
           A list of tickers with data durations.
         """
-        return [res.TickerResponse(**v) for v in self._get(request)]
+        api_response = res.DataApiResponse[res.Ticker](**self._get(request))
+        return api_response.data
 
 
 class StrikesEndpoint(DataApiEndpoint):
     _resource = "strikes"
 
-    def __call__(self, request: req.StrikesRequest) -> Sequence[res.StrikeResponse]:
+    def __call__(self, request: req.StrikesRequest) -> Sequence[res.Strike]:
         """Retrieves strikes data for the given asset(s).
 
         See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
@@ -145,7 +146,9 @@ class StrikesEndpoint(DataApiEndpoint):
         Returns:
           A list of strikes for each specified asset.
         """
-        return [res.StrikeResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.Strike](**self._get(request))
+        return api_response.data
 
 
 class StrikesByOptionsEndpoint(DataApiEndpoint):
@@ -154,7 +157,7 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
     def __call__(
         self,
         *requests: req.StrikesByOptionsRequest,
-    ) -> Sequence[res.StrikeResponse]:
+    ) -> Sequence[res.Strike]:
         """Retrieves strikes data by ticker, expiry, and strike.
 
         See the corresponding `Strikes by Options`_ and
@@ -173,11 +176,13 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
             response = self._get(requests[0])
         else:
             response = self._post(requests)
-        return [res.StrikeResponse(**v) for v in response]
+
+        api_response = res.DataApiResponse[res.Strike](**response)
+        return api_response.data
 
     def _post(
         self, requests: Sequence[req.StrikesByOptionsRequest]
-    ) -> Sequence[Mapping[str, Any]]:
+    ) -> Mapping[str, Any]:
         body = [json.loads(request.json(by_alias=True)) for request in requests]
         return _post(url=self._url(), body=body, params=self._update_params({}))
 
@@ -188,7 +193,7 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.MoniesRequest,
-    ) -> Sequence[res.MoneyImpliedResponse]:
+    ) -> Sequence[res.MoneyImplied]:
         """Retrieves monthly implied data for monies.
 
         See the corresponding `Monies`_ and `Monies History`_ endpoints.
@@ -200,7 +205,9 @@ class MoniesImpliedEndpoint(DataApiEndpoint):
         Returns:
           A list of implied monies for each specified asset.
         """
-        return [res.MoneyImpliedResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.MoneyImplied](**self._get(request))
+        return api_response.data
 
 
 class MoniesForecastEndpoint(DataApiEndpoint):
@@ -209,7 +216,7 @@ class MoniesForecastEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.MoniesRequest,
-    ) -> Sequence[res.MoneyForecastResponse]:
+    ) -> Sequence[res.MoneyForecast]:
         """Retrieves monthly forecast data for monies.
 
         See the corresponding `Monies`_ and `Monies History`_ endpoints.
@@ -221,7 +228,9 @@ class MoniesForecastEndpoint(DataApiEndpoint):
         Returns:
           A list of forecast monies for each specified asset.
         """
-        return [res.MoneyForecastResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.MoneyForecast](**self._get(request))
+        return api_response.data
 
 
 class SummariesEndpoint(DataApiEndpoint):
@@ -230,7 +239,7 @@ class SummariesEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.SummariesRequest,
-    ) -> Sequence[res.SmvSummaryResponse]:
+    ) -> Sequence[res.SmvSummary]:
         """Retrieves SMV Summary data.
 
         See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
@@ -242,13 +251,15 @@ class SummariesEndpoint(DataApiEndpoint):
         Returns:
           A list of SMV summaries for each specified asset.
         """
-        return [res.SmvSummaryResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.SmvSummary](**self._get(request))
+        return api_response.data
 
 
 class CoreDataEndpoint(DataApiEndpoint):
     _resource = "cores"
 
-    def __call__(self, request: req.CoreDataRequest) -> Sequence[res.CoreResponse]:
+    def __call__(self, request: req.CoreDataRequest) -> Sequence[res.Core]:
         """Retrieves Core data.
 
         See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
@@ -260,7 +271,9 @@ class CoreDataEndpoint(DataApiEndpoint):
         Returns:
           A list of core data for each specified asset.
         """
-        return [res.CoreResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.Core](**self._get(request))
+        return api_response.data
 
 
 class DailyPriceEndpoint(DataApiEndpoint):
@@ -270,7 +283,7 @@ class DailyPriceEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.DailyPriceRequest,
-    ) -> Sequence[res.DailyPriceResponse]:
+    ) -> Sequence[res.DailyPrice]:
         """Retrieves end of day daily stock price data.
 
         See the corresponding `Daily Price`_ endpoint.
@@ -282,7 +295,9 @@ class DailyPriceEndpoint(DataApiEndpoint):
         Returns:
           A list of daily price data for each specified asset.
         """
-        return [res.DailyPriceResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.DailyPrice](**self._get(request))
+        return api_response.data
 
 
 class HistoricalVolatilityEndpoint(DataApiEndpoint):
@@ -292,7 +307,7 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.HistoricalVolatilityRequest,
-    ) -> Sequence[res.HistoricalVolatilityResponse]:
+    ) -> Sequence[res.HistoricalVolatility]:
         """Retrieves historical volatility data.
 
         See the corresponding `Historical Volatility`_ endpoint.
@@ -304,7 +319,11 @@ class HistoricalVolatilityEndpoint(DataApiEndpoint):
         Returns:
           A list of historical volatility data for each specified asset.
         """
-        return [res.HistoricalVolatilityResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.HistoricalVolatility](
+            **self._get(request)
+        )
+        return api_response.data
 
 
 class DividendHistoryEndpoint(DataApiEndpoint):
@@ -314,7 +333,7 @@ class DividendHistoryEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.DividendHistoryRequest,
-    ) -> Sequence[res.DividendHistoryResponse]:
+    ) -> Sequence[res.DividendHistory]:
         """Retrieves dividend history data.
 
         See the corresponding `Dividend History`_ endpoint.
@@ -326,7 +345,9 @@ class DividendHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of dividend history data for each specified asset.
         """
-        return [res.DividendHistoryResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.DividendHistory](**self._get(request))
+        return api_response.data
 
 
 class EarningsHistoryEndpoint(DataApiEndpoint):
@@ -336,7 +357,7 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.EarningsHistoryRequest,
-    ) -> Sequence[res.EarningsHistoryResponse]:
+    ) -> Sequence[res.EarningsHistory]:
         """Retrieves earnings history data.
 
         See the corresponding `Earnings History`_ endpoint.
@@ -348,7 +369,9 @@ class EarningsHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of earnings history data for each specified asset.
         """
-        return [res.EarningsHistoryResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.EarningsHistory](**self._get(request))
+        return api_response.data
 
 
 class StockSplitHistoryEndpoint(DataApiEndpoint):
@@ -358,7 +381,7 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.StockSplitHistoryRequest,
-    ) -> Sequence[res.StockSplitHistoryResponse]:
+    ) -> Sequence[res.StockSplitHistory]:
         """Retrieves stock split history data.
 
         See the corresponding `Stock Split History`_ endpoint.
@@ -370,7 +393,9 @@ class StockSplitHistoryEndpoint(DataApiEndpoint):
         Returns:
           A list of stock split history data for each specified asset.
         """
-        return [res.StockSplitHistoryResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.StockSplitHistory](**self._get(request))
+        return api_response.data
 
 
 class IvRankEndpoint(DataApiEndpoint):
@@ -379,7 +404,7 @@ class IvRankEndpoint(DataApiEndpoint):
     def __call__(
         self,
         request: req.IvRankRequest,
-    ) -> Sequence[res.IvRankResponse]:
+    ) -> Sequence[res.IvRank]:
         """Retrieves IV rank data.
 
         See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
@@ -391,7 +416,9 @@ class IvRankEndpoint(DataApiEndpoint):
         Returns:
           A list of IV rank data for each specified asset.
         """
-        return [res.IvRankResponse(**v) for v in self._get(request)]
+
+        api_response = res.DataApiResponse[res.IvRank](**self._get(request))
+        return api_response.data
 
 
 class DataApi:
