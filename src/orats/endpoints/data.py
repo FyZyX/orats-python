@@ -87,11 +87,6 @@ class DataApiEndpoint(abc.ABC):
         self,
         request: Union[req.DataApiRequest, req.DataHistoryApiRequest],
     ) -> Sequence[Mapping[str, Any]]:
-        # Dynamically determine if the resource is historical.
-        #  This helps avoid duplication of endpoint objects
-        #  with a historical prefix. While this adds complexity
-        #  and hinders readability, it dramatically reduces the
-        #  amount of source code needed to cover all endpoints.
         is_historical = self._is_historical
         if not is_historical and isinstance(request, req.DataHistoryApiRequest):
             is_historical = request.trade_date is not None
