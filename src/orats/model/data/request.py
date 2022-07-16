@@ -50,10 +50,10 @@ class TickersRequest(_SingleTickerTemplateRequest):
     """Request duration of historical data for tickers."""
 
 
-class StrikesRequest(DataApiRequest):
+class StrikesRequest(_MultipleTickersHistoryTemplateRequest):
     """Retrieves strikes data for the given asset(s)."""
 
-    expiration_range: Optional[BoundedRange[int]] = Field(
+    expiration_range: Optional[str] = Field(
         None,
         alias="dte",
         description="Filters results to a range of days to expiration."
@@ -71,14 +71,9 @@ class StrikesRequest(DataApiRequest):
     )
 
 
-class StrikesByOptionsRequest(DataApiRequest):
+class StrikesByOptionsRequest(_SingleTickerTemplateRequest):
     """Retrieves strikes data by ticker, expiry, and strike."""
 
-    ticker: str = Field(
-        ...,
-        alias="ticker",
-        description="The ticker symbol of the underlying asset.",
-    )
     expiration_date: datetime.date = Field(
         ...,
         alias="expirDate",
@@ -90,18 +85,8 @@ class StrikesByOptionsRequest(DataApiRequest):
     )
 
 
-class MoniesRequest(DataApiRequest):
+class MoniesRequest(_MultipleTickersHistoryTemplateRequest):
     """Retrieves end of day monthly implied/forecast history data for monies."""
-
-    tickers: Sequence[str] = Field(
-        ...,
-        alias="ticker",
-        description="List of assets to retrieve.",
-    )
-    fields: Optional[Iterable[str]] = Field(
-        None,
-        description="The subset of fields to retrieve.",
-    )
 
 
 class SummariesRequest(_MultipleTickersTemplateRequest):

@@ -107,23 +107,14 @@ class OptionChain:
         if self._response:
             return self._response
 
-        if trade_date:
-            endpoint = endpoints.StrikesHistoryEndpoint(self._token)
-            request = req.StrikesHistoryRequest(
-                tickers=self._ticker,
-                trade_date=trade_date,
-                expiration_range=self._expiration_range,
-                delta_range=self._delta_range,
-            )
-        else:
-            endpoint = endpoints.StrikesEndpoint(self._token)
-            request = req.StrikesRequest(
-                tickers=self._ticker,
-                expiration_range=self._expiration_range,
-                delta_range=self._delta_range,
-            )
+        endpoint = endpoints.StrikesEndpoint(self._token)
+        request = req.StrikesRequest(
+            tickers=self._ticker,
+            trade_date=trade_date,
+            expiration_range=self._expiration_range,
+            delta_range=self._delta_range,
+        )
 
-        # TODO: Error handling
         self._response = endpoint(request)
         return self._response
 
