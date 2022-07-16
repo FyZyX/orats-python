@@ -19,8 +19,13 @@ class TestDataApi:
 
     def test_tickers(self):
         request = req.TickersRequest(ticker="IBM")
-        tickers = self._api.tickers(request)
+        endpoint = self._api.tickers
+
+        assert endpoint._url().endswith("tickers")
+
+        tickers = endpoint(request)
         assert len(tickers) == 1
+
         ticker = tickers[0]
         assert isinstance(ticker, res.TickerResponse)
         assert isinstance(ticker.underlying_symbol, str)
@@ -28,27 +33,40 @@ class TestDataApi:
         assert isinstance(ticker.min_date, datetime.date)
 
     def test_strikes(self):
+        endpoint = self._api.strikes
         request = req.StrikesRequest(
             tickers=("IBM",),
             expiration_range="30,",
             delta_range="0.30,0.45",
         )
-        strikes = self._api.strikes(request)
+
+        is_historical = request.trade_date is not None
+        url = endpoint._url(historical=is_historical)
+        assert url.endswith("strikes/options")
+        assert "hist" not in url
+
+        strikes = endpoint(request)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_history(self):
+        endpoint = self._api.strikes
         request = req.StrikesRequest(
             tickers=("IBM", "AAPL"),
             trade_date=datetime.date(2022, 7, 5),
             expiration_range="30,",
             delta_range="0.30,0.45",
         )
-        strikes = self._api.strikes(request)
+
+        is_historical = request.trade_date is not None
+        assert endpoint._url(historical=is_historical).endswith("hist/strikes")
+
+        strikes = endpoint(request)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_by_options(self):
+        endpoint = self._api.strikes_by_options
         requests = [
             req.StrikesByOptionsRequest(
                 ticker="IBM",
@@ -61,15 +79,22 @@ class TestDataApi:
                 strike=55,
             ),
         ]
-        strikes = self._api.strikes_by_options(*requests[:-1])
+
+        for request in requests:
+            is_historical = request.trade_date is not None
+            url = endpoint._url(historical=is_historical)
+            assert url.endswith("strikes/options")
+            assert "hist" not in url
+
+        strikes = endpoint(*requests[:-1])
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
-        strikes = self._api.strikes_by_options(*requests)
+        strikes = endpoint(*requests)
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)
 
     def test_strikes_history_by_options(self):
-
+        endpoint = self._api.strikes_by_options
         requests = [
             req.StrikesByOptionsRequest(
                 ticker="IBM",
@@ -84,6 +109,13 @@ class TestDataApi:
                 strike=55,
             ),
         ]
+
+        for request in requests:
+            is_historical = request.trade_date is not None
+            assert endpoint._url(historical=is_historical).endswith(
+                "hist/strikes/options"
+            )
+
         strikes = self._api.strikes_by_options(*requests[:-1])
         for strike in strikes:
             assert isinstance(strike, res.StrikeResponse)

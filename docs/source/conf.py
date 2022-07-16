@@ -40,7 +40,7 @@ extensions = [
 ]
 
 # Extension configuration options.
-autodoc_member_order = 'bysource'
+autodoc_member_order = "bysource"
 autodoc_pydantic_model_show_config_summary = False
 
 # Add any paths that contain templates here, relative to this directory.
