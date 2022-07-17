@@ -676,21 +676,29 @@ def iv_rank_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def daily_price_data_definition() -> Dict[str, Any]:
+def daily_price_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
+    today = datetime.date.today()
+    updated = datetime.datetime.now()
+    close_price = 100 + 65 * random.random()
+    high_price = close_price + 4 * random.random()
+    low_price = close_price - 4 * random.random()
+    open_price = close_price + 8 * (random.random())
+    volume = 1e7 * (1 + random.random())
+    adjustment = random.random()
     return {
-        "ticker": "IBM",
-        "tradeDate": "2006-01-03",
-        "clsPx": 48.36,
-        "hiPx": 48.65,
-        "loPx": 47.62,
-        "open": 48.59,
-        "stockVolume": 19880046,
-        "unadjClsPx": 82.06,
-        "unadjHiPx": 82.55,
-        "unadjLoPx": 80.81,
-        "unadjOpen": 82.45,
-        "unadjStockVolume": 11715200,
-        "updatedAt": "2022-05-12T23:26:13Z",
+        "ticker": ticker,
+        "tradeDate": str(today),
+        "clsPx": close_price,
+        "hiPx": high_price,
+        "loPx": low_price,
+        "open": open_price,
+        "stockVolume": 1e7 * (1 + random.random()),
+        "unadjClsPx": adjustment * close_price,
+        "unadjHiPx": adjustment * high_price,
+        "unadjLoPx": adjustment * low_price,
+        "unadjOpen": adjustment * open_price,
+        "unadjStockVolume": adjustment * volume,
+        "updatedAt": f"{updated}Z",
     }
 
 
