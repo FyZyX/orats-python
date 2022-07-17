@@ -20,11 +20,11 @@ def load_fixture(url, *args, **kwargs):
     return _endpoints[_resource(url)]
 
 
-def ticker() -> Dict[str, Any]:
+def ticker_data_definition() -> Dict[str, Any]:
     return {"ticker": "IBM", "min": "2007-01-03", "max": "2022-07-11"}
 
 
-def strike(ticker: str = "IBM") -> Dict[str, Any]:
+def strike_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
     today = datetime.date.today()
     updated = datetime.datetime.now()
     days_to_expiration = 39
@@ -83,7 +83,7 @@ def strike(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def money_implied(ticker: str = "IBM") -> Dict[str, Any]:
+def money_implied_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
     today = datetime.date.today()
     days_to_expiration = 39
     spot_price = 100 + 65 * random.random()
@@ -139,7 +139,7 @@ def money_implied(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def money_forecast(ticker: str = "IBM") -> Dict[str, Any]:
+def money_forecast_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
     today = datetime.date.today()
     days_to_expiration = 39
     spot_price = 100 + 65 * random.random()
@@ -180,7 +180,7 @@ def money_forecast(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def summary() -> Dict[str, Any]:
+def summary_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "tradeDate": "2022-07-11",
@@ -316,7 +316,7 @@ def summary() -> Dict[str, Any]:
     }
 
 
-def core() -> Dict[str, Any]:
+def core_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "tradeDate": "2022-07-11",
@@ -661,7 +661,7 @@ def core() -> Dict[str, Any]:
     }
 
 
-def iv_rank() -> Dict[str, Any]:
+def iv_rank_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "tradeDate": "2022-07-11",
@@ -674,7 +674,7 @@ def iv_rank() -> Dict[str, Any]:
     }
 
 
-def daily_price() -> Dict[str, Any]:
+def daily_price_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "tradeDate": "2006-01-03",
@@ -692,7 +692,7 @@ def daily_price() -> Dict[str, Any]:
     }
 
 
-def historical_volatility() -> Dict[str, Any]:
+def historical_volatility_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "tradeDate": "2006-01-05",
@@ -745,7 +745,7 @@ def historical_volatility() -> Dict[str, Any]:
     }
 
 
-def dividend_history() -> Dict[str, Any]:
+def dividend_history_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "exDate": "2005-02-08",
@@ -755,7 +755,7 @@ def dividend_history() -> Dict[str, Any]:
     }
 
 
-def earnings_history() -> Dict[str, Any]:
+def earnings_history_data_definition() -> Dict[str, Any]:
     return {
         "ticker": "IBM",
         "earnDate": "1980-03-31",
@@ -764,7 +764,7 @@ def earnings_history() -> Dict[str, Any]:
     }
 
 
-def stock_split_history() -> Dict[str, Any]:
+def stock_split_history_data_definition() -> Dict[str, Any]:
     return {"ticker": "UVXY", "splitDate": "2012-03-08", "divisor": 0.167}
 
 
@@ -774,24 +774,24 @@ def endpoint(resource, count=1):
 
 # TODO: Use mapping of Request types to Response types
 _endpoints = {
-    "tickers": endpoint(ticker),
-    "strikes": endpoint(strike),
-    "hist/strikes": endpoint(strike),
-    "strikes/options": endpoint(strike),
-    "hist/strikes/options": endpoint(strike),
-    "monies/implied": endpoint(money_implied),
-    "monies/forecast": endpoint(money_forecast),
-    "hist/monies/implied": endpoint(money_implied),
-    "hist/monies/forecast": endpoint(money_forecast),
-    "summaries": endpoint(summary),
-    "hist/summaries": endpoint(summary),
-    "cores": endpoint(core),
-    "hist/cores": endpoint(core),
-    "hist/dailies": endpoint(daily_price),
-    "hist/hvs": endpoint(historical_volatility),
-    "hist/divs": endpoint(dividend_history),
-    "hist/earnings": endpoint(earnings_history),
-    "hist/splits": endpoint(stock_split_history),
-    "ivrank": endpoint(iv_rank),
-    "hist/ivrank": endpoint(iv_rank),
+    "tickers": endpoint(ticker_data_definition),
+    "strikes": endpoint(strike_data_definition),
+    "hist/strikes": endpoint(strike_data_definition),
+    "strikes/options": endpoint(strike_data_definition),
+    "hist/strikes/options": endpoint(strike_data_definition),
+    "monies/implied": endpoint(money_implied_data_definition),
+    "monies/forecast": endpoint(money_forecast_data_definition),
+    "hist/monies/implied": endpoint(money_implied_data_definition),
+    "hist/monies/forecast": endpoint(money_forecast_data_definition),
+    "summaries": endpoint(summary_data_definition),
+    "hist/summaries": endpoint(summary_data_definition),
+    "cores": endpoint(core_data_definition),
+    "hist/cores": endpoint(core_data_definition),
+    "hist/dailies": endpoint(daily_price_data_definition),
+    "hist/hvs": endpoint(historical_volatility_data_definition),
+    "hist/divs": endpoint(dividend_history_data_definition),
+    "hist/earnings": endpoint(earnings_history_data_definition),
+    "hist/splits": endpoint(stock_split_history_data_definition),
+    "ivrank": endpoint(iv_rank_data_definition),
+    "hist/ivrank": endpoint(iv_rank_data_definition),
 }
