@@ -39,3 +39,8 @@ class Asset(BaseModel):
 class Universe:
     def __init__(self, tickers: Collection):
         self._assets: Collection[Asset] = {Asset(ticker=ticker) for ticker in tickers}
+
+
+class PriceHistory:
+    def _get_daily_prices(self):
+        pass
