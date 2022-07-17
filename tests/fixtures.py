@@ -774,8 +774,13 @@ def earnings_history_data_definition() -> Dict[str, Any]:
     }
 
 
-def stock_split_history_data_definition() -> Dict[str, Any]:
-    return {"ticker": "UVXY", "splitDate": "2012-03-08", "divisor": 0.167}
+def stock_split_history_data_definition(ticker="UVXY") -> Dict[str, Any]:
+    today = datetime.date.today()
+    return {
+        "ticker": ticker,
+        "splitDate": str(today),
+        "divisor": 0.1 * random.random(),
+    }
 
 
 def endpoint(resource, count=1):
