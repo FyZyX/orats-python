@@ -83,7 +83,7 @@ def strike(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def money(ticker: str = "IBM") -> Dict[str, Any]:
+def money_implied(ticker: str = "IBM") -> Dict[str, Any]:
     today = datetime.date.today()
     days_to_expiration = 39
     spot_price = 100 + 65 * random.random()
@@ -124,13 +124,54 @@ def money(ticker: str = "IBM") -> Dict[str, Any]:
         "vol0": 00.95**20 * volatility_100_delta,
         "typeFlag": 0,
         "atmiv": volatility_100_delta / 2,
-        "slope": 60*(random.random() - 0.5),
-        "deriv": 0.1*(random.random() - 0.5),
-        "fit": 1e-05*random.random(),
+        "slope": 60 * (random.random() - 0.5),
+        "deriv": 0.1 * (random.random() - 0.5),
+        "fit": 1e-05 * random.random(),
         "spotPrice": spot_price,
-        "calVol": volatility_100_delta*(0.4 + 0.2*random.random()) / 2,
+        "calVol": volatility_100_delta * (0.4 + 0.2 * random.random()) / 2,
         "unadjVol": volatility_100_delta / 2,
         "earnEffect": 0,
+        "quoteDate": f"{updated.isoformat()}Z",
+        "updatedAt": f"{updated.isoformat()}Z",
+        "snapShotEstTime": "1600",
+        "snapShotDate": f"{updated.isoformat()}Z",
+        "expiryTod": "pm",
+    }
+
+
+def money_forecast(ticker: str = "IBM") -> Dict[str, Any]:
+    today = datetime.date.today()
+    days_to_expiration = 39
+    spot_price = 100 + 65 * random.random()
+    volatility_100_delta = random.random()
+    updated = datetime.datetime.now()
+    return {
+        "ticker": ticker,
+        "tradeDate": str(today),
+        "expirDate": str(today + datetime.timedelta(days=days_to_expiration)),
+        "stockPrice": spot_price,
+        "riskFreeRate": 0.05 + 0.15 * random.random(),
+        "vol100": volatility_100_delta,
+        "vol95": 0.95 * volatility_100_delta,
+        "vol90": 0.95**2 * volatility_100_delta,
+        "vol85": 0.95**3 * volatility_100_delta,
+        "vol80": 0.95**4 * volatility_100_delta,
+        "vol75": 0.95**5 * volatility_100_delta,
+        "vol70": 0.95**6 * volatility_100_delta,
+        "vol65": 0.95**7 * volatility_100_delta,
+        "vol60": 0.95**8 * volatility_100_delta,
+        "vol55": 0.95**9 * volatility_100_delta,
+        "vol50": 0.95**10 * volatility_100_delta,
+        "vol45": 0.95**11 * volatility_100_delta,
+        "vol40": 0.95**12 * volatility_100_delta,
+        "vol35": 0.95**13 * volatility_100_delta,
+        "vol30": 0.95**14 * volatility_100_delta,
+        "vol25": 0.95**15 * volatility_100_delta,
+        "vol20": 0.95**16 * volatility_100_delta,
+        "vol15": 0.95**17 * volatility_100_delta,
+        "vol10": 0.95**18 * volatility_100_delta,
+        "vol5": 00.95**19 * volatility_100_delta,
+        "vol0": 00.95**20 * volatility_100_delta,
         "quoteDate": f"{updated.isoformat()}Z",
         "updatedAt": f"{updated.isoformat()}Z",
         "snapShotEstTime": "1600",
@@ -738,10 +779,10 @@ _endpoints = {
     "hist/strikes": endpoint(strike),
     "strikes/options": endpoint(strike),
     "hist/strikes/options": endpoint(strike),
-    "monies/implied": endpoint(money),
-    "monies/forecast": endpoint(money),
-    "hist/monies/implied": endpoint(money),
-    "hist/monies/forecast": endpoint(money),
+    "monies/implied": endpoint(money_implied),
+    "monies/forecast": endpoint(money_forecast),
+    "hist/monies/implied": endpoint(money_implied),
+    "hist/monies/forecast": endpoint(money_forecast),
     "summaries": endpoint(summary),
     "hist/summaries": endpoint(summary),
     "cores": endpoint(core),
