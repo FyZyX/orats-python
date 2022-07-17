@@ -765,12 +765,14 @@ def dividend_history_data_definition() -> Dict[str, Any]:
     }
 
 
-def earnings_history_data_definition() -> Dict[str, Any]:
+def earnings_history_data_definition(ticker="IMB") -> Dict[str, Any]:
+    today = datetime.date.today()
+    updated = datetime.datetime.now()
     return {
-        "ticker": "IBM",
-        "earnDate": "1980-03-31",
+        "ticker": ticker,
+        "earnDate": str(today),
         "anncTod": "1630",
-        "updatedAt": "2019-05-15T12:57:23Z",
+        "updatedAt": f"{updated}Z",
     }
 
 
