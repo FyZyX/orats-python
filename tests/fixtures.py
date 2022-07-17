@@ -661,16 +661,18 @@ def core_data_definition() -> Dict[str, Any]:
     }
 
 
-def iv_rank_data_definition() -> Dict[str, Any]:
+def iv_rank_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
+    today = datetime.date.today()
+    updated = datetime.datetime.now()
     return {
-        "ticker": "IBM",
-        "tradeDate": "2022-07-11",
-        "iv": 25.801,
-        "ivRank1m": 49.44,
-        "ivPct1m": 75,
-        "ivRank1y": 68.76,
-        "ivPct1y": 85.66,
-        "updatedAt": "2022-07-11T20:47:18Z",
+        "ticker": ticker,
+        "tradeDate": str(today),
+        "iv": 100 * random.random(),
+        "ivRank1m": 100 * random.random(),
+        "ivPct1m": 100 * random.random(),
+        "ivRank1y": 100 * random.random(),
+        "ivPct1y": 100 * random.random(),
+        "updatedAt": f"{updated}Z",
     }
 
 
