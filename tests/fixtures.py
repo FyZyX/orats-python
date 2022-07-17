@@ -755,13 +755,14 @@ def historical_volatility_data_definition() -> Dict[str, Any]:
     }
 
 
-def dividend_history_data_definition() -> Dict[str, Any]:
+def dividend_history_data_definition(ticker="IMB") -> Dict[str, Any]:
+    today = datetime.date.today()
     return {
-        "ticker": "IBM",
-        "exDate": "2005-02-08",
-        "divAmt": 0.18,
+        "ticker": ticker,
+        "exDate": today,
+        "divAmt": 1.5 * random.random(),
         "divFreq": "4",
-        "declaredDate": "2005-01-25",
+        "declaredDate": today - datetime.timedelta(days=15),
     }
 
 
