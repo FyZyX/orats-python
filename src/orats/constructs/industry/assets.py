@@ -48,7 +48,6 @@ class PriceHistory:
 
 class VolatilityHistory:
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
-    _periods = [datetime.timedelta(days=n) for n in _periods]
 
     def __init__(self, tickers: Sequence[str], token: str = None):
         self._tickers = tickers
@@ -68,7 +67,7 @@ class VolatilityHistory:
     def intraday(self, exclude_earnings: bool = True):
         results = {}
         if not exclude_earnings:
-            results[datetime.timedelta(days=1)] = self._response.hv_1_day
+            results[1] = self._response.hv_1_day
             values = [
                 self._response.hv_5_day,
                 self._response.hv_10_day,
