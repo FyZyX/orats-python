@@ -1,7 +1,7 @@
 """Higher level constructs for underlying assets."""
 
 import datetime
-from typing import Tuple, Collection, Optional, Sequence
+from typing import Tuple, Optional, Sequence, Set
 
 from pydantic import Field
 
@@ -11,19 +11,23 @@ from orats.constructs.api.data import response as res
 from orats.constructs.common import IndustryConstruct
 
 
-class Asset(IndustryConstruct):
+class Asset(IndustryConstruct[res.Ticker]):
     """Represents the underlying asset of an option contract."""
 
     ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
     _cache: Optional[res.Ticker] = None
 
-    def _get_ticker(self):
+    def _make_request(self, endpoint, request) -> res.Ticker:
         if self._cache:
             return self._cache
-        endpoint = endpoints.TickersEndpoint(self._token)
-        request = req.TickersRequest(ticker=self.ticker)
+
         self._cache = endpoint(request)[0]
         return self._cache
+
+    def _get_ticker(self):
+        endpoint = endpoints.TickersEndpoint(self._token)
+        request = req.TickersRequest(ticker=self.ticker)
+        return self._make_request(endpoint, request)
 
     def historical_data_range(self) -> Tuple[datetime.date, datetime.date]:
         """The duration of available historical data.
@@ -36,7 +40,7 @@ class Asset(IndustryConstruct):
 
 
 class Universe(IndustryConstruct):
-    assets: Collection[Asset]
+    assets: Set[Asset]
 
 
 class PriceHistory(IndustryConstruct):
@@ -44,25 +48,21 @@ class PriceHistory(IndustryConstruct):
         pass
 
 
-class VolatilityHistory(IndustryConstruct):
+class VolatilityHistory(IndustryConstruct[res.HistoricalVolatility]):
     tickers: Sequence[str]
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
-    _cache: Optional[res.HistoricalVolatility] = None
 
     def _get_historical_volatility(self):
-        if self._cache:
-            return self._cache
-
         endpoint = endpoints.HistoricalVolatilityEndpoint(self._token)
         request = req.HistoricalVolatilityRequest(
             tickers=self.tickers,
         )
-        self._cache = endpoint(request)[0]
-        return self._cache
+        return self._make_request(endpoint, request)
 
     def intraday(self, exclude_earnings: bool = True):
         history = self._get_historical_volatility()
         results = {}
+        print(history)
         if not exclude_earnings:
             results[1] = history.hv_1_day
             values = [
