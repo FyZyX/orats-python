@@ -1,9 +1,10 @@
 import datetime
 from typing import Generic, Optional, Sequence, TypeVar
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
 from pydantic.generics import GenericModel
 
+from orats.constructs.common import ApiConstruct
 from orats.errors import OratsError
 
 
@@ -11,12 +12,12 @@ def parse_date(dt: datetime.date):
     return dt.strftime("%Y/%m/%d")
 
 
-class DataFieldDefinition(BaseModel):
+class DataApiConstruct(ApiConstruct):
     class Config:
         allow_population_by_field_name = True
 
 
-T = TypeVar("T", bound=DataFieldDefinition)
+T = TypeVar("T", bound=DataApiConstruct)
 
 
 class DataApiResponse(GenericModel, Generic[T]):
@@ -31,7 +32,7 @@ class DataApiResponse(GenericModel, Generic[T]):
         return v
 
 
-class Ticker(DataFieldDefinition):
+class Ticker(DataApiConstruct):
     """Ticker symbol data duration definitions."""
 
     underlying_symbol: str = Field(..., alias="ticker")
@@ -39,7 +40,7 @@ class Ticker(DataFieldDefinition):
     max_date: datetime.date = Field(..., alias="max")
 
 
-class Strike(DataFieldDefinition):
+class Strike(DataApiConstruct):
     """Verbose strike definitions.
 
     See corresponding `Strikes`_ response object.
@@ -87,7 +88,7 @@ class Strike(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyImplied(DataFieldDefinition):
+class MoneyImplied(DataApiConstruct):
     """Monthly implied money definitions.
 
     See corresponding `Monies Implied`_ response object.
@@ -136,7 +137,7 @@ class MoneyImplied(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyForecast(DataFieldDefinition):
+class MoneyForecast(DataApiConstruct):
     """Monthly forecast money definitions.
 
     See corresponding `Monies Forecast`_ response object.
@@ -171,7 +172,7 @@ class MoneyForecast(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class SmvSummary(DataFieldDefinition):
+class SmvSummary(DataApiConstruct):
     """SMV Summary data definitions.
 
     See corresponding `Summaries`_ response object.
@@ -319,7 +320,7 @@ class SmvSummary(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class Core(DataFieldDefinition):
+class Core(DataApiConstruct):
     """Core definitions.
 
     See corresponding `Core`_ response object.
@@ -617,7 +618,7 @@ class Core(DataFieldDefinition):
         return value
 
 
-class DailyPrice(DataFieldDefinition):
+class DailyPrice(DataApiConstruct):
     """Daily price definitions.
 
     See corresponding `Daily Price`_ response object.
@@ -636,7 +637,7 @@ class DailyPrice(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class HistoricalVolatility(DataFieldDefinition):
+class HistoricalVolatility(DataApiConstruct):
     """Historical volatility definitions.
 
     See corresponding `Historical Volatility`_ response object.
@@ -691,7 +692,7 @@ class HistoricalVolatility(DataFieldDefinition):
     close_to_close_hv_ex_earnings_1000_day: float = Field(..., alias="clsHvXern1000d")
 
 
-class DividendHistory(DataFieldDefinition):
+class DividendHistory(DataApiConstruct):
     """Dividend History definitions.
 
     See corresponding `Dividend History`_ response object.
@@ -704,7 +705,7 @@ class DividendHistory(DataFieldDefinition):
     declared_date: datetime.date = Field(..., alias="declaredDate")
 
 
-class EarningsHistory(DataFieldDefinition):
+class EarningsHistory(DataApiConstruct):
     """Earnings history definitions.
 
     See corresponding `Earnings History`_ response object.
@@ -716,7 +717,7 @@ class EarningsHistory(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class StockSplitHistory(DataFieldDefinition):
+class StockSplitHistory(DataApiConstruct):
     """Stock split history definitions.
 
     See corresponding `Stock Split History`_ response object.
@@ -727,7 +728,7 @@ class StockSplitHistory(DataFieldDefinition):
     divisor: float
 
 
-class IvRank(DataFieldDefinition):
+class IvRank(DataApiConstruct):
     """IV Rank definitions.
 
     See corresponding `IV Rank`_ response object.
