@@ -14,7 +14,7 @@ See the `product page`_ and `API docs`_.
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
 import json
-from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar
+from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeAlias, TypeVar
 
 import httpx
 
@@ -47,15 +47,15 @@ def _post(url, params, body) -> Mapping[str, Any]:
 
 
 Req = TypeVar("Req", bound=req.DataApiRequest)
-Res = TypeVar("Res", bound=res.DataApiResponse)
+Res = TypeVar("Res", bound=res.DataApiConstruct)
 
 
 class DataApiEndpoint(Generic[Req, Res]):
-    """An **Endpoint** handles a **Request** and relays the **Response**."""
+    """An endpoint handles a request and relays the response."""
 
     _base_url = "https://api.orats.io/datav2"
     _resource: str
-    # This is a workaround to get access to the specific response type
+    # This is a workaround to get access to the specific construct type
     _response_type: Type[Res]
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
@@ -79,7 +79,9 @@ class DataApiEndpoint(Generic[Req, Res]):
         Returns:
           One or more Data API response objects.
         """
-        response = res.DataApiResponse[self._response_type](**self._get(request))
+        response = res.DataApiResponse[self._response_type](  # type: ignore
+            **self._get(request)
+        )
         return response.data or ()
 
     def _url(self, historical: bool = False) -> str:
@@ -165,7 +167,9 @@ class StrikesByOptionsEndpoint(
         if len(requests) == 1:
             return super().__call__(requests[0])
         else:
-            response = res.DataApiResponse[self._response_type](**self._post(requests))
+            response = res.DataApiResponse[self._response_type](  # type: ignore
+                **self._post(requests)
+            )
             return response.data or ()
 
     def _post(
@@ -193,13 +197,6 @@ class MoniesForecastEndpoint(DataApiEndpoint[req.MoniesRequest, res.MoneyForecas
 
     _resource = "monies/forecast"
     _response_type = res.MoneyForecast
-
-    def __call__(
-        self,
-        request: req.MoniesRequest,
-    ) -> Sequence[res.MoneyForecast]:
-
-        return super().__call__(request)
 
 
 class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, res.SmvSummary]):

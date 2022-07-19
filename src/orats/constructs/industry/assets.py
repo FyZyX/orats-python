@@ -1,7 +1,7 @@
 """Higher level constructs for underlying assets."""
 
 import datetime
-from typing import Tuple, Optional, Sequence, Set
+from typing import Tuple, Sequence, Set
 
 from pydantic import Field
 
@@ -11,7 +11,7 @@ from orats.constructs.api.data import response as res
 from orats.constructs.common import IndustryConstruct
 
 
-class Asset(IndustryConstruct[res.Ticker]):
+class Asset(IndustryConstruct[req.TickersRequest, res.Ticker]):
     """Represents the underlying asset of an option contract."""
 
     ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
@@ -40,7 +40,9 @@ class PriceHistory(IndustryConstruct):
         pass
 
 
-class VolatilityHistory(IndustryConstruct[res.HistoricalVolatility]):
+class VolatilityHistory(
+    IndustryConstruct[req.HistoricalVolatilityRequest, res.HistoricalVolatility]
+):
     tickers: Sequence[str]
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
 
@@ -54,7 +56,6 @@ class VolatilityHistory(IndustryConstruct[res.HistoricalVolatility]):
     def intraday(self, exclude_earnings: bool = True):
         history = self._get_historical_volatility()
         results = {}
-        print(history)
         if not exclude_earnings:
             results[1] = history.hv_1_day
             values = [
@@ -88,7 +89,7 @@ class VolatilityHistory(IndustryConstruct[res.HistoricalVolatility]):
         return results
 
     def close_to_close(self, exclude_earnings: bool = False):
-        history = self._cache
+        history = self._get_historical_volatility()
         if not exclude_earnings:
             values = [
                 history.close_to_close_hv_5_day,
