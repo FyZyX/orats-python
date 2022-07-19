@@ -15,14 +15,6 @@ class Asset(IndustryConstruct[res.Ticker]):
     """Represents the underlying asset of an option contract."""
 
     ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
-    _cache: Optional[res.Ticker] = None
-
-    def _make_request(self, endpoint, request) -> res.Ticker:
-        if self._cache:
-            return self._cache
-
-        self._cache = endpoint(request)[0]
-        return self._cache
 
     def _get_ticker(self):
         endpoint = endpoints.TickersEndpoint(self._token)
