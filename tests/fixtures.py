@@ -180,23 +180,25 @@ def money_forecast_data_definition(ticker: str = "IBM") -> Dict[str, Any]:
     }
 
 
-def summary_data_definition() -> Dict[str, Any]:
+def summary_data_definition(ticker="IMB") -> Dict[str, Any]:
+    today = datetime.date.today()
+    iv_ex_earnings_10_day = random.random()
     return {
-        "ticker": "IBM",
-        "tradeDate": "2022-07-11",
-        "stockPrice": 140.91,
-        "annActDiv": 6.6,
-        "annIdiv": 6.219711241365849,
+        "ticker": ticker,
+        "tradeDate": str(today),
+        "stockPrice": 100 + 40 + random.random(),
+        "annActDiv": 6 + random.random(),
+        "annIdiv": 6 + random.random(),
         "borrow30": 0.0007589506622195224,
         "borrow2y": 0.026864400946853068,
         "confidence": 0.9511693079292712,
-        "exErnIv10d": 0.3041920894594634,
-        "exErnIv20d": 0.29160431277613263,
-        "exErnIv30d": 0.28517382319786666,
-        "exErnIv60d": 0.2631281058677467,
-        "exErnIv90d": 0.2593226395931322,
-        "exErnIv6m": 0.25396767417436256,
-        "exErnIv1y": 0.2547238899422641,
+        "exErnIv10d": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv20d": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv30d": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv60d": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv90d": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv6m": (iv_ex_earnings_10_day - 0.5),
+        "exErnIv1y": (iv_ex_earnings_10_day - 0.5),
         "ieeEarnEffect": 2.3326074086309134,
         "impliedMove": 0.059163109598338016,
         "impliedNextDiv": 1.3731729188456947,
