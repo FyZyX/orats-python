@@ -1,9 +1,10 @@
 import datetime
 from typing import Generic, Optional, Sequence, TypeVar
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, validator
 from pydantic.generics import GenericModel
 
+from orats.constructs.common import ApiConstruct
 from orats.errors import OratsError
 
 
@@ -11,12 +12,12 @@ def parse_date(dt: datetime.date):
     return dt.strftime("%Y/%m/%d")
 
 
-class DataFieldDefinition(BaseModel):
+class DataApiConstruct(ApiConstruct):
     class Config:
         allow_population_by_field_name = True
 
 
-T = TypeVar("T", bound=DataFieldDefinition)
+T = TypeVar("T", bound=DataApiConstruct)
 
 
 class DataApiResponse(GenericModel, Generic[T]):
@@ -31,7 +32,7 @@ class DataApiResponse(GenericModel, Generic[T]):
         return v
 
 
-class Ticker(DataFieldDefinition):
+class Ticker(DataApiConstruct):
     """Ticker symbol data duration definitions."""
 
     underlying_symbol: str = Field(..., alias="ticker")
@@ -39,7 +40,7 @@ class Ticker(DataFieldDefinition):
     max_date: datetime.date = Field(..., alias="max")
 
 
-class Strike(DataFieldDefinition):
+class Strike(DataApiConstruct):
     """Verbose strike definitions.
 
     See corresponding `Strikes`_ response object.
@@ -87,7 +88,7 @@ class Strike(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyImplied(DataFieldDefinition):
+class MoneyImplied(DataApiConstruct):
     """Monthly implied money definitions.
 
     See corresponding `Monies Implied`_ response object.
@@ -136,7 +137,7 @@ class MoneyImplied(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyForecast(DataFieldDefinition):
+class MoneyForecast(DataApiConstruct):
     """Monthly forecast money definitions.
 
     See corresponding `Monies Forecast`_ response object.
@@ -171,7 +172,7 @@ class MoneyForecast(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class SmvSummary(DataFieldDefinition):
+class SmvSummary(DataApiConstruct):
     """SMV Summary data definitions.
 
     See corresponding `Summaries`_ response object.
@@ -319,7 +320,7 @@ class SmvSummary(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class Core(DataFieldDefinition):
+class Core(DataApiConstruct):
     """Core definitions.
 
     See corresponding `Core`_ response object.
@@ -617,7 +618,7 @@ class Core(DataFieldDefinition):
         return value
 
 
-class DailyPrice(DataFieldDefinition):
+class DailyPrice(DataApiConstruct):
     """Daily price definitions.
 
     See corresponding `Daily Price`_ response object.
@@ -636,7 +637,7 @@ class DailyPrice(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class HistoricalVolatility(DataFieldDefinition):
+class HistoricalVolatility(DataApiConstruct):
     """Historical volatility definitions.
 
     See corresponding `Historical Volatility`_ response object.
@@ -656,42 +657,42 @@ class HistoricalVolatility(DataFieldDefinition):
     hv_252_day: float = Field(..., alias="orHv252d")
     hv_500_day: float = Field(..., alias="orHv500d")
     hv_1000_day: float = Field(..., alias="orHv1000d")
-    close_to_close_hv_1_day: float = Field(..., alias="clsHv5d")
-    close_to_close_hv_5_day: float = Field(..., alias="clsHv10d")
-    close_to_close_hv_10_day: float = Field(..., alias="clsHv20d")
-    close_to_close_hv_20_day: float = Field(..., alias="clsHv30d")
-    close_to_close_hv_30_day: float = Field(..., alias="clsHv60d")
-    close_to_close_hv_60_day: float = Field(..., alias="clsHv90d")
-    close_to_close_hv_90_day: float = Field(..., alias="clsHv100d")
-    close_to_close_hv_100_day: float = Field(..., alias="clsHv120d")
-    close_to_close_hv_120_day: float = Field(..., alias="clsHv252d")
-    close_to_close_hv_252_day: float = Field(..., alias="clsHv500d")
-    close_to_close_hv_500_day: float = Field(..., alias="clsHv1000d")
-    hv_ex_earnings_1_day: float = Field(..., alias="orHvXern5d")
-    hv_ex_earnings_5_day: float = Field(..., alias="orHvXern10d")
-    hv_ex_earnings_10_day: float = Field(..., alias="orHvXern20d")
-    hv_ex_earnings_20_day: float = Field(..., alias="orHvXern30d")
-    hv_ex_earnings_30_day: float = Field(..., alias="orHvXern60d")
-    hv_ex_earnings_60_day: float = Field(..., alias="orHvXern90d")
-    hv_ex_earnings_90_day: float = Field(..., alias="orHvXern100d")
-    hv_ex_earnings_100_day: float = Field(..., alias="orHvXern120d")
-    hv_ex_earnings_120_day: float = Field(..., alias="orHvXern252d")
-    hv_ex_earnings_252_day: float = Field(..., alias="orHvXern500d")
-    hv_ex_earnings_500_day: float = Field(..., alias="orHvXern1000d")
-    hv_ex_earnings_1000_day: float = Field(..., alias="clsHvXern5d")
-    close_to_close_hv_ex_earnings_1_day: float = Field(..., alias="clsHvXern10d")
-    close_to_close_hv_ex_earnings_5_day: float = Field(..., alias="clsHvXern20d")
-    close_to_close_hv_ex_earnings_10_day: float = Field(..., alias="clsHvXern30d")
-    close_to_close_hv_ex_earnings_20_day: float = Field(..., alias="clsHvXern60d")
-    close_to_close_hv_ex_earnings_30_day: float = Field(..., alias="clsHvXern90d")
-    close_to_close_hv_ex_earnings_60_day: float = Field(..., alias="clsHvXern100d")
-    close_to_close_hv_ex_earnings_90_day: float = Field(..., alias="clsHvXern120d")
-    close_to_close_hv_ex_earnings_100_day: float = Field(..., alias="clsHvXern252d")
-    close_to_close_hv_ex_earnings_120_day: float = Field(..., alias="clsHvXern500d")
-    close_to_close_hv_ex_earnings_252_day: float = Field(..., alias="clsHvXern1000d")
+    close_to_close_hv_5_day: float = Field(..., alias="clsHv5d")
+    close_to_close_hv_10_day: float = Field(..., alias="clsHv10d")
+    close_to_close_hv_20_day: float = Field(..., alias="clsHv20d")
+    close_to_close_hv_30_day: float = Field(..., alias="clsHv30d")
+    close_to_close_hv_60_day: float = Field(..., alias="clsHv60d")
+    close_to_close_hv_90_day: float = Field(..., alias="clsHv90d")
+    close_to_close_hv_100_day: float = Field(..., alias="clsHv100d")
+    close_to_close_hv_120_day: float = Field(..., alias="clsHv120d")
+    close_to_close_hv_252_day: float = Field(..., alias="clsHv252d")
+    close_to_close_hv_500_day: float = Field(..., alias="clsHv500d")
+    close_to_close_hv_1000_day: float = Field(..., alias="clsHv1000d")
+    hv_ex_earnings_5_day: float = Field(..., alias="orHvXern5d")
+    hv_ex_earnings_10_day: float = Field(..., alias="orHvXern10d")
+    hv_ex_earnings_20_day: float = Field(..., alias="orHvXern20d")
+    hv_ex_earnings_30_day: float = Field(..., alias="orHvXern30d")
+    hv_ex_earnings_60_day: float = Field(..., alias="orHvXern60d")
+    hv_ex_earnings_90_day: float = Field(..., alias="orHvXern90d")
+    hv_ex_earnings_100_day: float = Field(..., alias="orHvXern100d")
+    hv_ex_earnings_120_day: float = Field(..., alias="orHvXern120d")
+    hv_ex_earnings_252_day: float = Field(..., alias="orHvXern252d")
+    hv_ex_earnings_500_day: float = Field(..., alias="orHvXern500d")
+    hv_ex_earnings_1000_day: float = Field(..., alias="orHvXern1000d")
+    close_to_close_hv_ex_earnings_5_day: float = Field(..., alias="clsHvXern5d")
+    close_to_close_hv_ex_earnings_10_day: float = Field(..., alias="clsHvXern10d")
+    close_to_close_hv_ex_earnings_20_day: float = Field(..., alias="clsHvXern20d")
+    close_to_close_hv_ex_earnings_30_day: float = Field(..., alias="clsHvXern30d")
+    close_to_close_hv_ex_earnings_60_day: float = Field(..., alias="clsHvXern60d")
+    close_to_close_hv_ex_earnings_90_day: float = Field(..., alias="clsHvXern90d")
+    close_to_close_hv_ex_earnings_100_day: float = Field(..., alias="clsHvXern100d")
+    close_to_close_hv_ex_earnings_120_day: float = Field(..., alias="clsHvXern120d")
+    close_to_close_hv_ex_earnings_252_day: float = Field(..., alias="clsHvXern252d")
+    close_to_close_hv_ex_earnings_500_day: float = Field(..., alias="clsHvXern500d")
+    close_to_close_hv_ex_earnings_1000_day: float = Field(..., alias="clsHvXern1000d")
 
 
-class DividendHistory(DataFieldDefinition):
+class DividendHistory(DataApiConstruct):
     """Dividend History definitions.
 
     See corresponding `Dividend History`_ response object.
@@ -704,7 +705,7 @@ class DividendHistory(DataFieldDefinition):
     declared_date: datetime.date = Field(..., alias="declaredDate")
 
 
-class EarningsHistory(DataFieldDefinition):
+class EarningsHistory(DataApiConstruct):
     """Earnings history definitions.
 
     See corresponding `Earnings History`_ response object.
@@ -716,7 +717,7 @@ class EarningsHistory(DataFieldDefinition):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class StockSplitHistory(DataFieldDefinition):
+class StockSplitHistory(DataApiConstruct):
     """Stock split history definitions.
 
     See corresponding `Stock Split History`_ response object.
@@ -727,7 +728,7 @@ class StockSplitHistory(DataFieldDefinition):
     divisor: float
 
 
-class IvRank(DataFieldDefinition):
+class IvRank(DataApiConstruct):
     """IV Rank definitions.
 
     See corresponding `IV Rank`_ response object.

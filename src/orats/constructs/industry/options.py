@@ -3,22 +3,20 @@
 import datetime
 from typing import Optional, Sequence
 
-from pydantic import BaseModel
-
 import orats.endpoints.data as endpoints
 from orats.constructs.api.data import request as req
 from orats.constructs.api.data import response as res
+from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
-from orats.constructs.industry.common import _get_token
 
 
-class Quote(BaseModel):
+class Quote(IndustryConstruct):
     price: float
     size: float
     iv: Optional[float] = None
 
 
-class Greeks(BaseModel):
+class Greeks(IndustryConstruct):
     delta: float
     gamma: float
     theta: float
@@ -27,7 +25,7 @@ class Greeks(BaseModel):
     phi: float
 
 
-class Option(BaseModel):
+class Option(IndustryConstruct):
     underlying: Asset
     expiration: datetime.date
     strike: float
@@ -49,36 +47,26 @@ class PutOption(Option):
     pass
 
 
-class OptionChain:
-    def __init__(self, ticker: str, token: str = None):
-        """Initializes an asset object.
-
-        Args:
-          ticker:
-            The ticker symbol of the underlying asset.
-          token:
-            API token.
-        """
-        self._ticker = ticker
-        self._token = token or _get_token()
-        self._expiration_range: Optional[str] = None
-        self._delta_range: Optional[str] = None
-        self._response: Optional[Sequence[res.Strike]] = None
+class OptionChain(IndustryConstruct):
+    ticker: str
+    _expiration_range: Optional[str] = None
+    _delta_range: Optional[str] = None
+    _cache: Optional[Sequence[res.Strike]] = None
 
     def _get_strikes(self, trade_date: datetime.date = None):
-        if self._response:
-            return self._response
+        if self._cache:
+            return self._cache
 
         endpoint = endpoints.StrikesEndpoint(self._token)
         request = req.StrikesRequest(
-            tickers=self._ticker,
+            tickers=self.ticker,
             trade_date=trade_date,
             expiration_range=self._expiration_range,
             delta_range=self._delta_range,
         )
 
-        self._response = endpoint(request)
-        return self._response
+        self._cache = endpoint(request)
+        return self._cache
 
     def filter_by_days_to_expiration(
         self,
@@ -176,3 +164,21 @@ class OptionChain:
             )
             for strike in self._get_strikes(trade_date)
         ]
+
+
+class VolatilitySurface(IndustryConstruct):
+    ticker: str
+    _cache: Optional[Sequence[res.MoneyImplied]] = None
+
+    def _get_monies(self, trade_date: datetime.date = None):
+        if self._cache:
+            return self._cache
+
+        endpoint = endpoints.MoniesImpliedEndpoint(self._token)
+        request = req.MoniesRequest(
+            tickers=self.ticker,
+            trade_date=trade_date,
+        )
+
+        self._cache = endpoint(request)
+        return self._cache
