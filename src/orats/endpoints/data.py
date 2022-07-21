@@ -13,9 +13,8 @@ See the `product page`_ and `API docs`_.
 .. _product page: https://orats.com/data-api/
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
-import abc
 import json
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeAlias, TypeVar
 
 import httpx
 
@@ -47,11 +46,17 @@ def _post(url, params, body) -> Mapping[str, Any]:
     return _handle_response(response)
 
 
-class DataApiEndpoint(abc.ABC):
-    """An **Endpoint** handles a **Request** and relays the **Response**."""
+Req = TypeVar("Req", bound=req.DataApiRequest)
+Res = TypeVar("Res", bound=res.DataApiConstruct)
+
+
+class DataApiEndpoint(Generic[Req, Res]):
+    """An endpoint handles a request and relays the response."""
 
     _base_url = "https://api.orats.io/datav2"
     _resource: str
+    # This is a workaround to get access to the specific construct type
+    _response_type: Type[Res]
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
 
@@ -64,8 +69,7 @@ class DataApiEndpoint(abc.ABC):
         """
         self._token = token
 
-    @abc.abstractmethod
-    def __call__(self, request) -> Sequence:
+    def __call__(self, request: Req) -> Sequence[Res]:
         """Handles a request and relays the response.
 
         Args:
@@ -75,7 +79,10 @@ class DataApiEndpoint(abc.ABC):
         Returns:
           One or more Data API response objects.
         """
-        ...
+        response = res.DataApiResponse[self._response_type](  # type: ignore
+            **self._get(request)
+        )
+        return response.data or ()
 
     def _url(self, historical: bool = False) -> str:
         resource = self._resource
@@ -94,10 +101,7 @@ class DataApiEndpoint(abc.ABC):
             updated_params[key] = param
         return updated_params
 
-    def _get(
-        self,
-        request: req.DataApiRequest,
-    ) -> Mapping[str, Any]:
+    def _get(self, request: Req) -> Mapping[str, Any]:
         is_historical = self._is_historical
         if not is_historical and isinstance(request, req.DataHistoryApiRequest):
             is_historical = request.trade_date is not None
@@ -109,76 +113,64 @@ class DataApiEndpoint(abc.ABC):
         )
 
 
-class TickersEndpoint(DataApiEndpoint):
+class TickersEndpoint(DataApiEndpoint[req.TickersRequest, res.Ticker]):
+    """Retrieves the duration of available data for various assets.
+
+    If no underlying asset is specified, the result will be a list
+    of all available ticker symbols. Each symbol is accompanied by
+    a start (min) and end (max) date for which data is available.
+    See the corresponding `Tickers`_ endpoint.
+    """
+
     _resource = "tickers"
-
-    def __call__(self, request: req.TickersRequest) -> Sequence[res.Ticker]:
-        """Retrieves the duration of available data for various assets.
-
-        If no underlying asset is specified, the result will be a list
-        of all available ticker symbols. Each symbol is accompanied by
-        a start (min) and end (max) date for which data is available.
-        See the corresponding `Tickers`_ endpoint.
-
-        Args:
-          request:
-            Tickers request object.
-
-        Returns:
-          A list of tickers with data durations.
-        """
-        response = res.DataApiResponse[res.Ticker](**self._get(request))
-        return response.data or ()
+    _response_type = res.Ticker
 
 
-class StrikesEndpoint(DataApiEndpoint):
+class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, res.Strike]):
+    """Retrieves strikes data for the given asset(s).
+
+    See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
+    """
+
     _resource = "strikes"
-
-    def __call__(self, request: req.StrikesRequest) -> Sequence[res.Strike]:
-        """Retrieves strikes data for the given asset(s).
-
-        See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
-
-        Args:
-          request:
-            Strikes request object.
-
-        Returns:
-          A list of strikes for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.Strike](**self._get(request))
-        return response.data or ()
+    _response_type = res.Strike
 
 
-class StrikesByOptionsEndpoint(DataApiEndpoint):
+class StrikesByOptionsEndpoint(
+    DataApiEndpoint[req.StrikesByOptionsRequest, res.Strike]
+):
+    """Retrieves strikes data by ticker, expiry, and strike.
+
+    See the corresponding `Strikes by Options`_ and
+    `Strikes History by Options`_ endpoints.
+    """
+
     _resource = "strikes/options"
+    _response_type = res.Strike
 
     def __call__(
         self,
         *requests: req.StrikesByOptionsRequest,
     ) -> Sequence[res.Strike]:
-        """Retrieves strikes data by ticker, expiry, and strike.
+        """Makes a call to the appropriate API endpoint.
 
-        See the corresponding `Strikes by Options`_ and
-        `Strikes History by Options`_ endpoints.
+        Passing a single request will use the GET request method,
+        while passing a sequence will use the POST request method.
 
         Args:
           requests:
-            StrikesByOption request object. Passing a single request will
-            use the GET request, while passing a sequence will use the POST
-            request method.
+            StrikesByOption request object.
 
         Returns:
           A list of strikes for each specified asset.
         """
         if len(requests) == 1:
-            data = self._get(requests[0])
+            return super().__call__(requests[0])
         else:
-            data = self._post(requests)
-
-        response = res.DataApiResponse[res.Strike](**data)
-        return response.data or ()
+            response = res.DataApiResponse[self._response_type](  # type: ignore
+                **self._post(requests)
+            )
+            return response.data or ()
 
     def _post(
         self, requests: Sequence[req.StrikesByOptionsRequest]
@@ -187,236 +179,117 @@ class StrikesByOptionsEndpoint(DataApiEndpoint):
         return _post(url=self._url(), body=body, params=self._update_params({}))
 
 
-class MoniesImpliedEndpoint(DataApiEndpoint):
+class MoniesImpliedEndpoint(DataApiEndpoint[req.MoniesRequest, res.MoneyImplied]):
+    """Retrieves monthly implied data for monies.
+
+    See the corresponding `Monies`_ and `Monies History`_ endpoints.
+    """
+
     _resource = "monies/implied"
-
-    def __call__(
-        self,
-        request: req.MoniesRequest,
-    ) -> Sequence[res.MoneyImplied]:
-        """Retrieves monthly implied data for monies.
-
-        See the corresponding `Monies`_ and `Monies History`_ endpoints.
-
-        Args:
-          request:
-            Monies request object.
-
-        Returns:
-          A list of implied monies for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.MoneyImplied](**self._get(request))
-        return response.data or ()
+    _response_type = res.MoneyImplied
 
 
-class MoniesForecastEndpoint(DataApiEndpoint):
+class MoniesForecastEndpoint(DataApiEndpoint[req.MoniesRequest, res.MoneyForecast]):
+    """Retrieves monthly forecast data for monies.
+
+    See the corresponding `Monies`_ and `Monies History`_ endpoints.
+    """
+
     _resource = "monies/forecast"
-
-    def __call__(
-        self,
-        request: req.MoniesRequest,
-    ) -> Sequence[res.MoneyForecast]:
-        """Retrieves monthly forecast data for monies.
-
-        See the corresponding `Monies`_ and `Monies History`_ endpoints.
-
-        Args:
-          request:
-            Monies request object.
-
-        Returns:
-          A list of forecast monies for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.MoneyForecast](**self._get(request))
-        return response.data or ()
+    _response_type = res.MoneyForecast
 
 
-class SummariesEndpoint(DataApiEndpoint):
+class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, res.SmvSummary]):
+    """Retrieves SMV Summary data.
+
+    See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
+    """
+
     _resource = "summaries"
-
-    def __call__(
-        self,
-        request: req.SummariesRequest,
-    ) -> Sequence[res.SmvSummary]:
-        """Retrieves SMV Summary data.
-
-        See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
-
-        Args:
-          request:
-            Summaries request object.
-
-        Returns:
-          A list of SMV summaries for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.SmvSummary](**self._get(request))
-        return response.data or ()
+    _response_type = res.SmvSummary
 
 
 class CoreDataEndpoint(DataApiEndpoint):
+    """Retrieves Core data.
+
+    See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
+    """
+
     _resource = "cores"
-
-    def __call__(self, request: req.CoreDataRequest) -> Sequence[res.Core]:
-        """Retrieves Core data.
-
-        See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
-
-        Args:
-          request:
-            CoreData request object.
-
-        Returns:
-          A list of core data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.Core](**self._get(request))
-        return response.data or ()
+    _response_type = res.Core
 
 
-class DailyPriceEndpoint(DataApiEndpoint):
+class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, res.DailyPrice]):
+    """Retrieves end of day daily stock price data.
+
+    See the corresponding `Daily Price`_ endpoint.
+    """
+
     _resource = "dailies"
+    _response_type = res.DailyPrice
     _is_historical = True
 
-    def __call__(
-        self,
-        request: req.DailyPriceRequest,
-    ) -> Sequence[res.DailyPrice]:
-        """Retrieves end of day daily stock price data.
 
-        See the corresponding `Daily Price`_ endpoint.
+class HistoricalVolatilityEndpoint(
+    DataApiEndpoint[req.HistoricalVolatilityRequest, res.HistoricalVolatility]
+):
+    """Retrieves historical volatility data.
 
-        Args:
-          request:
-            DailyPrice request object.
+    See the corresponding `Historical Volatility`_ endpoint.
+    """
 
-        Returns:
-          A list of daily price data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.DailyPrice](**self._get(request))
-        return response.data or ()
-
-
-class HistoricalVolatilityEndpoint(DataApiEndpoint):
     _resource = "hvs"
+    _response_type = res.HistoricalVolatility
     _is_historical = True
 
-    def __call__(
-        self,
-        request: req.HistoricalVolatilityRequest,
-    ) -> Sequence[res.HistoricalVolatility]:
-        """Retrieves historical volatility data.
 
-        See the corresponding `Historical Volatility`_ endpoint.
+class DividendHistoryEndpoint(
+    DataApiEndpoint[req.DividendHistoryRequest, res.DividendHistory]
+):
+    """Retrieves dividend history data.
 
-        Args:
-          request:
-            HistoricalVolatility request object.
+    See the corresponding `Dividend History`_ endpoint.
+    """
 
-        Returns:
-          A list of historical volatility data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.HistoricalVolatility](**self._get(request))
-        return response.data or ()
-
-
-class DividendHistoryEndpoint(DataApiEndpoint):
     _resource = "divs"
+    _response_type = res.DividendHistory
     _is_historical = True
 
-    def __call__(
-        self,
-        request: req.DividendHistoryRequest,
-    ) -> Sequence[res.DividendHistory]:
-        """Retrieves dividend history data.
 
-        See the corresponding `Dividend History`_ endpoint.
+class EarningsHistoryEndpoint(
+    DataApiEndpoint[req.EarningsHistoryRequest, res.EarningsHistory]
+):
+    """Retrieves earnings history data.
 
-        Args:
-          request:
-            DividendHistory request object.
+    See the corresponding `Earnings History`_ endpoint.
+    """
 
-        Returns:
-          A list of dividend history data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.DividendHistory](**self._get(request))
-        return response.data or ()
-
-
-class EarningsHistoryEndpoint(DataApiEndpoint):
     _resource = "earnings"
+    _response_type = res.EarningsHistory
     _is_historical = True
 
-    def __call__(
-        self,
-        request: req.EarningsHistoryRequest,
-    ) -> Sequence[res.EarningsHistory]:
-        """Retrieves earnings history data.
 
-        See the corresponding `Earnings History`_ endpoint.
+class StockSplitHistoryEndpoint(
+    DataApiEndpoint[req.StockSplitHistoryRequest, res.StockSplitHistory]
+):
+    """Retrieves stock split history data.
 
-        Args:
-          request:
-            EarningsHistory request object.
+    See the corresponding `Stock Split History`_ endpoint.
+    """
 
-        Returns:
-          A list of earnings history data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.EarningsHistory](**self._get(request))
-        return response.data or ()
-
-
-class StockSplitHistoryEndpoint(DataApiEndpoint):
     _resource = "splits"
+    _response_type = res.StockSplitHistory
     _is_historical = True
 
-    def __call__(
-        self,
-        request: req.StockSplitHistoryRequest,
-    ) -> Sequence[res.StockSplitHistory]:
-        """Retrieves stock split history data.
 
-        See the corresponding `Stock Split History`_ endpoint.
+class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, res.IvRank]):
+    """Retrieves IV rank data.
 
-        Args:
-          request:
-            StockSplitHistory request object.
+    See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
+    """
 
-        Returns:
-          A list of stock split history data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.StockSplitHistory](**self._get(request))
-        return response.data or ()
-
-
-class IvRankEndpoint(DataApiEndpoint):
     _resource = "ivrank"
-
-    def __call__(
-        self,
-        request: req.IvRankRequest,
-    ) -> Sequence[res.IvRank]:
-        """Retrieves IV rank data.
-
-        See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
-
-        Args:
-          request:
-            IvRank request object.
-
-        Returns:
-          A list of IV rank data for each specified asset.
-        """
-
-        response = res.DataApiResponse[res.IvRank](**self._get(request))
-        return response.data or ()
+    _response_type = res.IvRank
 
 
 class DataApi:
