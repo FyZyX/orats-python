@@ -18,6 +18,7 @@ from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeAlias, T
 
 import httpx
 
+from orats.common import get_token
 from orats.errors import InsufficientPermissionsError
 from orats.constructs.api.data import request as req
 from orats.constructs.api.data import response as res
@@ -299,7 +300,9 @@ class DataApi:
     responses in structured Python objects.
     """
 
-    def __init__(self, token: str):
+    def __init__(self, token: str = None):
+        token = token or get_token()
+
         self.tickers = TickersEndpoint(token)
         self.strikes = StrikesEndpoint(token)
         self.strikes_by_options = StrikesByOptionsEndpoint(token)
