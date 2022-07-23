@@ -818,20 +818,6 @@ class FakeDataApi:
     API calls during the development process.
     """
 
-    _tickers = _ticker()
-    _strikes = _strike()
-    _strikes_by_options = _strike()
-    _monies_implied = _money_implied()
-    _monies_forecast = _money_forecast()
-    _summaries = _summary()
-    _core_data = _core()
-    _daily_price = _daily_price()
-    _historical_volatility = _historical_volatility()
-    _dividend_history = _dividend_history()
-    _earnings_history = _earnings_history()
-    _stock_split_history = _stock_split_history()
-    _iv_rank = _iv_rank()
-
     def __init__(self):
         self._universe = [
             "".join(random.choices(string.ascii_uppercase, k=3)) for _ in range(5000)
