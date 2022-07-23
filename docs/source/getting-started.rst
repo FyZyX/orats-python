@@ -34,7 +34,7 @@ Have a look at the full list of available :ref:`API constructs <API Constructs>`
 Setting a Default Token
 -----------------------
 
-If a token is not passed to the :ref:`~orats.endpoints.data.DataApi` constructor,
+If a token is not passed to the :class:`~orats.endpoints.data.DataApi` constructor,
 the execution environment will be searched for a variable called ``ORATS_API_TOKEN``.
 If not token is found in the environment, the ``demo`` token will be used.
 
@@ -54,5 +54,5 @@ When the environment is set properly, you can instantiate objects without a toke
 
 .. note::
 
-   The ``demo`` token is very restrictive. If you are running to an :ref:`orats.errors.InsufficientPermissionsError`,
+   The ``demo`` token is very restrictive. If you are running to an :class:`~orats.errors.InsufficientPermissionsError`,
    make sure your token is available in the execution environment.
