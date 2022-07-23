@@ -11,7 +11,8 @@ Installation
 Basic Usage
 -----------
 
-Direct API requests are particularly simple.
+Direct API requests are particularly simple. For example, to access an endpoint from the
+Data API, all you need is the following snippet.
 
 .. code-block:: python
 
@@ -22,6 +23,8 @@ Direct API requests are particularly simple.
    tickers = api.tickers(request)
    for ticker in tickers:
        assert isinstance(ticker, res.Ticker)
+
+Have a look at the full list of available :ref:`API constructs <API Constructs>`.
 
 .. note::
 
