@@ -31,8 +31,9 @@ class FakeDataGenerator:
             "hist/ivrank": self.iv_rank,
         }
 
-    def get_data_definition(self, resource):
-        return self._data_definitions[resource]
+    def get_response(self, resource, count=1):
+        data_definition = self._data_definitions[resource]
+        return {"data": [data_definition() for _ in range(count)]}
 
     def set_date(self, date: datetime.date):
         self._date = date

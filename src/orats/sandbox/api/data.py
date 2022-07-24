@@ -15,8 +15,7 @@ def _resource(url):
 
 def fake_api_request(url, params=None, body=None, count=1):
     data_generator = FakeDataGenerator()
-    data_definition = data_generator.get_data_definition(_resource(url))
-    return {"data": [data_definition() for _ in range(count)]}
+    return data_generator.get_response(_resource(url))
 
 
 class FakeDataApi:
