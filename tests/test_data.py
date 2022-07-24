@@ -5,7 +5,7 @@ import pytest
 from orats.endpoints import data
 from orats.constructs.api.data import request as req
 from orats.constructs.api.data import response as res
-from orats.sandbox.api.data import fake_api_response
+from tests.fixtures import fake_api_response
 
 
 @pytest.fixture(autouse=True)
