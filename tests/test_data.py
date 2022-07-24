@@ -5,21 +5,13 @@ import pytest
 from orats.endpoints import data
 from orats.constructs.api.data import request as req
 from orats.constructs.api.data import response as res
-from orats.sandbox.generator import fake_api_request
-
-
-def _resource(url):
-    return "/".join(url.split("://")[1].split("/")[2:])
-
-
-def _mock_request(url, *args, **kwargs):
-    return fake_api_request(_resource(url))
+from orats.sandbox.api.data import fake_api_request
 
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(data, "_get", _mock_request)
-    monkeypatch.setattr(data, "_post", _mock_request)
+    monkeypatch.setattr(data, "_get", fake_api_request)
+    monkeypatch.setattr(data, "_post", fake_api_request)
 
 
 class TestDataApi:
