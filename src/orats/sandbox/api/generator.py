@@ -8,32 +8,6 @@ class FakeDataGenerator:
     def __init__(self, date: datetime.date = None):
         self._date = date or datetime.date.today()
         self._last_update = datetime.datetime.now()
-        self._data_definitions = {
-            "tickers": self.ticker,
-            "strikes": self.strike,
-            "hist/strikes": self.strike,
-            "strikes/options": self.strike,
-            "hist/strikes/options": self.strike,
-            "monies/implied": self.money_implied,
-            "monies/forecast": self.money_forecast,
-            "hist/monies/implied": self.money_implied,
-            "hist/monies/forecast": self.money_forecast,
-            "summaries": self.summary,
-            "hist/summaries": self.summary,
-            "cores": self.core,
-            "hist/cores": self.core,
-            "hist/dailies": self.daily_price,
-            "hist/hvs": self.historical_volatility,
-            "hist/divs": self.dividend_history,
-            "hist/earnings": self.earnings_history,
-            "hist/splits": self.stock_split_history,
-            "ivrank": self.iv_rank,
-            "hist/ivrank": self.iv_rank,
-        }
-
-    def get_response(self, resource, count=1):
-        data_definition = self._data_definitions[resource]
-        return {"data": [data_definition() for _ in range(count)]}
 
     def set_date(self, date: datetime.date):
         self._date = date
