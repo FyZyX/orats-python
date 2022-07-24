@@ -17,3 +17,14 @@ At this level, each construct corresponds to a specific API resource.
 
    data/request
    data/response
+
+.. note:: While not considered constructs in their own right, this section also
+   contains information about the :mod:`~orats.constructs.api.data.request` models,
+   which are used with :mod:`~orats.endpoints.data` endpoints to generate the
+   Level 0 constructs.
+
+A user is expected to create a **request** object from one of the subclasses of
+:class:`~orats.constructs.api.data.request.DataApiRequest`. These requests can be
+passed to the corresponding **endpoint** object, which is a subclass of type
+:class:`~orats.endpoints.data.DataApiEndpoint`.
+

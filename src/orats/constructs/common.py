@@ -1,8 +1,9 @@
-import os
 from typing import TYPE_CHECKING, Optional, Generic, TypeVar
 
 from pydantic import Field, PrivateAttr
 from pydantic.generics import GenericModel
+
+from orats.common import get_token
 
 if TYPE_CHECKING:
     from orats.endpoints import data as endpoints
@@ -10,13 +11,9 @@ if TYPE_CHECKING:
     from orats.constructs.api.data import response as res
 
 
-def _get_token() -> str:
-    return os.environ.get("ORATS_API_TOKEN", "demo")
-
-
 class Construct(GenericModel):
     _level: int
-    _token: str = Field(_get_token(), description="API token.")
+    _token: str = Field(get_token(), description="API token.")
 
 
 class ApiConstruct(Construct):
