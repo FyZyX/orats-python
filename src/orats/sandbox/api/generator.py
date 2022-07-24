@@ -715,7 +715,9 @@ class FakeDataGenerator:
             "updatedAt": f"{updated}Z",
         }
 
-    def historical_volatility(self, ticker: str = common.random_symbol()) -> common.Json:
+    def historical_volatility(
+        self, ticker: str = common.random_symbol()
+    ) -> common.Json:
         return {
             "ticker": ticker,
             "tradeDate": "2006-01-05",
