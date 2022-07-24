@@ -56,8 +56,14 @@ class _MultipleTickersDependentTemplateRequest(DataHistoryApiRequest):
     _dependency_check = validator("trade_date", allow_reuse=True)(dependency_check)
 
 
-class TickersRequest(_SingleTickerTemplateRequest):
+class TickersRequest(DataApiRequest):
     """Request duration of historical data for tickers."""
+
+    ticker: Optional[str] = Field(
+        None,
+        alias="ticker",
+        description="The ticker symbol of the underlying asset.",
+    )
 
 
 class StrikesRequest(_MultipleTickersTemplateRequest):
