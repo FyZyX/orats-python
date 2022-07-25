@@ -1,35 +1,14 @@
 import datetime
-from typing import Generic, Optional, Sequence, TypeVar
+from typing import Optional
 
 from pydantic import Field, validator
-from pydantic.generics import GenericModel
 
 from orats.constructs.common import ApiConstruct
-from orats.errors import OratsError
-
-
-def parse_date(dt: datetime.date):
-    return dt.strftime("%Y/%m/%d")
 
 
 class DataApiConstruct(ApiConstruct):
     class Config:
         allow_population_by_field_name = True
-
-
-T = TypeVar("T", bound=DataApiConstruct)
-
-
-class DataApiResponse(GenericModel, Generic[T]):
-    data: Optional[Sequence[T]]
-    message: Optional[str]
-    error: Optional[str]
-
-    @validator("error", "message")
-    def check_failures(cls, v):
-        if v is not None:
-            raise OratsError(v)
-        return v
 
 
 class Ticker(DataApiConstruct):

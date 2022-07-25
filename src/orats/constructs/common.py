@@ -6,9 +6,8 @@ from pydantic.generics import GenericModel
 from orats.common import get_token
 
 if TYPE_CHECKING:
-    from orats.endpoints import data as endpoints
-    from orats.constructs.api.data import request as req
-    from orats.constructs.api.data import response as res
+    from orats.constructs.api import data as constructs
+    from orats.endpoints.data import endpoints, request as req
 
 
 class Construct(GenericModel):
@@ -21,7 +20,7 @@ class ApiConstruct(Construct):
 
 
 Req = TypeVar("Req", bound="req.DataApiRequest")
-Res = TypeVar("Res", bound="res.DataApiConstruct")
+Res = TypeVar("Res", bound="constructs.DataApiConstruct")
 
 
 class IndustryConstruct(Construct, Generic[Req, Res]):

@@ -118,10 +118,6 @@ class CoreDataRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves Core history data."""
 
 
-class CoreDataHistoryRequest(_MultipleTickersDependentTemplateRequest):
-    """Retrieves Core history data."""
-
-
 class DailyPriceRequest(_MultipleTickersDependentTemplateRequest):
     """Retrieves end of day daily stock price data."""
 
