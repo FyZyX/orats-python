@@ -27,58 +27,62 @@ class FakeDataApi:
         else:
             universe = self._universe
         results = [self._generator.ticker(ticker) for ticker in universe]
-        return common.as_response(constructs.Ticker, results)
+        return common.as_responses(constructs.Ticker, results)
 
     def strikes(self, request: req.StrikesRequest) -> Sequence[constructs.Strike]:
         universe = request.tickers or self._universe
         results = [self._generator.strike(ticker) for ticker in universe]
-        return common.as_response(constructs.Strike, results)
+        return common.as_responses(constructs.Strike, results)
 
     def strikes_by_options(
         self, *requests: req.StrikesByOptionsRequest
     ) -> Sequence[constructs.Strike]:
         results = [self._generator.strike(request.ticker) for request in requests]
-        return common.as_response(constructs.Strike, results)
+        return common.as_responses(constructs.Strike, results)
 
     def monies_implied(
         self, request: req.MoniesRequest
     ) -> Sequence[constructs.MoneyImplied]:
         universe = request.tickers or self._universe
-        results = [self._generator.money_implied(ticker) for ticker in universe]
-        return common.as_response(constructs.MoneyImplied, results)
+        monies = []
+        for ticker in universe:
+            results = [self._generator.money_implied(ticker, days_to_expiration=dte)
+                       for dte in range(1, 100, 7)]
+            monies.extend(common.as_responses(constructs.MoneyImplied, results))
+        return monies
 
     def monies_forecast(
         self, request: req.MoniesRequest
     ) -> Sequence[constructs.MoneyForecast]:
         universe = request.tickers or self._universe
         results = [self._generator.money_forecast(ticker) for ticker in universe]
-        return common.as_response(constructs.MoneyForecast, results)
+        return common.as_responses(constructs.MoneyForecast, results)
 
     def summaries(
         self, request: req.SummariesRequest
     ) -> Sequence[constructs.SmvSummary]:
         universe = request.tickers or self._universe
         results = [self._generator.summary(ticker) for ticker in universe]
-        return common.as_response(constructs.SmvSummary, results)
+        return common.as_responses(constructs.SmvSummary, results)
 
     def core_data(self, request: req.CoreDataRequest) -> Sequence[constructs.Core]:
         universe = request.tickers or self._universe
         results = [self._generator.core(ticker) for ticker in universe]
-        return common.as_response(constructs.Core, results)
+        return common.as_responses(constructs.Core, results)
 
     def daily_price(
         self, request: req.DailyPriceRequest
     ) -> Sequence[constructs.DailyPrice]:
         universe = request.tickers or self._universe
         results = [self._generator.daily_price(ticker) for ticker in universe]
-        return common.as_response(constructs.DailyPrice, results)
+        return common.as_responses(constructs.DailyPrice, results)
 
     def historical_volatility(
         self, request: req.HistoricalVolatilityRequest
     ) -> Sequence[constructs.HistoricalVolatility]:
         universe = request.tickers or self._universe
         results = [self._generator.historical_volatility(ticker) for ticker in universe]
-        return common.as_response(constructs.HistoricalVolatility, results)
+        return common.as_responses(constructs.HistoricalVolatility, results)
 
     def dividend_history(
         self, request: req.DividendHistoryRequest
@@ -88,7 +92,7 @@ class FakeDataApi:
         else:
             universe = self._universe
         results = [self._generator.dividend_history(ticker) for ticker in universe]
-        return common.as_response(constructs.DividendHistory, results)
+        return common.as_responses(constructs.DividendHistory, results)
 
     def earnings_history(
         self, request: req.EarningsHistoryRequest
@@ -98,7 +102,7 @@ class FakeDataApi:
         else:
             universe = self._universe
         results = [self._generator.earnings_history(ticker) for ticker in universe]
-        return common.as_response(constructs.EarningsHistory, results)
+        return common.as_responses(constructs.EarningsHistory, results)
 
     def stock_split_history(
         self, request: req.StockSplitHistoryRequest
@@ -108,9 +112,9 @@ class FakeDataApi:
         else:
             universe = self._universe
         results = [self._generator.stock_split_history(ticker) for ticker in universe]
-        return common.as_response(constructs.StockSplitHistory, results)
+        return common.as_responses(constructs.StockSplitHistory, results)
 
     def iv_rank(self, request: req.IvRankRequest) -> Sequence[constructs.IvRank]:
         universe = request.tickers or self._universe
         results = [self._generator.iv_rank(ticker) for ticker in universe]
-        return common.as_response(constructs.IvRank, results)
+        return common.as_responses(constructs.IvRank, results)
