@@ -1,5 +1,5 @@
 Data API Requests
 =================
 
-.. automodule:: orats.constructs.api.data.request
+.. automodule:: orats.endpoints.data.request
    :members:

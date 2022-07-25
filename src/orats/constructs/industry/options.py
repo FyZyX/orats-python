@@ -3,11 +3,10 @@
 import datetime
 from typing import Optional, Sequence
 
-import orats.endpoints.data as endpoints
-from orats.constructs.api.data import request as req
-from orats.constructs.api.data import response as res
+from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
+from orats.endpoints.data import endpoints, request as req
 
 
 class Quote(IndustryConstruct):
@@ -51,7 +50,7 @@ class OptionChain(IndustryConstruct):
     ticker: str
     _expiration_range: Optional[str] = None
     _delta_range: Optional[str] = None
-    _cache: Optional[Sequence[res.Strike]] = None
+    _cache: Optional[Sequence[constructs.Strike]] = None
 
     def _get_strikes(self, trade_date: datetime.date = None):
         if self._cache:
@@ -168,7 +167,7 @@ class OptionChain(IndustryConstruct):
 
 class VolatilitySurface(IndustryConstruct):
     ticker: str
-    _cache: Optional[Sequence[res.MoneyImplied]] = None
+    _cache: Optional[Sequence[constructs.MoneyImplied]] = None
 
     def _get_monies(self, trade_date: datetime.date = None):
         if self._cache:

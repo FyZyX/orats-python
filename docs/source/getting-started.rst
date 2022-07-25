@@ -16,11 +16,11 @@ Data API, all you need is the following snippet.
 
 .. code-block:: python
 
-   from orats.constructs.api.data import request as req
+   from orats.endpoints.data import api, request as req
 
-   api = data.DataApi(token="demo")
+   data_api = api.DataApi(token="demo")
    request = req.TickersRequest(ticker="IBM")
-   tickers = api.tickers(request)
+   tickers = data_api.tickers(request)
    for ticker in tickers:
        assert isinstance(ticker, res.Ticker)
 
@@ -34,7 +34,7 @@ Have a look at the full list of available :ref:`API constructs <API Constructs>`
 Setting a Default Token
 -----------------------
 
-If a token is not passed to the :class:`~orats.endpoints.data.DataApi` constructor,
+If a token is not passed to the :class:`~orats.endpoints.data.api.DataApi` constructor,
 the execution environment will be searched for a variable called ``ORATS_API_TOKEN``.
 If not token is found in the environment, the ``demo`` token will be used.
 
@@ -47,10 +47,11 @@ When the environment is set properly, you can instantiate objects without a toke
 
 .. code-block:: python
 
-   from orats.constructs.api.data import request as req
+   from orats.endpoints.data import api, request as req
 
-   api = data.DataApi()
-   prices = api.daily_price(tickers=("IBM", "RIVN"))
+   data_api = api.DataApi()
+   request = req.DailyPriceRequest(tickers=("IBM", "RIVN"))
+   prices = data_api.daily_price(request)
 
 .. note::
 

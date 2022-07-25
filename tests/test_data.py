@@ -2,20 +2,19 @@ import datetime
 
 import pytest
 
-from orats.endpoints import data
-from orats.constructs.api.data import request as req
-from orats.constructs.api.data import response as res
+from orats.constructs.api import data as constructs
+from orats.endpoints.data import api, endpoints, request as req
 from tests.fixtures import fake_api_response
 
 
 @pytest.fixture(autouse=True)
 def data_api(monkeypatch):
-    monkeypatch.setattr(data, "_get", fake_api_response)
-    monkeypatch.setattr(data, "_post", fake_api_response)
+    monkeypatch.setattr(endpoints, "_get", fake_api_response)
+    monkeypatch.setattr(endpoints, "_post", fake_api_response)
 
 
 class TestDataApi:
-    _api = data.DataApi("demo")
+    _api = api.DataApi("demo")
 
     def test_tickers(self):
         request = req.TickersRequest(ticker="IBM")
@@ -27,7 +26,7 @@ class TestDataApi:
         assert len(tickers) == 1
 
         ticker = tickers[0]
-        assert isinstance(ticker, res.Ticker)
+        assert isinstance(ticker, constructs.Ticker)
         assert isinstance(ticker.underlying_symbol, str)
         assert isinstance(ticker.max_date, datetime.date)
         assert isinstance(ticker.min_date, datetime.date)
@@ -47,7 +46,7 @@ class TestDataApi:
 
         strikes = endpoint(request)
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
 
     def test_strikes_history(self):
         endpoint = self._api.strikes
@@ -63,7 +62,7 @@ class TestDataApi:
 
         strikes = endpoint(request)
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
 
     def test_strikes_by_options(self):
         endpoint = self._api.strikes_by_options
@@ -88,10 +87,10 @@ class TestDataApi:
 
         strikes = endpoint(*requests[:-1])
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
         strikes = endpoint(*requests)
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
 
     def test_strikes_history_by_options(self):
         endpoint = self._api.strikes_by_options
@@ -118,10 +117,10 @@ class TestDataApi:
 
         strikes = self._api.strikes_by_options(*requests[:-1])
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
         strikes = self._api.strikes_by_options(*requests)
         for strike in strikes:
-            assert isinstance(strike, res.Strike)
+            assert isinstance(strike, constructs.Strike)
 
     def test_monies_implied(self):
         request = req.MoniesRequest(
@@ -129,7 +128,7 @@ class TestDataApi:
         )
         monies = self._api.monies_implied(request)
         for money in monies:
-            assert isinstance(money, res.MoneyImplied)
+            assert isinstance(money, constructs.MoneyImplied)
 
     def test_monies_implied_history(self):
         request = req.MoniesRequest(
@@ -138,7 +137,7 @@ class TestDataApi:
         )
         monies = self._api.monies_implied(request)
         for money in monies:
-            assert isinstance(money, res.MoneyImplied)
+            assert isinstance(money, constructs.MoneyImplied)
 
     def test_monies_forecast(self):
         request = req.MoniesRequest(
@@ -146,7 +145,7 @@ class TestDataApi:
         )
         monies = self._api.monies_forecast(request)
         for money in monies:
-            assert isinstance(money, res.MoneyForecast)
+            assert isinstance(money, constructs.MoneyForecast)
 
     def test_monies_forecast_history(self):
         request = req.MoniesRequest(
@@ -155,7 +154,7 @@ class TestDataApi:
         )
         monies = self._api.monies_forecast(request)
         for money in monies:
-            assert isinstance(money, res.MoneyForecast)
+            assert isinstance(money, constructs.MoneyForecast)
 
     def test_summaries(self):
         request = req.SummariesRequest(
@@ -163,7 +162,7 @@ class TestDataApi:
         )
         summaries = self._api.summaries(request)
         for summary in summaries:
-            assert isinstance(summary, res.SmvSummary)
+            assert isinstance(summary, constructs.SmvSummary)
 
     def test_summaries_history(self):
         request = req.SummariesRequest(
@@ -172,7 +171,7 @@ class TestDataApi:
         )
         summaries = self._api.summaries(request)
         for summary in summaries:
-            assert isinstance(summary, res.SmvSummary)
+            assert isinstance(summary, constructs.SmvSummary)
 
     def test_core_data(self):
         request = req.CoreDataRequest(
@@ -180,7 +179,7 @@ class TestDataApi:
         )
         core_data = self._api.core_data(request)
         for core in core_data:
-            assert isinstance(core, res.Core)
+            assert isinstance(core, constructs.Core)
 
     def test_core_data_history(self):
         request = req.CoreDataRequest(
@@ -189,7 +188,7 @@ class TestDataApi:
         )
         core_data = self._api.core_data(request)
         for core in core_data:
-            assert isinstance(core, res.Core)
+            assert isinstance(core, constructs.Core)
 
     def test_daily_price(self):
         request = req.DailyPriceRequest(
@@ -197,7 +196,7 @@ class TestDataApi:
         )
         daily_price = self._api.daily_price(request)
         for price in daily_price:
-            assert isinstance(price, res.DailyPrice)
+            assert isinstance(price, constructs.DailyPrice)
 
     def test_historical_volatility(self):
         request = req.HistoricalVolatilityRequest(
@@ -205,25 +204,25 @@ class TestDataApi:
         )
         historical_volatility = self._api.historical_volatility(request)
         for vol in historical_volatility:
-            assert isinstance(vol, res.HistoricalVolatility)
+            assert isinstance(vol, constructs.HistoricalVolatility)
 
     def test_dividend_history(self):
         request = req.DividendHistoryRequest(ticker="IBM")
         dividend_history = self._api.dividend_history(request)
         for dividend in dividend_history:
-            assert isinstance(dividend, res.DividendHistory)
+            assert isinstance(dividend, constructs.DividendHistory)
 
     def test_earnings_history(self):
         request = req.EarningsHistoryRequest(ticker="IBM")
         earnings_history = self._api.earnings_history(request)
         for earnings in earnings_history:
-            assert isinstance(earnings, res.EarningsHistory)
+            assert isinstance(earnings, constructs.EarningsHistory)
 
     def test_stock_split_history(self):
         request = req.StockSplitHistoryRequest(ticker="IBM")
         stock_split_history = self._api.stock_split_history(request)
         for stock_split in stock_split_history:
-            assert isinstance(stock_split, res.StockSplitHistory)
+            assert isinstance(stock_split, constructs.StockSplitHistory)
 
     def test_iv_rank(self):
         request = req.IvRankRequest(
@@ -231,7 +230,7 @@ class TestDataApi:
         )
         iv_rank = self._api.iv_rank(request)
         for iv in iv_rank:
-            assert isinstance(iv, res.IvRank)
+            assert isinstance(iv, constructs.IvRank)
 
     def test_iv_rank_history(self):
         request = req.IvRankRequest(
@@ -240,4 +239,4 @@ class TestDataApi:
         )
         iv_rank = self._api.iv_rank(request)
         for iv in iv_rank:
-            assert isinstance(iv, res.IvRank)
+            assert isinstance(iv, constructs.IvRank)

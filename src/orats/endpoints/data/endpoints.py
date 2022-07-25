@@ -14,14 +14,13 @@ See the `product page`_ and `API docs`_.
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
 import json
-from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeAlias, TypeVar
+from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar
 
 import httpx
 
-from orats.common import get_token
+from orats.constructs.api import data as constructs
+from orats.endpoints.data import request as req, response as res
 from orats.errors import InsufficientPermissionsError
-from orats.constructs.api.data import request as req
-from orats.constructs.api.data import response as res
 
 
 def _handle_response(response: httpx.Response) -> Mapping[str, Any]:
@@ -48,7 +47,7 @@ def _post(url, params, body) -> Mapping[str, Any]:
 
 
 Req = TypeVar("Req", bound=req.DataApiRequest)
-Res = TypeVar("Res", bound=res.DataApiConstruct)
+Res = TypeVar("Res", bound=constructs.DataApiConstruct)
 
 
 class DataApiEndpoint(Generic[Req, Res]):
@@ -114,7 +113,7 @@ class DataApiEndpoint(Generic[Req, Res]):
         )
 
 
-class TickersEndpoint(DataApiEndpoint[req.TickersRequest, res.Ticker]):
+class TickersEndpoint(DataApiEndpoint[req.TickersRequest, constructs.Ticker]):
     """Retrieves the duration of available data for various assets.
 
     If no underlying asset is specified, the result will be a list
@@ -124,21 +123,21 @@ class TickersEndpoint(DataApiEndpoint[req.TickersRequest, res.Ticker]):
     """
 
     _resource = "tickers"
-    _response_type = res.Ticker
+    _response_type = constructs.Ticker
 
 
-class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, res.Strike]):
+class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, constructs.Strike]):
     """Retrieves strikes data for the given asset(s).
 
     See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
     """
 
     _resource = "strikes"
-    _response_type = res.Strike
+    _response_type = constructs.Strike
 
 
 class StrikesByOptionsEndpoint(
-    DataApiEndpoint[req.StrikesByOptionsRequest, res.Strike]
+    DataApiEndpoint[req.StrikesByOptionsRequest, constructs.Strike]
 ):
     """Retrieves strikes data by ticker, expiry, and strike.
 
@@ -147,12 +146,12 @@ class StrikesByOptionsEndpoint(
     """
 
     _resource = "strikes/options"
-    _response_type = res.Strike
+    _response_type = constructs.Strike
 
     def __call__(
         self,
         *requests: req.StrikesByOptionsRequest,
-    ) -> Sequence[res.Strike]:
+    ) -> Sequence[constructs.Strike]:
         """Makes a call to the appropriate API endpoint.
 
         Passing a single request will use the GET request method,
@@ -180,59 +179,63 @@ class StrikesByOptionsEndpoint(
         return _post(url=self._url(), body=body, params=self._update_params({}))
 
 
-class MoniesImpliedEndpoint(DataApiEndpoint[req.MoniesRequest, res.MoneyImplied]):
+class MoniesImpliedEndpoint(
+    DataApiEndpoint[req.MoniesRequest, constructs.MoneyImplied]
+):
     """Retrieves monthly implied data for monies.
 
     See the corresponding `Monies`_ and `Monies History`_ endpoints.
     """
 
     _resource = "monies/implied"
-    _response_type = res.MoneyImplied
+    _response_type = constructs.MoneyImplied
 
 
-class MoniesForecastEndpoint(DataApiEndpoint[req.MoniesRequest, res.MoneyForecast]):
+class MoniesForecastEndpoint(
+    DataApiEndpoint[req.MoniesRequest, constructs.MoneyForecast]
+):
     """Retrieves monthly forecast data for monies.
 
     See the corresponding `Monies`_ and `Monies History`_ endpoints.
     """
 
     _resource = "monies/forecast"
-    _response_type = res.MoneyForecast
+    _response_type = constructs.MoneyForecast
 
 
-class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, res.SmvSummary]):
+class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, constructs.SmvSummary]):
     """Retrieves SMV Summary data.
 
     See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
     """
 
     _resource = "summaries"
-    _response_type = res.SmvSummary
+    _response_type = constructs.SmvSummary
 
 
-class CoreDataEndpoint(DataApiEndpoint):
+class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, constructs.Core]):
     """Retrieves Core data.
 
     See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
     """
 
     _resource = "cores"
-    _response_type = res.Core
+    _response_type = constructs.Core
 
 
-class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, res.DailyPrice]):
+class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, constructs.DailyPrice]):
     """Retrieves end of day daily stock price data.
 
     See the corresponding `Daily Price`_ endpoint.
     """
 
     _resource = "dailies"
-    _response_type = res.DailyPrice
+    _response_type = constructs.DailyPrice
     _is_historical = True
 
 
 class HistoricalVolatilityEndpoint(
-    DataApiEndpoint[req.HistoricalVolatilityRequest, res.HistoricalVolatility]
+    DataApiEndpoint[req.HistoricalVolatilityRequest, constructs.HistoricalVolatility]
 ):
     """Retrieves historical volatility data.
 
@@ -240,12 +243,12 @@ class HistoricalVolatilityEndpoint(
     """
 
     _resource = "hvs"
-    _response_type = res.HistoricalVolatility
+    _response_type = constructs.HistoricalVolatility
     _is_historical = True
 
 
 class DividendHistoryEndpoint(
-    DataApiEndpoint[req.DividendHistoryRequest, res.DividendHistory]
+    DataApiEndpoint[req.DividendHistoryRequest, constructs.DividendHistory]
 ):
     """Retrieves dividend history data.
 
@@ -253,12 +256,12 @@ class DividendHistoryEndpoint(
     """
 
     _resource = "divs"
-    _response_type = res.DividendHistory
+    _response_type = constructs.DividendHistory
     _is_historical = True
 
 
 class EarningsHistoryEndpoint(
-    DataApiEndpoint[req.EarningsHistoryRequest, res.EarningsHistory]
+    DataApiEndpoint[req.EarningsHistoryRequest, constructs.EarningsHistory]
 ):
     """Retrieves earnings history data.
 
@@ -266,12 +269,12 @@ class EarningsHistoryEndpoint(
     """
 
     _resource = "earnings"
-    _response_type = res.EarningsHistory
+    _response_type = constructs.EarningsHistory
     _is_historical = True
 
 
 class StockSplitHistoryEndpoint(
-    DataApiEndpoint[req.StockSplitHistoryRequest, res.StockSplitHistory]
+    DataApiEndpoint[req.StockSplitHistoryRequest, constructs.StockSplitHistory]
 ):
     """Retrieves stock split history data.
 
@@ -279,40 +282,15 @@ class StockSplitHistoryEndpoint(
     """
 
     _resource = "splits"
-    _response_type = res.StockSplitHistory
+    _response_type = constructs.StockSplitHistory
     _is_historical = True
 
 
-class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, res.IvRank]):
+class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, constructs.IvRank]):
     """Retrieves IV rank data.
 
     See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
     """
 
     _resource = "ivrank"
-    _response_type = res.IvRank
-
-
-class DataApi:
-    """Low-level interface to the `Data API`_.
-
-    A direct translation of the Data API that simply wraps the
-    responses in structured Python objects.
-    """
-
-    def __init__(self, token: str = None):
-        token = token or get_token()
-
-        self.tickers = TickersEndpoint(token)
-        self.strikes = StrikesEndpoint(token)
-        self.strikes_by_options = StrikesByOptionsEndpoint(token)
-        self.monies_implied = MoniesImpliedEndpoint(token)
-        self.monies_forecast = MoniesForecastEndpoint(token)
-        self.summaries = SummariesEndpoint(token)
-        self.core_data = CoreDataEndpoint(token)
-        self.daily_price = DailyPriceEndpoint(token)
-        self.historical_volatility = HistoricalVolatilityEndpoint(token)
-        self.dividend_history = DividendHistoryEndpoint(token)
-        self.earnings_history = EarningsHistoryEndpoint(token)
-        self.stock_split_history = StockSplitHistoryEndpoint(token)
-        self.iv_rank = IvRankEndpoint(token)
+    _response_type = constructs.IvRank

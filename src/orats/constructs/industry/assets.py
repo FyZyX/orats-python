@@ -5,13 +5,12 @@ from typing import Tuple, Sequence, Set
 
 from pydantic import Field
 
-import orats.endpoints.data as endpoints
-from orats.constructs.api.data import request as req
-from orats.constructs.api.data import response as res
+from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
+from orats.endpoints.data import endpoints, request as req
 
 
-class Asset(IndustryConstruct[req.TickersRequest, res.Ticker]):
+class Asset(IndustryConstruct[req.TickersRequest, constructs.Ticker]):
     """Represents the underlying asset of an option contract."""
 
     ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
@@ -41,7 +40,7 @@ class PriceHistory(IndustryConstruct):
 
 
 class VolatilityHistory(
-    IndustryConstruct[req.HistoricalVolatilityRequest, res.HistoricalVolatility]
+    IndustryConstruct[req.HistoricalVolatilityRequest, constructs.HistoricalVolatility]
 ):
     tickers: Sequence[str]
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
