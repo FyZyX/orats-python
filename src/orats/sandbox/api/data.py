@@ -46,8 +46,10 @@ class FakeDataApi:
         universe = request.tickers or self._universe
         monies = []
         for ticker in universe:
-            results = [self._generator.money_implied(ticker, days_to_expiration=dte)
-                       for dte in range(1, 100, 7)]
+            results = [
+                self._generator.money_implied(ticker, days_to_expiration=dte)
+                for dte in range(1, 100, 7)
+            ]
             monies.extend(common.as_responses(constructs.MoneyImplied, results))
         return monies
 
