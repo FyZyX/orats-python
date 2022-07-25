@@ -44,8 +44,12 @@ class FakeDataApi:
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyImplied]:
         universe = request.tickers or self._universe
-        results = [self._generator.money_implied(ticker) for ticker in universe]
-        return common.as_response(api_constructs.MoneyImplied, results)
+        monies = []
+        for ticker in universe:
+            results = [self._generator.money_implied(ticker, days_to_expiration=dte)
+                       for dte in range(1, 100, 7)]
+            monies.extend(common.as_responses(constructs.MoneyImplied, results))
+        return monies
 
     def monies_forecast(
         self, request: req.MoniesRequest
