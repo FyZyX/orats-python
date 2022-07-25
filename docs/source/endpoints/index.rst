@@ -4,7 +4,7 @@ API Specification
 .. toctree::
    :maxdepth: 2
 
-   data
+   data/index
    live-data
    snapshot
    backtest

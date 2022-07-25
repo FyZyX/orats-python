@@ -1,9 +1,9 @@
-Data API
-========
+Data API Endpoints
+==================
 
 A **Data API Endpoint** handles a **Data API Request** and relays the **Data API Response**.
 
-.. automodule:: orats.endpoints.data
+.. automodule:: orats.endpoints.data.endpoints
    :special-members: __init__, __call__
    :members:
 
