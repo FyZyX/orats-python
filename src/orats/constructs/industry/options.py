@@ -8,37 +8,11 @@ from pydantic import PrivateAttr
 from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
+from orats.constructs.industry.common import bounds, group_by_ticker
 from orats.endpoints.data import endpoints, request as req
 
 
-def bounds(lower_bound, upper_bound):
-    """Format bounds for API requests
-
-    Args:
-      lower_bound:
-        Smallest number of days to expiration allowed.
-        If not specified, no bound will be set.
-      upper_bound:
-        Largest number of days to expiration allowed.
-        If not specified, no bound will be set.
-
-    Returns:
-      Range bounds as a comma separated pair
-    """
-    return ",".join(map(str, (lower_bound, upper_bound)))
-
-
-def group_by_ticker(strikes: Iterable[constructs.DataApiConstruct]):
-    group: Dict[str, List[constructs.DataApiConstruct]] = {}
-    for item in strikes:
-        value = item.ticker
-        if value not in group:
-            group[value] = []
-        group[value].append(item)
-    return group
-
-
-def get_chains(
+def chains(
     ticker: str,
     trade_date: datetime.date = None,
     min_delta=None,
@@ -58,7 +32,7 @@ def get_chains(
     return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
 
 
-def get_monies(
+def volatility_surfaces(
     tickers: Sequence[str],
     trade_date: datetime.date = None,
     token: str = None,

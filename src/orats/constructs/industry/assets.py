@@ -8,14 +8,14 @@ from orats.constructs.common import IndustryConstruct
 from orats.endpoints.data import endpoints, request as req
 
 
-def get_asset(ticker: str, token: str = None):
+def asset(ticker: str, token: str = None):
     endpoint = endpoints.TickersEndpoint(token)
     request = req.TickersRequest(ticker=ticker)
     response = endpoint(request)
     return Asset(ticker=response[0])
 
 
-def get_historical_volatility(tickers: Sequence[str], token: str = None):
+def historical_volatility(tickers: Sequence[str], token: str = None):
     endpoint = endpoints.HistoricalVolatilityEndpoint(token)
     request = req.HistoricalVolatilityRequest(tickers=tickers)
     response = endpoint(request)
