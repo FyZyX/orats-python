@@ -83,6 +83,7 @@ class VolatilityHistory(IndustryConstruct):
         return results
 
     def close_to_close(self, exclude_earnings: bool = False):
+        history = self._get_historical_volatility()
         if not exclude_earnings:
             values = [
                 self.history.close_to_close_hv_5_day,
