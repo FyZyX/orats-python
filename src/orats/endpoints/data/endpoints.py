@@ -94,7 +94,7 @@ class DataApiEndpoint(Generic[Req, Res]):
         return data
 
     def _key(self, *components):
-        return f"{self._resource}-{'-'.join(components)}"
+        return f"{self._resource}-{'-'.join([str(c) for c in components])}"
 
     def _url(self, historical: bool = False) -> str:
         resource = self._resource
