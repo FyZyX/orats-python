@@ -1,15 +1,16 @@
-from typing import Dict, Sequence, TypeVar
+from typing import TYPE_CHECKING, Dict, Sequence, TypeVar
 
-from orats.constructs.api import data as constructs
-from orats.endpoints.data import endpoints, request as req
+if TYPE_CHECKING:
+    from orats.constructs.api import data as constructs
+    from orats.endpoints.data import endpoints, request as req
 
 
-Req = TypeVar("Req", bound=req.DataApiRequest)
-Res = TypeVar("Res", bound=constructs.DataApiConstruct)
+Req = TypeVar("Req", bound="req.DataApiRequest")
+Res = TypeVar("Res", bound="constructs.DataApiConstruct")
 
 
 def cache_request(
-    endpoint: endpoints.DataApiEndpoint[Req, Res],
+    endpoint: "endpoints.DataApiEndpoint[Req, Res]",
     request: Req,
 ) -> Sequence[Res]:
     return endpoint(request)
