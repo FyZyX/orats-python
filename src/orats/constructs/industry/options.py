@@ -185,4 +185,18 @@ class OptionsChain(IndustryConstruct):
 
 
 class VolatilitySurface(IndustryConstruct):
-    monies: Sequence[constructs.MoneyImplied]
+    ticker: str
+    _cache: Optional[Sequence[constructs.MoneyImplied]] = None
+
+    def _get_monies(self, trade_date: datetime.date = None):
+        if self._cache:
+            return self._cache
+
+        endpoint = endpoints.MoniesImpliedEndpoint(self._token)
+        request = req.MoniesRequest(
+            tickers=self.ticker,
+            trade_date=trade_date,
+        )
+
+        self._cache = endpoint(request)
+        return self._cache
