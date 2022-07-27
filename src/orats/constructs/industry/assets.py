@@ -5,23 +5,20 @@ from typing import Tuple, Sequence, Set
 
 from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
-from orats.constructs.industry.cache import cache_request
 from orats.endpoints.data import endpoints, request as req
 
 
 def get_asset(ticker: str, token: str = None):
-    key = f"ticker-{ticker}"
     endpoint = endpoints.TickersEndpoint(token)
     request = req.TickersRequest(ticker=ticker)
-    response = cache_request(key, endpoint, request)
+    response = endpoint(request)
     return Asset(ticker=response[0])
 
 
 def get_historical_volatility(tickers: Sequence[str], token: str = None):
-    key = f"historical-volatility-{'-'.join(tickers)}"
     endpoint = endpoints.HistoricalVolatilityEndpoint(token)
     request = req.HistoricalVolatilityRequest(tickers=tickers)
-    response = cache_request(key, endpoint, request)
+    response = endpoint(request)
     return [VolatilityHistory(history=history) for history in response]
 
 

@@ -8,7 +8,6 @@ from pydantic import PrivateAttr
 from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
-from orats.constructs.industry.cache import cache_request
 from orats.endpoints.data import endpoints, request as req
 
 
@@ -48,9 +47,6 @@ def get_chains(
     max_days_to_expiration=None,
     token: str = None,
 ):
-    filters = [min_delta, max_delta, min_days_to_expiration, max_days_to_expiration]
-    components = "-".join([n or "#" for n in filters])
-    key = f"chain-{ticker}-{trade_date or datetime.date.today()}-{components}"
     endpoint = endpoints.StrikesEndpoint(token)
     request = req.StrikesRequest(
         tickers=ticker,
@@ -58,7 +54,7 @@ def get_chains(
         expiration_range=bounds(min_days_to_expiration, max_days_to_expiration),
         delta_range=bounds(min_delta, max_delta),
     )
-    response = cache_request(key, endpoint, request)
+    response = endpoint(request)
     return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
 
 

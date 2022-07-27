@@ -21,6 +21,7 @@ import httpx
 from orats.common import get_token
 from orats.constructs.api import data as constructs
 from orats.endpoints.data import request as req, response as res
+from orats.endpoints.data.cache import RequestCache
 from orats.errors import InsufficientPermissionsError
 
 
@@ -60,6 +61,7 @@ class DataApiEndpoint(Generic[Req, Res]):
     _response_type: Type[Res]
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
+    _cache = RequestCache()
 
     def __init__(self, token: str = None):
         """Initializes an API endpoint for a specified resource.
@@ -80,10 +82,19 @@ class DataApiEndpoint(Generic[Req, Res]):
         Returns:
           One or more Data API response objects.
         """
+        key = self._key(*request.dict().values())
+        if key in self._cache:
+            return self._cache[key]
+
         response = res.DataApiResponse[self._response_type](  # type: ignore
             **self._get(request)
         )
-        return response.data or ()
+        data = response.data or ()
+        self._cache[key] = data
+        return data
+
+    def _key(self, *components):
+        return f"{self._resource}-{'-'.join(components)}"
 
     def _url(self, historical: bool = False) -> str:
         resource = self._resource

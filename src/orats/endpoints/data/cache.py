@@ -9,17 +9,10 @@ Res = TypeVar("Res", bound=constructs.DataApiConstruct)
 
 
 def cache_request(
-    key: str,
     endpoint: endpoints.DataApiEndpoint[Req, Res],
     request: Req,
 ) -> Sequence[Res]:
-    cache = RequestCache()
-    if key in cache:
-        return cache[key]
-
-    response = endpoint(request)
-    cache[key] = response
-    return response
+    return endpoint(request)
 
 
 class RequestCache:
