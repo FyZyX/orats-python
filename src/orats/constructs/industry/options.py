@@ -1,12 +1,65 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence
+
+from pydantic import PrivateAttr
 
 from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
+from orats.constructs.industry.cache import cache_request
 from orats.endpoints.data import endpoints, request as req
+
+
+def bounds(lower_bound, upper_bound):
+    """Format bounds for API requests
+
+    Args:
+      lower_bound:
+        Smallest number of days to expiration allowed.
+        If not specified, no bound will be set.
+      upper_bound:
+        Largest number of days to expiration allowed.
+        If not specified, no bound will be set.
+
+    Returns:
+      Range bounds as a comma separated pair
+    """
+    return ",".join(map(str, (lower_bound, upper_bound)))
+
+
+def group_by_ticker(strikes: Iterable[constructs.Strike]):
+    group: Dict[str, List[constructs.Strike]] = {}
+    for item in strikes:
+        value = item.underlying_symbol
+        if value not in group:
+            group[value] = []
+        group[value].append(item)
+    return group
+
+
+def get_chains(
+    ticker: str,
+    trade_date: datetime.date = None,
+    min_delta=None,
+    max_delta=None,
+    min_days_to_expiration=None,
+    max_days_to_expiration=None,
+    token: str = None,
+):
+    filters = [min_delta, max_delta, min_days_to_expiration, max_days_to_expiration]
+    components = "-".join([n or "#" for n in filters])
+    key = f"chain-{ticker}-{trade_date or datetime.date.today()}-{components}"
+    endpoint = endpoints.StrikesEndpoint(token)
+    request = req.StrikesRequest(
+        tickers=ticker,
+        trade_date=trade_date,
+        expiration_range=bounds(min_days_to_expiration, max_days_to_expiration),
+        delta_range=bounds(min_delta, max_delta),
+    )
+    response = cache_request(key, endpoint, request)
+    return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
 
 
 class Quote(IndustryConstruct):
@@ -39,130 +92,112 @@ class Option(IndustryConstruct):
 
 
 class CallOption(Option):
-    pass
+    @classmethod
+    def from_strike(cls, strike: constructs.Strike):
+        return cls(
+            underlying=Asset(ticker=strike.underlying_symbol),
+            expiration=strike.expiration_date,
+            strike=strike.strike,
+            price=strike.call_value,
+            spot=strike.spot_price,
+            volume=strike.call_volume,
+            open_interest=strike.call_open_interest,
+            iv=strike.iv,
+            greeks=Greeks(
+                delta=strike.delta,
+                gamma=strike.gamma,
+                theta=strike.theta,
+                vega=strike.vega,
+                rho=strike.rho,
+                phi=strike.phi,
+            ),
+            bid=Quote(
+                price=strike.call_bid_price,
+                size=strike.call_bid_size,
+                iv=strike.call_bid_iv,
+            ),
+            offer=Quote(
+                price=strike.call_ask_price,
+                size=strike.call_ask_size,
+                iv=strike.call_ask_iv,
+            ),
+        )
 
 
 class PutOption(Option):
-    pass
-
-
-class OptionChain(IndustryConstruct):
-    ticker: str
-    _expiration_range: Optional[str] = None
-    _delta_range: Optional[str] = None
-    _cache: Optional[Sequence[constructs.Strike]] = None
-
-    def _get_strikes(self, trade_date: datetime.date = None):
-        if self._cache:
-            return self._cache
-
-        endpoint = endpoints.StrikesEndpoint(self._token)
-        request = req.StrikesRequest(
-            tickers=self.ticker,
-            trade_date=trade_date,
-            expiration_range=self._expiration_range,
-            delta_range=self._delta_range,
+    @classmethod
+    def from_strike(cls, strike: constructs.Strike):
+        return cls(
+            underlying=Asset(ticker=strike.underlying_symbol),
+            expiration=strike.expiration_date,
+            strike=strike.strike,
+            price=strike.put_value,
+            spot=strike.spot_price,
+            volume=strike.put_volume,
+            open_interest=strike.put_open_interest,
+            iv=strike.iv,
+            greeks=Greeks(
+                delta=strike.delta - 1,
+                gamma=strike.gamma,
+                theta=strike.theta,
+                vega=strike.vega,
+                rho=strike.rho,
+                phi=strike.phi,
+            ),
+            bid=Quote(
+                price=strike.put_bid_price,
+                size=strike.put_bid_size,
+                iv=strike.put_bid_iv,
+            ),
+            offer=Quote(
+                price=strike.put_ask_price,
+                size=strike.put_ask_size,
+                iv=strike.put_ask_iv,
+            ),
         )
 
-        self._cache = endpoint(request)
-        return self._cache
 
-    def filter_by_days_to_expiration(
-        self,
-        lower_bound: int = None,
-        upper_bound: int = None,
-    ):
-        """Keep only those options within the specified range of days to expiration.
+class OptionsChain(IndustryConstruct):
+    """
+    `Greeks are the same for Calls and Puts
+    <https://blog.orats.com/option-greeks-are-the-same-for-calls-and-puts>`_
+    """
 
-        Args:
-          lower_bound:
-            Smallest number of days to expiration allowed.
-            If not specified, no bound will be set.
-          upper_bound:
-            Largest number of days to expiration allowed.
-            If not specified, no bound will be set.
+    strikes: Sequence[constructs.Strike]
+    _expirations: List[datetime.date] = PrivateAttr([])
+    _calls: Dict[datetime.date, List[Option]] = PrivateAttr({})
+    _puts: Dict[datetime.date, List[Option]] = PrivateAttr({})
 
-        Returns:
-          A list of strikes for each specified asset.
-        """
-        self._expiration_range = ",".join(map(str, (lower_bound, upper_bound)))
+    def __init__(self, **data: Any):
+        self._group_by_expiration()
+        super().__init__(**data)
 
-    def filter_by_delta(
-        self,
-        lower_bound: float = None,
-        upper_bound: float = None,
-    ):
-        self._delta_range = ",".join(map(str, (lower_bound, upper_bound)))
+    def __iter__(self):
+        yield from (
+            (self._calls[expiration], self._puts[expiration])
+            for expiration in self._expirations
+        )
 
-    def options(self, trade_date: datetime.date = None):
-        # https://blog.orats.com/option-greeks-are-the-same-for-calls-and-puts
-        return self._get_strikes(trade_date)
+    def _group_by_expiration(self):
+        self._calls, self._puts = {}, {}
+        for strike in self.strikes:
+            expiration = strike.expiration_date
 
-    def calls(self, trade_date: datetime.date = None):
-        return [
-            CallOption(
-                underlying=Asset(ticker=strike.underlying_symbol),
-                expiration=strike.expiration_date,
-                strike=strike.strike,
-                price=strike.call_value,
-                spot=strike.spot_price,
-                volume=strike.call_volume,
-                open_interest=strike.call_open_interest,
-                iv=strike.iv,
-                greeks=Greeks(
-                    delta=strike.delta,
-                    gamma=strike.gamma,
-                    theta=strike.theta,
-                    vega=strike.vega,
-                    rho=strike.rho,
-                    phi=strike.phi,
-                ),
-                bid=Quote(
-                    price=strike.call_bid_price,
-                    size=strike.call_bid_size,
-                    iv=strike.call_bid_iv,
-                ),
-                offer=Quote(
-                    price=strike.call_ask_price,
-                    size=strike.call_ask_size,
-                    iv=strike.call_ask_iv,
-                ),
-            )
-            for strike in self._get_strikes(trade_date)
-        ]
+            call = CallOption.from_strike(strike)
+            if expiration not in self._calls:
+                self._calls[expiration] = []
+            self._calls[expiration].append(call)
 
-    def puts(self, trade_date: datetime.date = None):
-        return [
-            PutOption(
-                underlying=Asset(ticker=strike.underlying_symbol),
-                expiration=strike.expiration_date,
-                strike=strike.strike,
-                price=strike.put_value,
-                spot=strike.spot_price,
-                volume=strike.put_volume,
-                open_interest=strike.put_open_interest,
-                iv=strike.iv,
-                greeks=Greeks(
-                    delta=strike.delta - 1,
-                    gamma=strike.gamma,
-                    theta=strike.theta,
-                    vega=strike.vega,
-                    rho=strike.rho,
-                    phi=strike.phi,
-                ),
-                bid=Quote(
-                    price=strike.put_bid_price,
-                    size=strike.put_bid_size,
-                    iv=strike.put_bid_iv,
-                ),
-                offer=Quote(
-                    price=strike.put_ask_price,
-                    size=strike.put_ask_size,
-                    iv=strike.put_ask_iv,
-                ),
-            )
-            for strike in self._get_strikes(trade_date)
-        ]
+            put = PutOption.from_strike(strike)
+            if expiration not in self._puts:
+                self._puts[expiration] = []
+            self._puts[expiration].append(put)
+
+    def calls(self):
+        return self._calls
+
+    def puts(self):
+        return self._puts
 
 
 class VolatilitySurface(IndustryConstruct):

@@ -18,6 +18,7 @@ from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar
 
 import httpx
 
+from orats.common import get_token
 from orats.constructs.api import data as constructs
 from orats.endpoints.data import request as req, response as res
 from orats.errors import InsufficientPermissionsError
@@ -60,14 +61,14 @@ class DataApiEndpoint(Generic[Req, Res]):
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
 
-    def __init__(self, token: str):
+    def __init__(self, token: str = None):
         """Initializes an API endpoint for a specified resource.
 
         Args:
           token:
             The authentication token provided to the user.
         """
-        self._token = token
+        self._token = token or get_token()
 
     def __call__(self, request: Req) -> Sequence[Res]:
         """Handles a request and relays the response.
