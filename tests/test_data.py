@@ -27,7 +27,7 @@ class TestDataApi:
 
         ticker = tickers[0]
         assert isinstance(ticker, constructs.Ticker)
-        assert isinstance(ticker.underlying_symbol, str)
+        assert isinstance(ticker.ticker, str)
         assert isinstance(ticker.max_date, datetime.date)
         assert isinstance(ticker.min_date, datetime.date)
 
@@ -162,7 +162,7 @@ class TestDataApi:
         )
         summaries = self._api.summaries(request)
         for summary in summaries:
-            assert isinstance(summary, constructs.SmvSummary)
+            assert isinstance(summary, constructs.Summary)
 
     def test_summaries_history(self):
         request = req.SummariesRequest(
@@ -171,7 +171,7 @@ class TestDataApi:
         )
         summaries = self._api.summaries(request)
         for summary in summaries:
-            assert isinstance(summary, constructs.SmvSummary)
+            assert isinstance(summary, constructs.Summary)
 
     def test_core_data(self):
         request = req.CoreDataRequest(

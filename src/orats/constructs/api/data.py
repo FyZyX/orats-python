@@ -7,6 +7,8 @@ from orats.constructs.common import ApiConstruct
 
 
 class DataApiConstruct(ApiConstruct):
+    ticker: str = Field(..., alias="ticker")
+
     class Config:
         allow_population_by_field_name = True
 
@@ -14,7 +16,6 @@ class DataApiConstruct(ApiConstruct):
 class Ticker(DataApiConstruct):
     """Ticker symbol data duration definitions."""
 
-    underlying_symbol: str = Field(..., alias="ticker")
     min_date: datetime.date = Field(..., alias="min")
     max_date: datetime.date = Field(..., alias="max")
 
@@ -25,7 +26,6 @@ class Strike(DataApiConstruct):
     See corresponding `Strikes`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     days_to_expiration: int = Field(..., alias="dte")
@@ -73,7 +73,6 @@ class MoneyImplied(DataApiConstruct):
     See corresponding `Monies Implied`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     underlying_price: float = Field(..., alias="stockPrice")
@@ -122,7 +121,6 @@ class MoneyForecast(DataApiConstruct):
     See corresponding `Monies Forecast`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     underlying_price: float = Field(..., alias="stockPrice")
@@ -151,13 +149,12 @@ class MoneyForecast(DataApiConstruct):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class SmvSummary(DataApiConstruct):
+class Summary(DataApiConstruct):
     """SMV Summary data definitions.
 
     See corresponding `Summaries`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     underlying_price: float = Field(..., alias="stockPrice")
     annual_dividend: float = Field(..., alias="annActDiv")
@@ -305,7 +302,6 @@ class Core(DataApiConstruct):
     See corresponding `Core`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     asset_type: int = Field(..., alias="assetType")
     prior_close: float = Field(..., alias="priorCls")
@@ -603,7 +599,6 @@ class DailyPrice(DataApiConstruct):
     See corresponding `Daily Price`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     open: float = Field(..., alias="open")
     high: float = Field(..., alias="hiPx")
@@ -622,7 +617,6 @@ class HistoricalVolatility(DataApiConstruct):
     See corresponding `Historical Volatility`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     hv_1_day: float = Field(..., alias="orHv1d")
     hv_5_day: float = Field(..., alias="orHv5d")
@@ -677,7 +671,6 @@ class DividendHistory(DataApiConstruct):
     See corresponding `Dividend History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     ex_dividend_date: datetime.date = Field(..., alias="exDate")
     dividend_amount: float = Field(..., alias="divAmt")
     dividend_frequency: int = Field(..., alias="divFreq")
@@ -690,7 +683,6 @@ class EarningsHistory(DataApiConstruct):
     See corresponding `Earnings History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     earnings_date: datetime.date = Field(..., alias="earnDate")
     time_of_day_announced: int = Field(..., alias="anncTod")
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
@@ -702,7 +694,6 @@ class StockSplitHistory(DataApiConstruct):
     See corresponding `Stock Split History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     split_date: datetime.date = Field(..., alias="splitDate")
     divisor: float
 
@@ -713,7 +704,6 @@ class IvRank(DataApiConstruct):
     See corresponding `IV Rank`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     iv: float = Field(..., alias="iv")
     iv_rank_1_month: float = Field(..., alias="ivRank1m")

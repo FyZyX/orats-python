@@ -215,14 +215,14 @@ class MoniesForecastEndpoint(
     _response_type = constructs.MoneyForecast
 
 
-class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, constructs.SmvSummary]):
+class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, constructs.Summary]):
     """Retrieves SMV Summary data.
 
     See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
     """
 
     _resource = "summaries"
-    _response_type = constructs.SmvSummary
+    _response_type = constructs.Summary
 
 
 class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, constructs.Core]):

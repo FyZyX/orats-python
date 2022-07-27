@@ -54,12 +54,10 @@ class FakeDataApi:
         results = [self._generator.money_forecast(ticker) for ticker in universe]
         return common.as_response(constructs.MoneyForecast, results)
 
-    def summaries(
-        self, request: req.SummariesRequest
-    ) -> Sequence[constructs.SmvSummary]:
+    def summaries(self, request: req.SummariesRequest) -> Sequence[constructs.Summary]:
         universe = request.tickers or self._universe
         results = [self._generator.summary(ticker) for ticker in universe]
-        return common.as_response(constructs.SmvSummary, results)
+        return common.as_response(constructs.Summary, results)
 
     def core_data(self, request: req.CoreDataRequest) -> Sequence[constructs.Core]:
         universe = request.tickers or self._universe

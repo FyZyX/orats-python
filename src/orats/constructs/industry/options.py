@@ -28,10 +28,10 @@ def bounds(lower_bound, upper_bound):
     return ",".join(map(str, (lower_bound, upper_bound)))
 
 
-def group_by_ticker(strikes: Iterable[constructs.Strike]):
-    group: Dict[str, List[constructs.Strike]] = {}
+def group_by_ticker(strikes: Iterable[constructs.DataApiConstruct]):
+    group: Dict[str, List[constructs.DataApiConstruct]] = {}
     for item in strikes:
-        value = item.underlying_symbol
+        value = item.ticker
         if value not in group:
             group[value] = []
         group[value].append(item)
@@ -56,6 +56,20 @@ def get_chains(
     )
     response = endpoint(request)
     return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
+
+
+def get_monies(
+    tickers: Sequence[str],
+    trade_date: datetime.date = None,
+    token: str = None,
+):
+    endpoint = endpoints.MoniesImpliedEndpoint(token)
+    request = req.MoniesRequest(
+        tickers=tickers,
+        trade_date=trade_date,
+    )
+    response = endpoint(request)
+    return [VolatilitySurface(monies=monies) for monies in group_by_ticker(response)]
 
 
 class Quote(IndustryConstruct):
@@ -91,7 +105,7 @@ class CallOption(Option):
     @classmethod
     def from_strike(cls, strike: constructs.Strike):
         return cls(
-            underlying=Asset(ticker=strike.underlying_symbol),
+            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.call_value,
@@ -124,7 +138,7 @@ class PutOption(Option):
     @classmethod
     def from_strike(cls, strike: constructs.Strike):
         return cls(
-            underlying=Asset(ticker=strike.underlying_symbol),
+            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.put_value,
@@ -197,18 +211,4 @@ class OptionsChain(IndustryConstruct):
 
 
 class VolatilitySurface(IndustryConstruct):
-    ticker: str
-    _cache: Optional[Sequence[constructs.MoneyImplied]] = None
-
-    def _get_monies(self, trade_date: datetime.date = None):
-        if self._cache:
-            return self._cache
-
-        endpoint = endpoints.MoniesImpliedEndpoint(self._token)
-        request = req.MoniesRequest(
-            tickers=self.ticker,
-            trade_date=trade_date,
-        )
-
-        self._cache = endpoint(request)
-        return self._cache
+    monies: Sequence[constructs.MoneyImplied]
