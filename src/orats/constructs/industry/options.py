@@ -15,10 +15,10 @@ from orats.endpoints.data import endpoints, request as req
 def chains(
     ticker: str,
     trade_date: datetime.date = None,
-    min_delta=None,
-    max_delta=None,
-    min_days_to_expiration=None,
-    max_days_to_expiration=None,
+    min_delta: float = None,
+    max_delta: float = None,
+    min_days_to_expiration: int = None,
+    max_days_to_expiration: int = None,
     token: str = None,
 ):
     endpoint = endpoints.StrikesEndpoint(token)
@@ -190,15 +190,17 @@ class OptionsChain(IndustryConstruct):
 
 class VolatilitySurface(IndustryConstruct):
     monies: Sequence[api_constructs.Money]
+    _expirations: List[datetime.date] = PrivateAttr([])
+    _slices: Dict[datetime.date, List[api_constructs.Money]] = PrivateAttr({})
 
     def _group_by_expiration(self):
-        group = {}
         for money in self.monies:
-            value = money.expiration_date
-            if value not in group:
-                group[value] = []
-            group[value].append(money)
-        return group
+            expiration = money.expiration_date
+            self._expirations.append(expiration)
+            if expiration not in self._slices:
+                self._slices[expiration] = []
+            self._slices[expiration].append(money)
+        return self._slices
 
     def slice(self, expiration: datetime.date):
-        pass
+        return self._slices[expiration]
