@@ -1,7 +1,7 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pydantic import PrivateAttr
 
@@ -35,9 +35,13 @@ def chains(
 def volatility_surfaces(
     tickers: Sequence[str],
     trade_date: datetime.date = None,
+    forecast: bool = False,
     token: str = None,
 ):
-    endpoint = endpoints.MoniesImpliedEndpoint(token)
+    if forecast:
+        endpoint = endpoints.MoniesForecastEndpoint(token)
+    else:
+        endpoint = endpoints.MoniesImpliedEndpoint(token)
     request = req.MoniesRequest(
         tickers=tickers,
         trade_date=trade_date,
@@ -185,18 +189,4 @@ class OptionsChain(IndustryConstruct):
 
 
 class VolatilitySurface(IndustryConstruct):
-    ticker: str
-    _cache: Optional[Sequence[constructs.MoneyImplied]] = None
-
-    def _get_monies(self, trade_date: datetime.date = None):
-        if self._cache:
-            return self._cache
-
-        endpoint = endpoints.MoniesImpliedEndpoint(self._token)
-        request = req.MoniesRequest(
-            tickers=self.ticker,
-            trade_date=trade_date,
-        )
-
-        self._cache = endpoint(request)
-        return self._cache
+    monies: Sequence[Union[constructs.MoneyImplied, constructs.MoneyForecast]]
