@@ -3,22 +3,29 @@
 import datetime
 from typing import Tuple, Sequence, Set
 
-from pydantic import Field
-
 from orats.constructs.api import data as constructs
 from orats.constructs.common import IndustryConstruct
 from orats.endpoints.data import endpoints, request as req
 
 
-class Asset(IndustryConstruct[req.TickersRequest, constructs.Ticker]):
+def asset(ticker: str, token: str = None):
+    endpoint = endpoints.TickersEndpoint(token)
+    request = req.TickersRequest(ticker=ticker)
+    response = endpoint(request)
+    return Asset(ticker=response[0])
+
+
+def historical_volatility(tickers: Sequence[str], token: str = None):
+    endpoint = endpoints.HistoricalVolatilityEndpoint(token)
+    request = req.HistoricalVolatilityRequest(tickers=tickers)
+    response = endpoint(request)
+    return [VolatilityHistory(history=history) for history in response]
+
+
+class Asset(IndustryConstruct):
     """Represents the underlying asset of an option contract."""
 
-    ticker: str = Field(..., description="The ticker symbol of the underlying asset.")
-
-    def _get_ticker(self):
-        endpoint = endpoints.TickersEndpoint(self._token)
-        request = req.TickersRequest(ticker=self.ticker)
-        return self._make_request(endpoint, request)
+    ticker: constructs.Ticker
 
     def historical_data_range(self) -> Tuple[datetime.date, datetime.date]:
         """The duration of available historical data.
@@ -26,8 +33,7 @@ class Asset(IndustryConstruct[req.TickersRequest, constructs.Ticker]):
         Returns:
           The minimum and maximum dates of available data.
         """
-        ticker = self._get_ticker()
-        return ticker.min_date, ticker.max_date
+        return self.ticker.min_date, self.ticker.max_date
 
 
 class Universe(IndustryConstruct):
@@ -35,86 +41,74 @@ class Universe(IndustryConstruct):
 
 
 class PriceHistory(IndustryConstruct):
-    def _get_daily_prices(self):
-        pass
+    pass
 
 
-class VolatilityHistory(
-    IndustryConstruct[req.HistoricalVolatilityRequest, constructs.HistoricalVolatility]
-):
-    tickers: Sequence[str]
+class VolatilityHistory(IndustryConstruct):
+    history: constructs.HistoricalVolatility
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
 
-    def _get_historical_volatility(self):
-        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token)
-        request = req.HistoricalVolatilityRequest(
-            tickers=self.tickers,
-        )
-        return self._make_request(endpoint, request)
-
     def intraday(self, exclude_earnings: bool = True):
-        history = self._get_historical_volatility()
         results = {}
         if not exclude_earnings:
-            results[1] = history.hv_1_day
+            results[1] = self.history.hv_1_day
             values = [
-                history.hv_5_day,
-                history.hv_10_day,
-                history.hv_20_day,
-                history.hv_30_day,
-                history.hv_60_day,
-                history.hv_90_day,
-                history.hv_100_day,
-                history.hv_120_day,
-                history.hv_252_day,
-                history.hv_500_day,
-                history.hv_1000_day,
+                self.history.hv_5_day,
+                self.history.hv_10_day,
+                self.history.hv_20_day,
+                self.history.hv_30_day,
+                self.history.hv_60_day,
+                self.history.hv_90_day,
+                self.history.hv_100_day,
+                self.history.hv_120_day,
+                self.history.hv_252_day,
+                self.history.hv_500_day,
+                self.history.hv_1000_day,
             ]
         else:
             values = [
-                history.hv_ex_earnings_5_day,
-                history.hv_ex_earnings_10_day,
-                history.hv_ex_earnings_20_day,
-                history.hv_ex_earnings_30_day,
-                history.hv_ex_earnings_60_day,
-                history.hv_ex_earnings_90_day,
-                history.hv_ex_earnings_100_day,
-                history.hv_ex_earnings_120_day,
-                history.hv_ex_earnings_252_day,
-                history.hv_ex_earnings_500_day,
-                history.hv_ex_earnings_1000_day,
+                self.history.hv_ex_earnings_5_day,
+                self.history.hv_ex_earnings_10_day,
+                self.history.hv_ex_earnings_20_day,
+                self.history.hv_ex_earnings_30_day,
+                self.history.hv_ex_earnings_60_day,
+                self.history.hv_ex_earnings_90_day,
+                self.history.hv_ex_earnings_100_day,
+                self.history.hv_ex_earnings_120_day,
+                self.history.hv_ex_earnings_252_day,
+                self.history.hv_ex_earnings_500_day,
+                self.history.hv_ex_earnings_1000_day,
             ]
         results.update(zip(self._periods, values))
         return results
 
     def close_to_close(self, exclude_earnings: bool = False):
-        history = self._get_historical_volatility()
         if not exclude_earnings:
             values = [
-                history.close_to_close_hv_5_day,
-                history.close_to_close_hv_10_day,
-                history.close_to_close_hv_20_day,
-                history.close_to_close_hv_30_day,
-                history.close_to_close_hv_60_day,
-                history.close_to_close_hv_90_day,
-                history.close_to_close_hv_100_day,
-                history.close_to_close_hv_120_day,
-                history.close_to_close_hv_252_day,
-                history.close_to_close_hv_500_day,
-                history.close_to_close_hv_1000_day,
+                self.history.close_to_close_hv_5_day,
+                self.history.close_to_close_hv_10_day,
+                self.history.close_to_close_hv_20_day,
+                self.history.close_to_close_hv_30_day,
+                self.history.close_to_close_hv_60_day,
+                self.history.close_to_close_hv_90_day,
+                self.history.close_to_close_hv_100_day,
+                self.history.close_to_close_hv_120_day,
+                self.history.close_to_close_hv_252_day,
+                self.history.close_to_close_hv_500_day,
+                self.history.close_to_close_hv_1000_day,
             ]
         else:
             values = [
-                history.close_to_close_hv_ex_earnings_5_day,
-                history.close_to_close_hv_ex_earnings_10_day,
-                history.close_to_close_hv_ex_earnings_20_day,
-                history.close_to_close_hv_ex_earnings_30_day,
-                history.close_to_close_hv_ex_earnings_60_day,
-                history.close_to_close_hv_ex_earnings_90_day,
-                history.close_to_close_hv_ex_earnings_100_day,
-                history.close_to_close_hv_ex_earnings_120_day,
-                history.close_to_close_hv_ex_earnings_252_day,
-                history.close_to_close_hv_ex_earnings_500_day,
-                history.close_to_close_hv_ex_earnings_1000_day,
+                self.history.close_to_close_hv_ex_earnings_5_day,
+                self.history.close_to_close_hv_ex_earnings_10_day,
+                self.history.close_to_close_hv_ex_earnings_20_day,
+                self.history.close_to_close_hv_ex_earnings_30_day,
+                self.history.close_to_close_hv_ex_earnings_60_day,
+                self.history.close_to_close_hv_ex_earnings_90_day,
+                self.history.close_to_close_hv_ex_earnings_100_day,
+                self.history.close_to_close_hv_ex_earnings_120_day,
+                self.history.close_to_close_hv_ex_earnings_252_day,
+                self.history.close_to_close_hv_ex_earnings_500_day,
+                self.history.close_to_close_hv_ex_earnings_1000_day,
             ]
         return dict(zip(self._periods, values))
