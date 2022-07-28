@@ -235,7 +235,9 @@ class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]
     _response_type = api_constructs.Core
 
 
-class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, api_constructs.DailyPrice]):
+class DailyPriceEndpoint(
+    DataApiEndpoint[req.DailyPriceRequest, api_constructs.DailyPrice]
+):
     """Retrieves end of day daily stock price data.
 
     See the corresponding `Daily Price`_ endpoint.
@@ -247,7 +249,9 @@ class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, api_constructs.D
 
 
 class HistoricalVolatilityEndpoint(
-    DataApiEndpoint[req.HistoricalVolatilityRequest, api_constructs.HistoricalVolatility]
+    DataApiEndpoint[
+        req.HistoricalVolatilityRequest, api_constructs.HistoricalVolatility
+    ]
 ):
     """Retrieves historical volatility data.
 
