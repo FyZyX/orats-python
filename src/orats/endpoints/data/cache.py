@@ -6,7 +6,7 @@ if TYPE_CHECKING:
 
 
 Req = TypeVar("Req", bound="req.DataApiRequest")
-Res = TypeVar("Res", bound="constructs.DataApiConstruct")
+Res = TypeVar("Res", bound="api_constructs.DataApiConstruct")
 
 
 def cache_request(

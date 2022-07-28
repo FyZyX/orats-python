@@ -22,9 +22,9 @@ def bounds(lower_bound, upper_bound):
 
 def group_by_ticker(constructs: Iterable[api_constructs.DataApiConstruct]):
     group: Dict[str, List[api_constructs.DataApiConstruct]] = {}
-    for constructs in constructs:
-        ticker = constructs.ticker
+    for construct in constructs:
+        ticker = construct.ticker
         if ticker not in group:
             group[ticker] = []
-        group[ticker].append(constructs)
+        group[ticker].append(construct)
     return group

@@ -1,7 +1,7 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pydantic import PrivateAttr
 
@@ -38,6 +38,7 @@ def volatility_surfaces(
     forecast: bool = False,
     token: str = None,
 ):
+    endpoint: Union[endpoints.MoniesImpliedEndpoint, endpoints.MoniesForecastEndpoint]
     if forecast:
         endpoint = endpoints.MoniesForecastEndpoint(token)
     else:
