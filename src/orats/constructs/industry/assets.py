@@ -3,7 +3,7 @@
 import datetime
 from typing import Tuple, Sequence, Set
 
-from orats.constructs.api import data as constructs
+from orats.constructs.api import data as api_constructs
 from orats.constructs.common import IndustryConstruct
 from orats.endpoints.data import endpoints, request as req
 
@@ -25,7 +25,7 @@ def historical_volatility(tickers: Sequence[str], token: str = None):
 class Asset(IndustryConstruct):
     """Represents the underlying asset of an option contract."""
 
-    ticker: constructs.Ticker
+    ticker: api_constructs.Ticker
 
     def historical_data_range(self) -> Tuple[datetime.date, datetime.date]:
         """The duration of available historical data.
@@ -45,7 +45,7 @@ class PriceHistory(IndustryConstruct):
 
 
 class VolatilityHistory(IndustryConstruct):
-    history: constructs.HistoricalVolatility
+    history: api_constructs.HistoricalVolatility
     _periods = [5, 10, 20, 30, 60, 90, 100, 120, 252, 500, 1000]
 
     def intraday(self, exclude_earnings: bool = True):

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Dict, Sequence, TypeVar
 
 if TYPE_CHECKING:
-    from orats.constructs.api import data as constructs
+    from orats.constructs.api import data as api_constructs
     from orats.endpoints.data import endpoints, request as req
 
 
@@ -17,7 +17,7 @@ def cache_request(
 
 
 class RequestCache:
-    _cache: "Dict[str, Sequence[constructs.DataApiConstruct]]" = {}
+    _cache: "Dict[str, Sequence[api_constructs.DataApiConstruct]]" = {}
 
     def __getitem__(self, item):
         return self._cache[item]

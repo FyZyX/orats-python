@@ -1,11 +1,11 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Optional, Sequence
 
 from pydantic import PrivateAttr
 
-from orats.constructs.api import data as constructs
+from orats.constructs.api import data as api_constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
 from orats.constructs.industry.common import bounds, group_by_ticker
@@ -81,9 +81,9 @@ class Option(IndustryConstruct):
 
 class CallOption(Option):
     @classmethod
-    def from_strike(cls, strike: constructs.Strike):
+    def from_strike(cls, strike: api_constructs.Strike):
         return cls(
-            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
+            underlying=Asset(ticker=api_constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.call_value,
@@ -114,9 +114,9 @@ class CallOption(Option):
 
 class PutOption(Option):
     @classmethod
-    def from_strike(cls, strike: constructs.Strike):
+    def from_strike(cls, strike: api_constructs.Strike):
         return cls(
-            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
+            underlying=Asset(ticker=api_constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.put_value,
@@ -151,7 +151,7 @@ class OptionsChain(IndustryConstruct):
     <https://blog.orats.com/option-greeks-are-the-same-for-calls-and-puts>`_
     """
 
-    strikes: Sequence[constructs.Strike]
+    strikes: Sequence[api_constructs.Strike]
     _expirations: List[datetime.date] = PrivateAttr([])
     _calls: Dict[datetime.date, List[Option]] = PrivateAttr({})
     _puts: Dict[datetime.date, List[Option]] = PrivateAttr({})
@@ -189,4 +189,16 @@ class OptionsChain(IndustryConstruct):
 
 
 class VolatilitySurface(IndustryConstruct):
-    monies: Sequence[Union[constructs.MoneyImplied, constructs.MoneyForecast]]
+    monies: Sequence[api_constructs.Money]
+
+    def _group_by_expiration(self):
+        group = {}
+        for money in self.monies:
+            value = money.expiration_date
+            if value not in group:
+                group[value] = []
+            group[value].append(money)
+        return group
+
+    def slice(self, expiration: datetime.date):
+        pass
