@@ -9,7 +9,6 @@ from orats.endpoints.data import endpoints, request as req
 
 
 class AssetAnalyzer:
-
     def __init__(self, token: str = None):
         self._token = token
 
