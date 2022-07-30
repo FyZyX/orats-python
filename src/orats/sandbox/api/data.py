@@ -45,9 +45,7 @@ class FakeDataApi:
         results = [self._generator.strike(request.ticker) for request in requests]
         return common.as_response(api_constructs.Strike, results)
 
-    def _monies(
-        self, request: req.MoniesRequest, func: Callable
-    ) -> Sequence[Union[api_constructs.MoneyImplied, api_constructs.MoneyForecast]]:
+    def _monies(self, request: req.MoniesRequest, func: Callable):
         universe = request.tickers or self._universe
         monies = []
         for ticker in universe:
