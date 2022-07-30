@@ -14,7 +14,7 @@ See the `product page`_ and `API docs`_.
 .. _API docs: https://docs.orats.io/datav2-api-guide/
 """
 import json
-from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar
+from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar, Callable
 
 import httpx
 
@@ -23,6 +23,7 @@ from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req, response as res
 from orats.endpoints.data.cache import RequestCache
 from orats.errors import InsufficientPermissionsError
+from orats.sandbox.api.data import FakeDataApi
 
 
 def _handle_response(response: httpx.Response) -> Mapping[str, Any]:
@@ -61,9 +62,11 @@ class DataApiEndpoint(Generic[Req, Res]):
     _response_type: Type[Res]
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
+    # Point this to the corresponding data generator
+    _data_generator: Callable[[Req], Sequence[Res]]
     _cache = RequestCache()
 
-    def __init__(self, token: str = None):
+    def __init__(self, token: str = None, mock: bool = False):
         """Initializes an API endpoint for a specified resource.
 
         Args:
@@ -71,6 +74,7 @@ class DataApiEndpoint(Generic[Req, Res]):
             The authentication token provided to the user.
         """
         self._token = token or get_token()
+        self._mock = mock
 
     def __call__(self, request: Req) -> Sequence[Res]:
         """Handles a request and relays the response.
@@ -82,6 +86,9 @@ class DataApiEndpoint(Generic[Req, Res]):
         Returns:
           One or more Data API response objects.
         """
+        if self._mock:
+            return self._data_generator(request)  # type: ignore
+
         key = self._key(*request.dict().values())
         if key in self._cache:
             return self._cache[key]
@@ -136,6 +143,7 @@ class TickersEndpoint(DataApiEndpoint[req.TickersRequest, api_constructs.Ticker]
 
     _resource = "tickers"
     _response_type = api_constructs.Ticker
+    _data_generator = FakeDataApi().tickers
 
 
 class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, api_constructs.Strike]):
@@ -146,6 +154,7 @@ class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, api_constructs.Strike]
 
     _resource = "strikes"
     _response_type = api_constructs.Strike
+    _data_generator = FakeDataApi().strikes
 
 
 class StrikesByOptionsEndpoint(
@@ -159,6 +168,7 @@ class StrikesByOptionsEndpoint(
 
     _resource = "strikes/options"
     _response_type = api_constructs.Strike
+    _data_generator = FakeDataApi().strikes_by_options
 
     def __call__(
         self,
@@ -176,6 +186,9 @@ class StrikesByOptionsEndpoint(
         Returns:
           A list of strikes for each specified asset.
         """
+        if self._mock:
+            return self._data_generator(*requests)  # type: ignore
+
         if len(requests) == 1:
             return super().__call__(requests[0])
         else:
@@ -201,6 +214,7 @@ class MoniesImpliedEndpoint(
 
     _resource = "monies/implied"
     _response_type = api_constructs.MoneyImplied
+    _data_generator = FakeDataApi().monies_implied
 
 
 class MoniesForecastEndpoint(
@@ -213,6 +227,7 @@ class MoniesForecastEndpoint(
 
     _resource = "monies/forecast"
     _response_type = api_constructs.MoneyForecast
+    _data_generator = FakeDataApi().monies_forecast
 
 
 class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, api_constructs.Summary]):
@@ -223,6 +238,7 @@ class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, api_constructs.Sum
 
     _resource = "summaries"
     _response_type = api_constructs.Summary
+    _data_generator = FakeDataApi().summaries
 
 
 class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]):
@@ -233,6 +249,7 @@ class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]
 
     _resource = "cores"
     _response_type = api_constructs.Core
+    _data_generator = FakeDataApi().core_data
 
 
 class DailyPriceEndpoint(
@@ -246,6 +263,7 @@ class DailyPriceEndpoint(
     _resource = "dailies"
     _response_type = api_constructs.DailyPrice
     _is_historical = True
+    _data_generator = FakeDataApi().daily_price
 
 
 class HistoricalVolatilityEndpoint(
@@ -261,6 +279,7 @@ class HistoricalVolatilityEndpoint(
     _resource = "hvs"
     _response_type = api_constructs.HistoricalVolatility
     _is_historical = True
+    _data_generator = FakeDataApi().historical_volatility
 
 
 class DividendHistoryEndpoint(
@@ -274,6 +293,7 @@ class DividendHistoryEndpoint(
     _resource = "divs"
     _response_type = api_constructs.DividendHistory
     _is_historical = True
+    _data_generator = FakeDataApi().dividend_history
 
 
 class EarningsHistoryEndpoint(
@@ -287,6 +307,7 @@ class EarningsHistoryEndpoint(
     _resource = "earnings"
     _response_type = api_constructs.EarningsHistory
     _is_historical = True
+    _data_generator = FakeDataApi().earnings_history
 
 
 class StockSplitHistoryEndpoint(
@@ -300,6 +321,7 @@ class StockSplitHistoryEndpoint(
     _resource = "splits"
     _response_type = api_constructs.StockSplitHistory
     _is_historical = True
+    _data_generator = FakeDataApi().stock_split_history
 
 
 class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, api_constructs.IvRank]):
@@ -310,3 +332,4 @@ class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, api_constructs.IvRank]):
 
     _resource = "ivrank"
     _response_type = api_constructs.IvRank
+    _data_generator = FakeDataApi().iv_rank
