@@ -45,23 +45,31 @@ class FakeDataApi:
         results = [self._generator.strike(request.ticker) for request in requests]
         return common.as_response(api_constructs.Strike, results)
 
-    def _monies(self, request: req.MoniesRequest, func: Callable):
-        universe = request.tickers or self._universe
-        monies = []
-        for ticker in universe:
-            results = [func(ticker, days_to_expiration=dte) for dte in range(1, 100, 7)]
-            monies.extend(common.as_responses(api_constructs.MoneyImplied, results))
-        return monies
-
     def monies_implied(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyImplied]:
-        return self._monies(request, self._generator.money_implied)
+        universe = request.tickers or self._universe
+        monies = []
+        for ticker in universe:
+            results = [
+                self._generator.money_implied(ticker, days_to_expiration=dte)
+                for dte in range(1, 100, 7)
+            ]
+            monies.extend(common.as_responses(api_constructs.MoneyImplied, results))
+        return monies
 
     def monies_forecast(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyForecast]:
-        return self._monies(request, self._generator.money_forecast)
+        universe = request.tickers or self._universe
+        monies = []
+        for ticker in universe:
+            results = [
+                self._generator.money_forecast(ticker, days_to_expiration=dte)
+                for dte in range(1, 100, 7)
+            ]
+            monies.extend(common.as_responses(api_constructs.MoneyForecast, results))
+        return monies
 
     def summaries(
         self, request: req.SummariesRequest
