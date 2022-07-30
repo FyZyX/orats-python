@@ -1,6 +1,6 @@
 from typing import Dict, Iterable, List
 
-from orats.constructs.api import data as constructs
+from orats.constructs.api import data as api_constructs
 
 
 def bounds(lower_bound, upper_bound):
@@ -20,11 +20,11 @@ def bounds(lower_bound, upper_bound):
     return ",".join(map(str, (lower_bound, upper_bound)))
 
 
-def group_by_ticker(strikes: Iterable[constructs.DataApiConstruct]):
-    group: Dict[str, List[constructs.DataApiConstruct]] = {}
-    for item in strikes:
-        value = item.ticker
-        if value not in group:
-            group[value] = []
-        group[value].append(item)
+def group_by_ticker(constructs: Iterable[api_constructs.DataApiConstruct]):
+    group: Dict[str, List[api_constructs.DataApiConstruct]] = {}
+    for construct in constructs:
+        ticker = construct.ticker
+        if ticker not in group:
+            group[ticker] = []
+        group[ticker].append(construct)
     return group

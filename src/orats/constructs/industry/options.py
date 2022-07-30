@@ -1,11 +1,11 @@
 """Higher level constructs for option contracts."""
 
 import datetime
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 from pydantic import PrivateAttr
 
-from orats.constructs.api import data as constructs
+from orats.constructs.api import data as api_constructs
 from orats.constructs.common import IndustryConstruct
 from orats.constructs.industry.assets import Asset
 from orats.constructs.industry.common import bounds, group_by_ticker
@@ -15,10 +15,10 @@ from orats.endpoints.data import endpoints, request as req
 def chains(
     ticker: str,
     trade_date: datetime.date = None,
-    min_delta=None,
-    max_delta=None,
-    min_days_to_expiration=None,
-    max_days_to_expiration=None,
+    min_delta: float = None,
+    max_delta: float = None,
+    min_days_to_expiration: int = None,
+    max_days_to_expiration: int = None,
     token: str = None,
 ):
     endpoint = endpoints.StrikesEndpoint(token)
@@ -35,9 +35,14 @@ def chains(
 def volatility_surfaces(
     tickers: Sequence[str],
     trade_date: datetime.date = None,
+    forecast: bool = False,
     token: str = None,
 ):
-    endpoint = endpoints.MoniesImpliedEndpoint(token)
+    endpoint: Union[endpoints.MoniesImpliedEndpoint, endpoints.MoniesForecastEndpoint]
+    if forecast:
+        endpoint = endpoints.MoniesForecastEndpoint(token)
+    else:
+        endpoint = endpoints.MoniesImpliedEndpoint(token)
     request = req.MoniesRequest(
         tickers=tickers,
         trade_date=trade_date,
@@ -77,9 +82,9 @@ class Option(IndustryConstruct):
 
 class CallOption(Option):
     @classmethod
-    def from_strike(cls, strike: constructs.Strike):
+    def from_strike(cls, strike: api_constructs.Strike):
         return cls(
-            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
+            underlying=Asset(ticker=api_constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.call_value,
@@ -110,9 +115,9 @@ class CallOption(Option):
 
 class PutOption(Option):
     @classmethod
-    def from_strike(cls, strike: constructs.Strike):
+    def from_strike(cls, strike: api_constructs.Strike):
         return cls(
-            underlying=Asset(ticker=constructs.Ticker(ticker=strike.ticker)),
+            underlying=Asset(ticker=api_constructs.Ticker(ticker=strike.ticker)),
             expiration=strike.expiration_date,
             strike=strike.strike,
             price=strike.put_value,
@@ -147,7 +152,7 @@ class OptionsChain(IndustryConstruct):
     <https://blog.orats.com/option-greeks-are-the-same-for-calls-and-puts>`_
     """
 
-    strikes: Sequence[constructs.Strike]
+    strikes: Sequence[api_constructs.Strike]
     _expirations: List[datetime.date] = PrivateAttr([])
     _calls: Dict[datetime.date, List[Option]] = PrivateAttr({})
     _puts: Dict[datetime.date, List[Option]] = PrivateAttr({})
@@ -185,4 +190,22 @@ class OptionsChain(IndustryConstruct):
 
 
 class VolatilitySurface(IndustryConstruct):
-    monies: Sequence[constructs.MoneyImplied]
+    monies: Sequence[api_constructs.Money]
+    _expirations: List[datetime.date] = PrivateAttr([])
+    _slices: Dict[datetime.date, List[api_constructs.Money]] = PrivateAttr({})
+
+    def __init__(self, **data: Any):
+        self._group_by_expiration()
+        super().__init__(**data)
+
+    def _group_by_expiration(self):
+        for money in self.monies:
+            expiration = money.expiration_date
+            self._expirations.append(expiration)
+            if expiration not in self._slices:
+                self._slices[expiration] = []
+            self._slices[expiration].append(money)
+        return self._slices
+
+    def slice(self, expiration: datetime.date):
+        return self._slices[expiration]
