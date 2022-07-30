@@ -21,8 +21,12 @@ def format_timestamp(ts) -> str:
         raise ValueError
 
 
-def as_response(construct_type, values):
-    return [construct_type(**value) for value in values]
+def as_response(construct_type, value):
+    return construct_type(**value)
+
+
+def as_responses(construct_type, values):
+    return [as_response(construct_type, value) for value in values]
 
 
 def random_symbol() -> str:

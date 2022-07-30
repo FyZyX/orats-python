@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence
+from typing import Sequence, Callable, Union
 
 from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req
@@ -15,10 +15,15 @@ class FakeDataApi:
     API calls during the development process.
     """
 
-    def __init__(self):
-        self._universe = common.universe()
-        self._trade_date = datetime.date.today()
-        self._updated = datetime.datetime.now()
+    def __init__(
+        self,
+        universe=common.universe(),
+        trade_date=datetime.date.today(),
+        updated=datetime.datetime.now(),
+    ):
+        self._universe = universe
+        self._trade_date = trade_date
+        self._updated = updated
         self._generator = FakeDataGenerator()
 
     def tickers(self, request: req.TickersRequest) -> Sequence[api_constructs.Ticker]:
@@ -44,15 +49,27 @@ class FakeDataApi:
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyImplied]:
         universe = request.tickers or self._universe
-        results = [self._generator.money_implied(ticker) for ticker in universe]
-        return common.as_response(api_constructs.MoneyImplied, results)
+        monies = []
+        for ticker in universe:
+            results = [
+                self._generator.money_implied(ticker, days_to_expiration=dte)
+                for dte in range(1, 100, 7)
+            ]
+            monies.extend(common.as_responses(api_constructs.MoneyImplied, results))
+        return monies
 
     def monies_forecast(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyForecast]:
         universe = request.tickers or self._universe
-        results = [self._generator.money_forecast(ticker) for ticker in universe]
-        return common.as_response(api_constructs.MoneyForecast, results)
+        monies = []
+        for ticker in universe:
+            results = [
+                self._generator.money_forecast(ticker, days_to_expiration=dte)
+                for dte in range(1, 100, 7)
+            ]
+            monies.extend(common.as_responses(api_constructs.MoneyForecast, results))
+        return monies
 
     def summaries(
         self, request: req.SummariesRequest
