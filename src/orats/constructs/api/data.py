@@ -132,34 +132,6 @@ class MoneyForecast(Money):
     See corresponding `Monies Forecast`_ response object.
     """
 
-    ticker: str = Field(..., alias="ticker")
-    trade_date: datetime.date = Field(..., alias="tradeDate")
-    expiration_date: datetime.date = Field(..., alias="expirDate")
-    underlying_price: float = Field(..., alias="stockPrice")
-    risk_free_rate: float = Field(..., alias="riskFreeRate")
-    iv_100_delta: float = Field(..., alias="vol100")
-    iv_95_delta: float = Field(..., alias="vol95")
-    iv_90_delta: float = Field(..., alias="vol90")
-    iv_85_delta: float = Field(..., alias="vol85")
-    iv_80_delta: float = Field(..., alias="vol80")
-    iv_75_delta: float = Field(..., alias="vol75")
-    iv_70_delta: float = Field(..., alias="vol70")
-    iv_65_delta: float = Field(..., alias="vol65")
-    iv_60_delta: float = Field(..., alias="vol60")
-    iv_55_delta: float = Field(..., alias="vol55")
-    iv_50_delta: float = Field(..., alias="vol50")
-    iv_45_delta: float = Field(..., alias="vol45")
-    iv_40_delta: float = Field(..., alias="vol40")
-    iv_35_delta: float = Field(..., alias="vol35")
-    iv_30_delta: float = Field(..., alias="vol30")
-    iv_25_delta: float = Field(..., alias="vol25")
-    iv_20_delta: float = Field(..., alias="vol20")
-    iv_15_delta: float = Field(..., alias="vol15")
-    iv_10_delta: float = Field(..., alias="vol10")
-    iv_5_delta: float = Field(..., alias="vol5")
-    iv_0_delta: float = Field(..., alias="vol0")
-    updated_at: datetime.datetime = Field(..., alias="updatedAt")
-
 
 class Summary(DataApiConstruct):
     """SMV Summary data definitions.

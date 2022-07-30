@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence, Collection
+from typing import Sequence, Callable, Union
 
 from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req
@@ -45,25 +45,28 @@ class FakeDataApi:
         results = [self._generator.strike(request.ticker) for request in requests]
         return common.as_response(api_constructs.Strike, results)
 
-    def monies_implied(
-        self, request: req.MoniesRequest
-    ) -> Sequence[api_constructs.MoneyImplied]:
+    def _monies(
+        self, request: req.MoniesRequest, func: Callable
+    ) -> Sequence[Union[api_constructs.MoneyImplied, api_constructs.MoneyForecast]]:
         universe = request.tickers or self._universe
         monies = []
         for ticker in universe:
             results = [
-                self._generator.money_implied(ticker, days_to_expiration=dte)
+                func(ticker, days_to_expiration=dte)
                 for dte in range(1, 100, 7)
             ]
-            monies.extend(common.as_responses(constructs.MoneyImplied, results))
+            monies.extend(common.as_responses(api_constructs.MoneyImplied, results))
         return monies
+
+    def monies_implied(
+        self, request: req.MoniesRequest
+    ) -> Sequence[api_constructs.MoneyImplied]:
+        return self._monies(request, self._generator.money_implied)
 
     def monies_forecast(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyForecast]:
-        universe = request.tickers or self._universe
-        results = [self._generator.money_forecast(ticker) for ticker in universe]
-        return common.as_response(api_constructs.MoneyForecast, results)
+        return self._monies(request, self._generator.money_forecast)
 
     def summaries(
         self, request: req.SummariesRequest
