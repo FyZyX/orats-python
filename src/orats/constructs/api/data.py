@@ -16,6 +16,7 @@ class DataApiConstruct(ApiConstruct):
 class Ticker(DataApiConstruct):
     """Ticker symbol data duration definitions."""
 
+    ticker: str = Field(..., alias="ticker")
     min_date: datetime.date = Field(..., alias="min")
     max_date: datetime.date = Field(..., alias="max")
 
@@ -26,6 +27,7 @@ class Strike(DataApiConstruct):
     See corresponding `Strikes`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     days_to_expiration: int = Field(..., alias="dte")
@@ -73,6 +75,7 @@ class Money(DataApiConstruct):
     This class helps abstract over the volatility surface construct.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     underlying_price: float = Field(..., alias="stockPrice")
@@ -129,6 +132,34 @@ class MoneyForecast(Money):
     See corresponding `Monies Forecast`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
+    trade_date: datetime.date = Field(..., alias="tradeDate")
+    expiration_date: datetime.date = Field(..., alias="expirDate")
+    underlying_price: float = Field(..., alias="stockPrice")
+    risk_free_rate: float = Field(..., alias="riskFreeRate")
+    iv_100_delta: float = Field(..., alias="vol100")
+    iv_95_delta: float = Field(..., alias="vol95")
+    iv_90_delta: float = Field(..., alias="vol90")
+    iv_85_delta: float = Field(..., alias="vol85")
+    iv_80_delta: float = Field(..., alias="vol80")
+    iv_75_delta: float = Field(..., alias="vol75")
+    iv_70_delta: float = Field(..., alias="vol70")
+    iv_65_delta: float = Field(..., alias="vol65")
+    iv_60_delta: float = Field(..., alias="vol60")
+    iv_55_delta: float = Field(..., alias="vol55")
+    iv_50_delta: float = Field(..., alias="vol50")
+    iv_45_delta: float = Field(..., alias="vol45")
+    iv_40_delta: float = Field(..., alias="vol40")
+    iv_35_delta: float = Field(..., alias="vol35")
+    iv_30_delta: float = Field(..., alias="vol30")
+    iv_25_delta: float = Field(..., alias="vol25")
+    iv_20_delta: float = Field(..., alias="vol20")
+    iv_15_delta: float = Field(..., alias="vol15")
+    iv_10_delta: float = Field(..., alias="vol10")
+    iv_5_delta: float = Field(..., alias="vol5")
+    iv_0_delta: float = Field(..., alias="vol0")
+    updated_at: datetime.datetime = Field(..., alias="updatedAt")
+
 
 class Summary(DataApiConstruct):
     """SMV Summary data definitions.
@@ -136,6 +167,7 @@ class Summary(DataApiConstruct):
     See corresponding `Summaries`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     underlying_price: float = Field(..., alias="stockPrice")
     annual_dividend: float = Field(..., alias="annActDiv")
@@ -283,6 +315,7 @@ class Core(DataApiConstruct):
     See corresponding `Core`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     asset_type: int = Field(..., alias="assetType")
     prior_close: float = Field(..., alias="priorCls")
@@ -580,6 +613,7 @@ class DailyPrice(DataApiConstruct):
     See corresponding `Daily Price`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     open: float = Field(..., alias="open")
     high: float = Field(..., alias="hiPx")
@@ -598,6 +632,7 @@ class HistoricalVolatility(DataApiConstruct):
     See corresponding `Historical Volatility`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     hv_1_day: float = Field(..., alias="orHv1d")
     hv_5_day: float = Field(..., alias="orHv5d")
@@ -652,6 +687,7 @@ class DividendHistory(DataApiConstruct):
     See corresponding `Dividend History`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     ex_dividend_date: datetime.date = Field(..., alias="exDate")
     dividend_amount: float = Field(..., alias="divAmt")
     dividend_frequency: int = Field(..., alias="divFreq")
@@ -664,6 +700,7 @@ class EarningsHistory(DataApiConstruct):
     See corresponding `Earnings History`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     earnings_date: datetime.date = Field(..., alias="earnDate")
     time_of_day_announced: int = Field(..., alias="anncTod")
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
@@ -675,6 +712,7 @@ class StockSplitHistory(DataApiConstruct):
     See corresponding `Stock Split History`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     split_date: datetime.date = Field(..., alias="splitDate")
     divisor: float
 
@@ -685,6 +723,7 @@ class IvRank(DataApiConstruct):
     See corresponding `IV Rank`_ response object.
     """
 
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     iv: float = Field(..., alias="iv")
     iv_rank_1_month: float = Field(..., alias="ivRank1m")
