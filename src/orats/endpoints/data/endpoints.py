@@ -18,8 +18,10 @@ from typing import Any, Iterable, Generic, Mapping, Sequence, Type, TypeVar
 
 import httpx
 
-from orats.constructs.api import data as constructs
+from orats.common import get_token
+from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req, response as res
+from orats.endpoints.data.cache import RequestCache
 from orats.errors import InsufficientPermissionsError
 
 
@@ -47,7 +49,7 @@ def _post(url, params, body) -> Mapping[str, Any]:
 
 
 Req = TypeVar("Req", bound=req.DataApiRequest)
-Res = TypeVar("Res", bound=constructs.DataApiConstruct)
+Res = TypeVar("Res", bound=api_constructs.DataApiConstruct)
 
 
 class DataApiEndpoint(Generic[Req, Res]):
@@ -59,15 +61,16 @@ class DataApiEndpoint(Generic[Req, Res]):
     _response_type: Type[Res]
     # Set this to true in subclasses that always use the historical prefix
     _is_historical: bool = False
+    _cache = RequestCache()
 
-    def __init__(self, token: str):
+    def __init__(self, token: str = None):
         """Initializes an API endpoint for a specified resource.
 
         Args:
           token:
             The authentication token provided to the user.
         """
-        self._token = token
+        self._token = token or get_token()
 
     def __call__(self, request: Req) -> Sequence[Res]:
         """Handles a request and relays the response.
@@ -79,10 +82,19 @@ class DataApiEndpoint(Generic[Req, Res]):
         Returns:
           One or more Data API response objects.
         """
+        key = self._key(*request.dict().values())
+        if key in self._cache:
+            return self._cache[key]
+
         response = res.DataApiResponse[self._response_type](  # type: ignore
             **self._get(request)
         )
-        return response.data or ()
+        data = response.data or ()
+        self._cache[key] = data
+        return data
+
+    def _key(self, *components):
+        return f"{self._resource}-{'-'.join([str(c) for c in components])}"
 
     def _url(self, historical: bool = False) -> str:
         resource = self._resource
@@ -113,7 +125,7 @@ class DataApiEndpoint(Generic[Req, Res]):
         )
 
 
-class TickersEndpoint(DataApiEndpoint[req.TickersRequest, constructs.Ticker]):
+class TickersEndpoint(DataApiEndpoint[req.TickersRequest, api_constructs.Ticker]):
     """Retrieves the duration of available data for various assets.
 
     If no underlying asset is specified, the result will be a list
@@ -123,21 +135,21 @@ class TickersEndpoint(DataApiEndpoint[req.TickersRequest, constructs.Ticker]):
     """
 
     _resource = "tickers"
-    _response_type = constructs.Ticker
+    _response_type = api_constructs.Ticker
 
 
-class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, constructs.Strike]):
+class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, api_constructs.Strike]):
     """Retrieves strikes data for the given asset(s).
 
     See the corresponding `Strikes`_ and `Strikes History`_ endpoints.
     """
 
     _resource = "strikes"
-    _response_type = constructs.Strike
+    _response_type = api_constructs.Strike
 
 
 class StrikesByOptionsEndpoint(
-    DataApiEndpoint[req.StrikesByOptionsRequest, constructs.Strike]
+    DataApiEndpoint[req.StrikesByOptionsRequest, api_constructs.Strike]
 ):
     """Retrieves strikes data by ticker, expiry, and strike.
 
@@ -146,12 +158,12 @@ class StrikesByOptionsEndpoint(
     """
 
     _resource = "strikes/options"
-    _response_type = constructs.Strike
+    _response_type = api_constructs.Strike
 
     def __call__(
         self,
         *requests: req.StrikesByOptionsRequest,
-    ) -> Sequence[constructs.Strike]:
+    ) -> Sequence[api_constructs.Strike]:
         """Makes a call to the appropriate API endpoint.
 
         Passing a single request will use the GET request method,
@@ -180,7 +192,7 @@ class StrikesByOptionsEndpoint(
 
 
 class MoniesImpliedEndpoint(
-    DataApiEndpoint[req.MoniesRequest, constructs.MoneyImplied]
+    DataApiEndpoint[req.MoniesRequest, api_constructs.MoneyImplied]
 ):
     """Retrieves monthly implied data for monies.
 
@@ -188,11 +200,11 @@ class MoniesImpliedEndpoint(
     """
 
     _resource = "monies/implied"
-    _response_type = constructs.MoneyImplied
+    _response_type = api_constructs.MoneyImplied
 
 
 class MoniesForecastEndpoint(
-    DataApiEndpoint[req.MoniesRequest, constructs.MoneyForecast]
+    DataApiEndpoint[req.MoniesRequest, api_constructs.MoneyForecast]
 ):
     """Retrieves monthly forecast data for monies.
 
@@ -200,42 +212,46 @@ class MoniesForecastEndpoint(
     """
 
     _resource = "monies/forecast"
-    _response_type = constructs.MoneyForecast
+    _response_type = api_constructs.MoneyForecast
 
 
-class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, constructs.SmvSummary]):
+class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, api_constructs.Summary]):
     """Retrieves SMV Summary data.
 
     See the corresponding `Summaries`_ and `Summaries History`_ endpoints.
     """
 
     _resource = "summaries"
-    _response_type = constructs.SmvSummary
+    _response_type = api_constructs.Summary
 
 
-class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, constructs.Core]):
+class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]):
     """Retrieves Core data.
 
     See the corresponding `Core Data`_ and `Core Data History`_ endpoints.
     """
 
     _resource = "cores"
-    _response_type = constructs.Core
+    _response_type = api_constructs.Core
 
 
-class DailyPriceEndpoint(DataApiEndpoint[req.DailyPriceRequest, constructs.DailyPrice]):
+class DailyPriceEndpoint(
+    DataApiEndpoint[req.DailyPriceRequest, api_constructs.DailyPrice]
+):
     """Retrieves end of day daily stock price data.
 
     See the corresponding `Daily Price`_ endpoint.
     """
 
     _resource = "dailies"
-    _response_type = constructs.DailyPrice
+    _response_type = api_constructs.DailyPrice
     _is_historical = True
 
 
 class HistoricalVolatilityEndpoint(
-    DataApiEndpoint[req.HistoricalVolatilityRequest, constructs.HistoricalVolatility]
+    DataApiEndpoint[
+        req.HistoricalVolatilityRequest, api_constructs.HistoricalVolatility
+    ]
 ):
     """Retrieves historical volatility data.
 
@@ -243,12 +259,12 @@ class HistoricalVolatilityEndpoint(
     """
 
     _resource = "hvs"
-    _response_type = constructs.HistoricalVolatility
+    _response_type = api_constructs.HistoricalVolatility
     _is_historical = True
 
 
 class DividendHistoryEndpoint(
-    DataApiEndpoint[req.DividendHistoryRequest, constructs.DividendHistory]
+    DataApiEndpoint[req.DividendHistoryRequest, api_constructs.DividendHistory]
 ):
     """Retrieves dividend history data.
 
@@ -256,12 +272,12 @@ class DividendHistoryEndpoint(
     """
 
     _resource = "divs"
-    _response_type = constructs.DividendHistory
+    _response_type = api_constructs.DividendHistory
     _is_historical = True
 
 
 class EarningsHistoryEndpoint(
-    DataApiEndpoint[req.EarningsHistoryRequest, constructs.EarningsHistory]
+    DataApiEndpoint[req.EarningsHistoryRequest, api_constructs.EarningsHistory]
 ):
     """Retrieves earnings history data.
 
@@ -269,12 +285,12 @@ class EarningsHistoryEndpoint(
     """
 
     _resource = "earnings"
-    _response_type = constructs.EarningsHistory
+    _response_type = api_constructs.EarningsHistory
     _is_historical = True
 
 
 class StockSplitHistoryEndpoint(
-    DataApiEndpoint[req.StockSplitHistoryRequest, constructs.StockSplitHistory]
+    DataApiEndpoint[req.StockSplitHistoryRequest, api_constructs.StockSplitHistory]
 ):
     """Retrieves stock split history data.
 
@@ -282,15 +298,15 @@ class StockSplitHistoryEndpoint(
     """
 
     _resource = "splits"
-    _response_type = constructs.StockSplitHistory
+    _response_type = api_constructs.StockSplitHistory
     _is_historical = True
 
 
-class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, constructs.IvRank]):
+class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, api_constructs.IvRank]):
     """Retrieves IV rank data.
 
     See the corresponding `IV Rank`_ and `IV Rank History`_ endpoints.
     """
 
     _resource = "ivrank"
-    _response_type = constructs.IvRank
+    _response_type = api_constructs.IvRank

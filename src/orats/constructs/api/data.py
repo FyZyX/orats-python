@@ -7,6 +7,8 @@ from orats.constructs.common import ApiConstruct
 
 
 class DataApiConstruct(ApiConstruct):
+    ticker: str = Field(..., alias="ticker")
+
     class Config:
         allow_population_by_field_name = True
 
@@ -14,7 +16,7 @@ class DataApiConstruct(ApiConstruct):
 class Ticker(DataApiConstruct):
     """Ticker symbol data duration definitions."""
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     min_date: datetime.date = Field(..., alias="min")
     max_date: datetime.date = Field(..., alias="max")
 
@@ -25,7 +27,7 @@ class Strike(DataApiConstruct):
     See corresponding `Strikes`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     days_to_expiration: int = Field(..., alias="dte")
@@ -67,24 +69,17 @@ class Strike(DataApiConstruct):
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyImplied(DataApiConstruct):
-    """Monthly implied money definitions.
+class Money(DataApiConstruct):
+    """Base class for impied and forecasted monies.
 
-    See corresponding `Monies Implied`_ response object.
+    This class helps abstract over the volatility surface construct.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     expiration_date: datetime.date = Field(..., alias="expirDate")
     underlying_price: float = Field(..., alias="stockPrice")
-    spot_price: float = Field(..., alias="spotPrice")
     risk_free_rate: float = Field(..., alias="riskFreeRate")
-    yield_rate: float = Field(..., alias="yieldRate")
-    residual_yield_rate: float = Field(..., alias="residualYieldRate")
-    residual_rate_slope: float = Field(..., alias="residualRateSlp")
-    residual_r2: float = Field(..., alias="residualR2")
-    confidence: float
-    market_width: float = Field(..., alias="mwVol")
     iv_100_delta: float = Field(..., alias="vol100")
     iv_95_delta: float = Field(..., alias="vol95")
     iv_90_delta: float = Field(..., alias="vol90")
@@ -106,6 +101,22 @@ class MoneyImplied(DataApiConstruct):
     iv_10_delta: float = Field(..., alias="vol10")
     iv_5_delta: float = Field(..., alias="vol5")
     iv_0_delta: float = Field(..., alias="vol0")
+    updated_at: datetime.datetime = Field(..., alias="updatedAt")
+
+
+class MoneyImplied(Money):
+    """Monthly implied money definitions.
+
+    See corresponding `Monies Implied`_ response object.
+    """
+
+    spot_price: float = Field(..., alias="spotPrice")
+    yield_rate: float = Field(..., alias="yieldRate")
+    residual_yield_rate: float = Field(..., alias="residualYieldRate")
+    residual_rate_slope: float = Field(..., alias="residualRateSlp")
+    residual_r2: float = Field(..., alias="residualR2")
+    confidence: float
+    market_width: float = Field(..., alias="mwVol")
     atm_iv: float = Field(..., alias="atmiv")
     slope: float
     derivative: float = Field(..., alias="deriv")
@@ -113,51 +124,22 @@ class MoneyImplied(DataApiConstruct):
     iv: float = Field(..., alias="calVol")
     unadjusted_iv: float = Field(..., alias="unadjVol")
     earnings_effect: float = Field(..., alias="earnEffect")
-    updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 
-class MoneyForecast(DataApiConstruct):
+class MoneyForecast(Money):
     """Monthly forecast money definitions.
 
     See corresponding `Monies Forecast`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
-    trade_date: datetime.date = Field(..., alias="tradeDate")
-    expiration_date: datetime.date = Field(..., alias="expirDate")
-    underlying_price: float = Field(..., alias="stockPrice")
-    risk_free_rate: float = Field(..., alias="riskFreeRate")
-    iv_100_delta: float = Field(..., alias="vol100")
-    iv_95_delta: float = Field(..., alias="vol95")
-    iv_90_delta: float = Field(..., alias="vol90")
-    iv_85_delta: float = Field(..., alias="vol85")
-    iv_80_delta: float = Field(..., alias="vol80")
-    iv_75_delta: float = Field(..., alias="vol75")
-    iv_70_delta: float = Field(..., alias="vol70")
-    iv_65_delta: float = Field(..., alias="vol65")
-    iv_60_delta: float = Field(..., alias="vol60")
-    iv_55_delta: float = Field(..., alias="vol55")
-    iv_50_delta: float = Field(..., alias="vol50")
-    iv_45_delta: float = Field(..., alias="vol45")
-    iv_40_delta: float = Field(..., alias="vol40")
-    iv_35_delta: float = Field(..., alias="vol35")
-    iv_30_delta: float = Field(..., alias="vol30")
-    iv_25_delta: float = Field(..., alias="vol25")
-    iv_20_delta: float = Field(..., alias="vol20")
-    iv_15_delta: float = Field(..., alias="vol15")
-    iv_10_delta: float = Field(..., alias="vol10")
-    iv_5_delta: float = Field(..., alias="vol5")
-    iv_0_delta: float = Field(..., alias="vol0")
-    updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
-
-class SmvSummary(DataApiConstruct):
+class Summary(DataApiConstruct):
     """SMV Summary data definitions.
 
     See corresponding `Summaries`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     underlying_price: float = Field(..., alias="stockPrice")
     annual_dividend: float = Field(..., alias="annActDiv")
@@ -305,7 +287,7 @@ class Core(DataApiConstruct):
     See corresponding `Core`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     asset_type: int = Field(..., alias="assetType")
     prior_close: float = Field(..., alias="priorCls")
@@ -603,7 +585,7 @@ class DailyPrice(DataApiConstruct):
     See corresponding `Daily Price`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     open: float = Field(..., alias="open")
     high: float = Field(..., alias="hiPx")
@@ -622,7 +604,7 @@ class HistoricalVolatility(DataApiConstruct):
     See corresponding `Historical Volatility`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     hv_1_day: float = Field(..., alias="orHv1d")
     hv_5_day: float = Field(..., alias="orHv5d")
@@ -677,7 +659,7 @@ class DividendHistory(DataApiConstruct):
     See corresponding `Dividend History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     ex_dividend_date: datetime.date = Field(..., alias="exDate")
     dividend_amount: float = Field(..., alias="divAmt")
     dividend_frequency: int = Field(..., alias="divFreq")
@@ -690,7 +672,7 @@ class EarningsHistory(DataApiConstruct):
     See corresponding `Earnings History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     earnings_date: datetime.date = Field(..., alias="earnDate")
     time_of_day_announced: int = Field(..., alias="anncTod")
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
@@ -702,7 +684,7 @@ class StockSplitHistory(DataApiConstruct):
     See corresponding `Stock Split History`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     split_date: datetime.date = Field(..., alias="splitDate")
     divisor: float
 
@@ -713,7 +695,7 @@ class IvRank(DataApiConstruct):
     See corresponding `IV Rank`_ response object.
     """
 
-    underlying_symbol: str = Field(..., alias="ticker")
+    ticker: str = Field(..., alias="ticker")
     trade_date: datetime.date = Field(..., alias="tradeDate")
     iv: float = Field(..., alias="iv")
     iv_rank_1_month: float = Field(..., alias="ivRank1m")

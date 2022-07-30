@@ -1,6 +1,7 @@
 import datetime
 import random
 
+from orats.constructs.api.data import Ticker
 from orats.sandbox import common
 
 
