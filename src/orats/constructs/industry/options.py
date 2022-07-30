@@ -194,6 +194,10 @@ class VolatilitySurface(IndustryConstruct):
     _expirations: List[datetime.date] = PrivateAttr([])
     _slices: Dict[datetime.date, List[api_constructs.Money]] = PrivateAttr({})
 
+    def __init__(self, **data: Any):
+        self._group_by_expiration()
+        super().__init__(**data)
+
     def _group_by_expiration(self):
         for money in self.monies:
             expiration = money.expiration_date
