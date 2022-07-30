@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence
+from typing import Sequence, Collection
 
 from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req
@@ -15,10 +15,15 @@ class FakeDataApi:
     API calls during the development process.
     """
 
-    def __init__(self):
-        self._universe = common.universe()
-        self._trade_date = datetime.date.today()
-        self._updated = datetime.datetime.now()
+    def __init__(
+        self,
+        universe=common.universe(),
+        trade_date=datetime.date.today(),
+        updated=datetime.datetime.now(),
+    ):
+        self._universe = universe
+        self._trade_date = trade_date
+        self._updated = updated
         self._generator = FakeDataGenerator()
 
     def tickers(self, request: req.TickersRequest) -> Sequence[api_constructs.Ticker]:
