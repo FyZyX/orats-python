@@ -1,5 +1,5 @@
 import datetime
-from typing import Sequence, Callable, Union
+from typing import Sequence
 
 from orats.constructs.api import data as api_constructs
 from orats.endpoints.data import request as req
