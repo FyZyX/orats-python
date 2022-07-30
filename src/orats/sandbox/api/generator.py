@@ -181,24 +181,25 @@ class FakeDataGenerator:
         }
 
     def summary(self, ticker: str = common.random_symbol()) -> common.Json:
-        today = datetime.date.today()
         iv_ex_earnings_10_day = random.random()
+        volatilities = [0.95**k * iv_ex_earnings_10_day for k in range(0, 7)]
+        spot_price = common.random_increase(100, 65)
         return {
             "ticker": ticker,
-            "tradeDate": str(today),
-            "stockPrice": 100 + 40 + random.random(),
-            "annActDiv": 6 + random.random(),
-            "annIdiv": 6 + random.random(),
+            "tradeDate": str(self._date),
+            "stockPrice": spot_price,
+            "annActDiv": common.random_increase(6),
+            "annIdiv": common.random_increase(6),
             "borrow30": 0.0007589506622195224,
             "borrow2y": 0.026864400946853068,
             "confidence": 0.9511693079292712,
-            "exErnIv10d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv20d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv30d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv60d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv90d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv6m": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv1y": (iv_ex_earnings_10_day - 0.5),
+            "exErnIv10d": volatilities[0],
+            "exErnIv20d": volatilities[1],
+            "exErnIv30d": volatilities[2],
+            "exErnIv60d": volatilities[3],
+            "exErnIv90d": volatilities[4],
+            "exErnIv6m": volatilities[5],
+            "exErnIv1y": volatilities[6],
             "ieeEarnEffect": 2.3326074086309134,
             "impliedMove": 0.059163109598338016,
             "impliedNextDiv": 1.3731729188456947,

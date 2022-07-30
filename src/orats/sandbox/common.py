@@ -54,8 +54,8 @@ def random_increase(value, scalar=1, precision=None):
     return round_value(value + scalar * random.random(), precision=precision)
 
 
-def random_decrease(value, scalar=1):
-    return value - scalar * random.random()
+def random_decrease(value, scalar=1, precision=None):
+    return round_value(value - scalar * random.random(), precision=precision)
 
 
 def random_pos_neg_value(scalar=1):
