@@ -12,43 +12,51 @@ from orats.constructs.industry.common import bounds, group_by_ticker
 from orats.endpoints.data import endpoints, request as req
 
 
-def chains(
-    ticker: str,
-    trade_date: datetime.date = None,
-    min_delta: float = None,
-    max_delta: float = None,
-    min_days_to_expiration: int = None,
-    max_days_to_expiration: int = None,
-    token: str = None,
-):
-    endpoint = endpoints.StrikesEndpoint(token)
-    request = req.StrikesRequest(
-        tickers=ticker,
-        trade_date=trade_date,
-        expiration_range=bounds(min_days_to_expiration, max_days_to_expiration),
-        delta_range=bounds(min_delta, max_delta),
-    )
-    response = endpoint(request)
-    return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
+class OptionsAnalyzer:
+    def __init__(self, token: str = None):
+        self._token = token
 
+    def option_chains(
+        self,
+        tickers: Sequence[str],
+        trade_date: datetime.date = None,
+        min_delta: float = None,
+        max_delta: float = None,
+        min_days_to_expiration: int = None,
+        max_days_to_expiration: int = None,
+    ):
+        endpoint = endpoints.StrikesEndpoint(self._token)
+        request = req.StrikesRequest(
+            tickers=tickers,
+            trade_date=trade_date,
+            expiration_range=bounds(min_days_to_expiration, max_days_to_expiration),
+            delta_range=bounds(min_delta, max_delta),
+        )
+        response = endpoint(request)
+        return [OptionsChain(strikes=strikes) for strikes in group_by_ticker(response)]
 
-def volatility_surfaces(
-    tickers: Sequence[str],
-    trade_date: datetime.date = None,
-    forecast: bool = False,
-    token: str = None,
-):
-    endpoint: Union[endpoints.MoniesImpliedEndpoint, endpoints.MoniesForecastEndpoint]
-    if forecast:
-        endpoint = endpoints.MoniesForecastEndpoint(token)
-    else:
-        endpoint = endpoints.MoniesImpliedEndpoint(token)
-    request = req.MoniesRequest(
-        tickers=tickers,
-        trade_date=trade_date,
-    )
-    response = endpoint(request)
-    return [VolatilitySurface(monies=monies) for monies in group_by_ticker(response)]
+    def volatility_surfaces(
+        self,
+        tickers: Sequence[str],
+        trade_date: datetime.date = None,
+        forecast: bool = False,
+    ):
+        endpoint: Union[
+            endpoints.MoniesImpliedEndpoint, endpoints.MoniesForecastEndpoint
+        ]
+        if forecast:
+            endpoint = endpoints.MoniesForecastEndpoint(self._token)
+        else:
+            endpoint = endpoints.MoniesImpliedEndpoint(self._token)
+
+        request = req.MoniesRequest(
+            tickers=tickers,
+            trade_date=trade_date,
+        )
+        response = endpoint(request)
+        return [
+            VolatilitySurface(monies=monies) for monies in group_by_ticker(response)
+        ]
 
 
 class Quote(IndustryConstruct):

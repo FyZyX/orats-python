@@ -9,19 +9,21 @@ class DataApi:
     responses in structured Python objects.
     """
 
-    def __init__(self, token: str = None):
+    def __init__(self, token: str = None, mock: bool = False):
         token = token or get_token()
 
-        self.tickers = endpoints.TickersEndpoint(token)
-        self.strikes = endpoints.StrikesEndpoint(token)
-        self.strikes_by_options = endpoints.StrikesByOptionsEndpoint(token)
-        self.monies_implied = endpoints.MoniesImpliedEndpoint(token)
-        self.monies_forecast = endpoints.MoniesForecastEndpoint(token)
-        self.summaries = endpoints.SummariesEndpoint(token)
-        self.core_data = endpoints.CoreDataEndpoint(token)
-        self.daily_price = endpoints.DailyPriceEndpoint(token)
-        self.historical_volatility = endpoints.HistoricalVolatilityEndpoint(token)
-        self.dividend_history = endpoints.DividendHistoryEndpoint(token)
-        self.earnings_history = endpoints.EarningsHistoryEndpoint(token)
-        self.stock_split_history = endpoints.StockSplitHistoryEndpoint(token)
-        self.iv_rank = endpoints.IvRankEndpoint(token)
+        self.tickers = endpoints.TickersEndpoint(token, mock=mock)
+        self.strikes = endpoints.StrikesEndpoint(token, mock=mock)
+        self.strikes_by_options = endpoints.StrikesByOptionsEndpoint(token, mock=mock)
+        self.monies_implied = endpoints.MoniesImpliedEndpoint(token, mock=mock)
+        self.monies_forecast = endpoints.MoniesForecastEndpoint(token, mock=mock)
+        self.summaries = endpoints.SummariesEndpoint(token, mock=mock)
+        self.core_data = endpoints.CoreDataEndpoint(token, mock=mock)
+        self.daily_price = endpoints.DailyPriceEndpoint(token, mock=mock)
+        self.historical_volatility = endpoints.HistoricalVolatilityEndpoint(
+            token, mock=mock
+        )
+        self.dividend_history = endpoints.DividendHistoryEndpoint(token, mock=mock)
+        self.earnings_history = endpoints.EarningsHistoryEndpoint(token, mock=mock)
+        self.stock_split_history = endpoints.StockSplitHistoryEndpoint(token, mock=mock)
+        self.iv_rank = endpoints.IvRankEndpoint(token, mock=mock)
