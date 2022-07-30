@@ -8,18 +8,21 @@ from orats.constructs.common import IndustryConstruct
 from orats.endpoints.data import endpoints, request as req
 
 
-def asset(ticker: str, token: str = None):
-    endpoint = endpoints.TickersEndpoint(token)
-    request = req.TickersRequest(ticker=ticker)
-    response = endpoint(request)
-    return Asset(ticker=response[0])
+class AssetAnalyzer:
+    def __init__(self, token: str = None):
+        self._token = token
 
+    def asset(self, ticker: str):
+        endpoint = endpoints.TickersEndpoint(self._token)
+        request = req.TickersRequest(ticker=ticker)
+        response = endpoint(request)
+        return Asset(ticker=response[0])
 
-def historical_volatility(tickers: Sequence[str], token: str = None):
-    endpoint = endpoints.HistoricalVolatilityEndpoint(token)
-    request = req.HistoricalVolatilityRequest(tickers=tickers)
-    response = endpoint(request)
-    return [VolatilityHistory(history=history) for history in response]
+    def historical_volatility(self, tickers: Sequence[str]):
+        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token)
+        request = req.HistoricalVolatilityRequest(tickers=tickers)
+        response = endpoint(request)
+        return [VolatilityHistory(history=history) for history in response]
 
 
 class Asset(IndustryConstruct):
