@@ -25,9 +25,23 @@ class AssetAnalyzer:
         response = endpoint(request)
         return [Asset(ticker=ticker) for ticker in response]
 
-    def historical_volatility(self, tickers: Sequence[str]):
+    def price_history(
+        self,
+        tickers: Sequence[str] = None,
+        trade_date: datetime.date = None,
+    ):
+        endpoint = endpoints.DailyPriceEndpoint(self._token, mock=self._mock)
+        request = req.DailyPriceRequest(tickers=tickers, trade_date=trade_date)
+        response = endpoint(request)
+        return [PriceHistory(history=history) for history in response]
+
+    def historical_volatility(
+        self,
+        tickers: Sequence[str] = None,
+        trade_date: datetime.date = None,
+    ):
         endpoint = endpoints.HistoricalVolatilityEndpoint(self._token, mock=self._mock)
-        request = req.HistoricalVolatilityRequest(tickers=tickers)
+        request = req.HistoricalVolatilityRequest(tickers=tickers, trade_date=trade_date)
         response = endpoint(request)
         return [VolatilityHistory(history=history) for history in response]
 
@@ -57,7 +71,7 @@ class Universe(IndustryConstruct):
 
 
 class PriceHistory(IndustryConstruct):
-    pass
+    history: api_constructs.DailyPrice
 
 
 class VolatilityHistory(IndustryConstruct):
