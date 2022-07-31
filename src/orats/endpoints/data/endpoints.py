@@ -149,9 +149,7 @@ class TickersEndpoint(DataApiEndpoint[req.TickersRequest, api_constructs.Ticker]
     _resource = "tickers"
     _response_type = api_constructs.Ticker
 
-    def example(
-        self, request: req.TickersRequest
-    ) -> Sequence[api_constructs.Ticker]:
+    def example(self, request: req.TickersRequest) -> Sequence[api_constructs.Ticker]:
         universe = [request.ticker] if request.ticker else common.universe()
         results = [self._data_generator.ticker(ticker) for ticker in universe]
         return common.as_responses(api_constructs.Ticker, results)
@@ -166,9 +164,7 @@ class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, api_constructs.Strike]
     _resource = "strikes"
     _response_type = api_constructs.Strike
 
-    def example(
-        self, request: req.StrikesRequest
-    ) -> Sequence[api_constructs.Strike]:
+    def example(self, request: req.StrikesRequest) -> Sequence[api_constructs.Strike]:
         universe = request.tickers or common.universe()
         results = [self._data_generator.strike(ticker) for ticker in universe]
         return common.as_responses(api_constructs.Strike, results)
@@ -302,9 +298,7 @@ class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]
     _resource = "cores"
     _response_type = api_constructs.Core
 
-    def example(
-        self, request: req.CoreDataRequest
-    ) -> Sequence[api_constructs.Core]:
+    def example(self, request: req.CoreDataRequest) -> Sequence[api_constructs.Core]:
         universe = request.tickers or common.universe()
         results = [self._data_generator.core(ticker) for ticker in universe]
         return common.as_responses(api_constructs.Core, results)
@@ -425,9 +419,7 @@ class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, api_constructs.IvRank]):
     _resource = "ivrank"
     _response_type = api_constructs.IvRank
 
-    def example(
-        self, request: req.IvRankRequest
-    ) -> Sequence[api_constructs.IvRank]:
+    def example(self, request: req.IvRankRequest) -> Sequence[api_constructs.IvRank]:
         universe = request.tickers or common.universe()
         results = [self._data_generator.iv_rank(ticker) for ticker in universe]
         return common.as_responses(api_constructs.IvRank, results)
