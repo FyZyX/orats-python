@@ -1,14 +1,13 @@
 import datetime
 import random
 
-from orats.constructs.api.data import Ticker
-from orats.sandbox import common
+from orats.endpoints import common
 
 
 class FakeDataGenerator:
     def __init__(self, date: datetime.date = None):
         self._date = date or datetime.date.today()
-        self._last_update = datetime.datetime.now()
+        self._last_update = datetime.datetime.combine(self._date, datetime.time(16, 3))
 
     def set_date(self, date: datetime.date):
         self._date = date
@@ -181,37 +180,45 @@ class FakeDataGenerator:
         }
 
     def summary(self, ticker: str = common.random_symbol()) -> common.Json:
-        today = datetime.date.today()
+        earnings_effect = common.random_value(0.3)
         iv_ex_earnings_10_day = random.random()
+        iv_interpolated_10_day = iv_ex_earnings_10_day + earnings_effect
+        ex_earnings_volatilities = [
+            0.95**k * iv_ex_earnings_10_day for k in range(0, 7)
+        ]
+        volatilities = [0.95**k * iv_interpolated_10_day for k in range(0, 7)]
+        spot_price = common.random_increase(100, 65)
+        market_width = common.random_value(0.04)
+        next_dividend = common.offset_value(spot_price * 0.03, spot_price * 0.02)
         return {
             "ticker": ticker,
-            "tradeDate": str(today),
-            "stockPrice": 100 + 40 + random.random(),
-            "annActDiv": 6 + random.random(),
-            "annIdiv": 6 + random.random(),
-            "borrow30": 0.0007589506622195224,
-            "borrow2y": 0.026864400946853068,
-            "confidence": 0.9511693079292712,
-            "exErnIv10d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv20d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv30d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv60d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv90d": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv6m": (iv_ex_earnings_10_day - 0.5),
-            "exErnIv1y": (iv_ex_earnings_10_day - 0.5),
-            "ieeEarnEffect": 2.3326074086309134,
-            "impliedMove": 0.059163109598338016,
-            "impliedNextDiv": 1.3731729188456947,
-            "iv10d": 0.38004932901298644,
-            "iv20d": 0.3529915107614268,
-            "iv30d": 0.3255071862567114,
-            "iv60d": 0.2827035536453777,
-            "iv90d": 0.2795040098334221,
-            "iv6m": 0.27121636682668493,
-            "iv1y": 0.2677721968612911,
-            "mwAdj30": 0.018797358208937392,
-            "mwAdj2y": 0.011647567343255817,
-            "nextDiv": "1.65",
+            "tradeDate": str(self._date),
+            "stockPrice": spot_price,
+            "annActDiv": common.random_increase(6),
+            "annIdiv": common.random_increase(6),
+            "borrow30": common.random_value(0.05),
+            "borrow2y": common.random_value(0.05),
+            "confidence": common.random_value(),
+            "exErnIv10d": ex_earnings_volatilities[0],
+            "exErnIv20d": ex_earnings_volatilities[1],
+            "exErnIv30d": ex_earnings_volatilities[2],
+            "exErnIv60d": ex_earnings_volatilities[3],
+            "exErnIv90d": ex_earnings_volatilities[4],
+            "exErnIv6m": ex_earnings_volatilities[5],
+            "exErnIv1y": ex_earnings_volatilities[6],
+            "ieeEarnEffect": common.random_value(3),
+            "impliedMove": earnings_effect,
+            "impliedNextDiv": common.offset_value(next_dividend, spot_price * 0.02),
+            "iv10d": volatilities[0],
+            "iv20d": volatilities[1],
+            "iv30d": volatilities[2],
+            "iv60d": volatilities[3],
+            "iv90d": volatilities[4],
+            "iv6m": volatilities[5],
+            "iv1y": volatilities[6],
+            "mwAdj30": market_width,
+            "mwAdj2y": common.random_decrease(market_width, 0.01),
+            "nextDiv": str(next_dividend),
             "rDrv30": 0.0664285390504781,
             "rDrv2y": 0.07293921201827949,
             "rSlp30": 3.8435617418488426,

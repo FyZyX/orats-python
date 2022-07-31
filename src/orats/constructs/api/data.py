@@ -591,10 +591,12 @@ class DailyPrice(DataApiConstruct):
     high: float = Field(..., alias="hiPx")
     low: float = Field(..., alias="loPx")
     close: float = Field(..., alias="clsPx")
+    volume: int = Field(..., alias="stockVolume")
     unadjusted_open: float = Field(..., alias="unadjOpen")
     unadjusted_high: float = Field(..., alias="unadjHiPx")
     unadjusted_low: float = Field(..., alias="unadjLoPx")
     unadjusted_close: float = Field(..., alias="unadjClsPx")
+    unadjusted_volume: int = Field(..., alias="unadjStockVolume")
     updated_at: datetime.datetime = Field(..., alias="updatedAt")
 
 

@@ -13,8 +13,9 @@ from orats.endpoints.data import endpoints, request as req
 
 
 class OptionsAnalyzer:
-    def __init__(self, token: str = None):
+    def __init__(self, token: str = None, mock: bool = False):
         self._token = token
+        self._mock = mock
 
     def option_chains(
         self,
@@ -25,7 +26,7 @@ class OptionsAnalyzer:
         min_days_to_expiration: int = None,
         max_days_to_expiration: int = None,
     ):
-        endpoint = endpoints.StrikesEndpoint(self._token)
+        endpoint = endpoints.StrikesEndpoint(self._token, mock=self._mock)
         request = req.StrikesRequest(
             tickers=tickers,
             trade_date=trade_date,
@@ -45,9 +46,9 @@ class OptionsAnalyzer:
             endpoints.MoniesImpliedEndpoint, endpoints.MoniesForecastEndpoint
         ]
         if forecast:
-            endpoint = endpoints.MoniesForecastEndpoint(self._token)
+            endpoint = endpoints.MoniesForecastEndpoint(self._token, mock=self._mock)
         else:
-            endpoint = endpoints.MoniesImpliedEndpoint(self._token)
+            endpoint = endpoints.MoniesImpliedEndpoint(self._token, mock=self._mock)
 
         request = req.MoniesRequest(
             tickers=tickers,

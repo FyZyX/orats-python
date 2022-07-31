@@ -45,7 +45,7 @@ def offset_value(value, offset):
     if isinstance(value, int):
         return value + random.randint(0, 2 * offset) - offset
     elif isinstance(value, float):
-        return value + offset * random_pos_neg_value()
+        return value + random_pos_neg_value(offset)
     else:
         raise ValueError
 
@@ -54,19 +54,19 @@ def random_increase(value, scalar=1, precision=None):
     return round_value(value + scalar * random.random(), precision=precision)
 
 
-def random_decrease(value, scalar=1):
-    return value - scalar * random.random()
+def random_decrease(value, scalar: float = 1, precision=None):
+    return round_value(value - scalar * random.random(), precision=precision)
 
 
 def random_pos_neg_value(scalar=1):
-    return scalar * (random.random() - 0.5)
+    return 2 * scalar * (random.random() - 0.5)
 
 
 def positive_integer(max_value=200):
     return random.randint(0, max_value)
 
 
-def random_value(scalar=1, precision=None):
+def random_value(scalar: float = 1, precision=None):
     return round_value(scalar * random.random(), precision=precision)
 
 

@@ -9,18 +9,41 @@ from orats.endpoints.data import endpoints, request as req
 
 
 class AssetAnalyzer:
-    def __init__(self, token: str = None):
+    def __init__(self, token: str = None, mock: bool = False):
         self._token = token
+        self._mock = mock
 
     def asset(self, ticker: str):
-        endpoint = endpoints.TickersEndpoint(self._token)
+        endpoint = endpoints.TickersEndpoint(self._token, mock=self._mock)
         request = req.TickersRequest(ticker=ticker)
         response = endpoint(request)
         return Asset(ticker=response[0])
 
-    def historical_volatility(self, tickers: Sequence[str]):
-        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token)
-        request = req.HistoricalVolatilityRequest(tickers=tickers)
+    def universe(self):
+        endpoint = endpoints.TickersEndpoint(self._token, mock=self._mock)
+        request = req.TickersRequest()
+        response = endpoint(request)
+        return [Asset(ticker=ticker) for ticker in response]
+
+    def price_history(
+        self,
+        tickers: Sequence[str] = None,
+        trade_date: datetime.date = None,
+    ):
+        endpoint = endpoints.DailyPriceEndpoint(self._token, mock=self._mock)
+        request = req.DailyPriceRequest(tickers=tickers, trade_date=trade_date)
+        response = endpoint(request)
+        return [PriceHistory(history=history) for history in response]
+
+    def historical_volatility(
+        self,
+        tickers: Sequence[str] = None,
+        trade_date: datetime.date = None,
+    ):
+        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token, mock=self._mock)
+        request = req.HistoricalVolatilityRequest(
+            tickers=tickers, trade_date=trade_date
+        )
         response = endpoint(request)
         return [VolatilityHistory(history=history) for history in response]
 
@@ -42,9 +65,41 @@ class Asset(IndustryConstruct):
 class Universe(IndustryConstruct):
     assets: Set[Asset]
 
+    def __iter__(self):
+        yield from self.assets
+
+    def symbols(self):
+        yield from (asset.ticker for asset in self.assets)
+
+
+class PriceBar(IndustryConstruct):
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: int
+
 
 class PriceHistory(IndustryConstruct):
-    pass
+    history: api_constructs.DailyPrice
+
+    def candle(self):
+        return PriceBar(
+            open=self.history.unadjusted_open,
+            high=self.history.unadjusted_high,
+            low=self.history.unadjusted_low,
+            close=self.history.unadjusted_close,
+            volume=self.history.unadjusted_volume,
+        )
+
+    def adjusted_candle(self):
+        return PriceBar(
+            open=self.history.open,
+            high=self.history.high,
+            low=self.history.low,
+            close=self.history.close,
+            volume=self.history.volume,
+        )
 
 
 class VolatilityHistory(IndustryConstruct):

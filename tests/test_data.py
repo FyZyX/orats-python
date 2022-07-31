@@ -1,20 +1,11 @@
 import datetime
 
-import pytest
-
 from orats.constructs.api import data as constructs
-from orats.endpoints.data import api, endpoints, request as req
-from tests.fixtures import fake_api_response
-
-
-@pytest.fixture(autouse=True)
-def data_api(monkeypatch):
-    monkeypatch.setattr(endpoints, "_get", fake_api_response)
-    monkeypatch.setattr(endpoints, "_post", fake_api_response)
+from orats.endpoints.data import api, request as req
 
 
 class TestDataApi:
-    _api = api.DataApi("demo")
+    _api = api.DataApi("demo", mock=True)
 
     def test_tickers(self):
         request = req.TickersRequest(ticker="IBM")
