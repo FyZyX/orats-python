@@ -88,7 +88,7 @@ class DataApiEndpoint(abc.ABC, Generic[Req, Res]):
           One or more Data API response objects.
         """
         if self._mock:
-            return self._generate_fake_data(request)
+            return self.example(request)
 
         key = self._key(*request.dict().values())
         if key in self._cache:
@@ -133,8 +133,8 @@ class DataApiEndpoint(abc.ABC, Generic[Req, Res]):
         )
 
     @abc.abstractmethod
-    def _generate_fake_data(self, request: Req) -> Sequence[Res]:
-        pass
+    def example(self, request: Req) -> Sequence[Res]:
+        """Generate a response with fake data for development purposes."""
 
 
 class TickersEndpoint(DataApiEndpoint[req.TickersRequest, api_constructs.Ticker]):
@@ -149,7 +149,7 @@ class TickersEndpoint(DataApiEndpoint[req.TickersRequest, api_constructs.Ticker]
     _resource = "tickers"
     _response_type = api_constructs.Ticker
 
-    def _generate_fake_data(
+    def example(
         self, request: req.TickersRequest
     ) -> Sequence[api_constructs.Ticker]:
         universe = [request.ticker] if request.ticker else common.universe()
@@ -166,7 +166,7 @@ class StrikesEndpoint(DataApiEndpoint[req.StrikesRequest, api_constructs.Strike]
     _resource = "strikes"
     _response_type = api_constructs.Strike
 
-    def _generate_fake_data(
+    def example(
         self, request: req.StrikesRequest
     ) -> Sequence[api_constructs.Strike]:
         universe = request.tickers or common.universe()
@@ -203,7 +203,7 @@ class StrikesByOptionsEndpoint(
           A list of strikes for each specified asset.
         """
         if self._mock:
-            return self._generate_fake_data(*requests)
+            return self.example(*requests)
 
         if len(requests) == 1:
             return super().__call__(requests[0])
@@ -219,7 +219,7 @@ class StrikesByOptionsEndpoint(
         body = [json.loads(request.json(by_alias=True)) for request in requests]
         return _post(url=self._url(), body=body, params=self._update_params({}))
 
-    def _generate_fake_data(
+    def example(
         self, *requests: req.StrikesByOptionsRequest
     ) -> Sequence[api_constructs.Strike]:
         results = [self._data_generator.strike(request.ticker) for request in requests]
@@ -237,7 +237,7 @@ class MoniesImpliedEndpoint(
     _resource = "monies/implied"
     _response_type = api_constructs.MoneyImplied
 
-    def _generate_fake_data(
+    def example(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyImplied]:
         universe = request.tickers or common.universe()
@@ -262,7 +262,7 @@ class MoniesForecastEndpoint(
     _resource = "monies/forecast"
     _response_type = api_constructs.MoneyForecast
 
-    def _generate_fake_data(
+    def example(
         self, request: req.MoniesRequest
     ) -> Sequence[api_constructs.MoneyForecast]:
         universe = request.tickers or common.universe()
@@ -285,7 +285,7 @@ class SummariesEndpoint(DataApiEndpoint[req.SummariesRequest, api_constructs.Sum
     _resource = "summaries"
     _response_type = api_constructs.Summary
 
-    def _generate_fake_data(
+    def example(
         self, request: req.SummariesRequest
     ) -> Sequence[api_constructs.Summary]:
         universe = request.tickers or common.universe()
@@ -302,7 +302,7 @@ class CoreDataEndpoint(DataApiEndpoint[req.CoreDataRequest, api_constructs.Core]
     _resource = "cores"
     _response_type = api_constructs.Core
 
-    def _generate_fake_data(
+    def example(
         self, request: req.CoreDataRequest
     ) -> Sequence[api_constructs.Core]:
         universe = request.tickers or common.universe()
@@ -322,7 +322,7 @@ class DailyPriceEndpoint(
     _response_type = api_constructs.DailyPrice
     _is_historical = True
 
-    def _generate_fake_data(
+    def example(
         self, request: req.DailyPriceRequest
     ) -> Sequence[api_constructs.DailyPrice]:
         universe = request.tickers or common.universe()
@@ -344,7 +344,7 @@ class HistoricalVolatilityEndpoint(
     _response_type = api_constructs.HistoricalVolatility
     _is_historical = True
 
-    def _generate_fake_data(
+    def example(
         self, request: req.HistoricalVolatilityRequest
     ) -> Sequence[api_constructs.HistoricalVolatility]:
         universe = request.tickers or common.universe()
@@ -366,7 +366,7 @@ class DividendHistoryEndpoint(
     _response_type = api_constructs.DividendHistory
     _is_historical = True
 
-    def _generate_fake_data(
+    def example(
         self, request: req.DividendHistoryRequest
     ) -> Sequence[api_constructs.DividendHistory]:
         universe = [request.ticker] if request.ticker else common.universe()
@@ -386,7 +386,7 @@ class EarningsHistoryEndpoint(
     _response_type = api_constructs.EarningsHistory
     _is_historical = True
 
-    def _generate_fake_data(
+    def example(
         self, request: req.EarningsHistoryRequest
     ) -> Sequence[api_constructs.EarningsHistory]:
         universe = [request.ticker] if request.ticker else common.universe()
@@ -406,7 +406,7 @@ class StockSplitHistoryEndpoint(
     _response_type = api_constructs.StockSplitHistory
     _is_historical = True
 
-    def _generate_fake_data(
+    def example(
         self, request: req.StockSplitHistoryRequest
     ) -> Sequence[api_constructs.StockSplitHistory]:
         universe = [request.ticker] if request.ticker else common.universe()
@@ -425,7 +425,7 @@ class IvRankEndpoint(DataApiEndpoint[req.IvRankRequest, api_constructs.IvRank]):
     _resource = "ivrank"
     _response_type = api_constructs.IvRank
 
-    def _generate_fake_data(
+    def example(
         self, request: req.IvRankRequest
     ) -> Sequence[api_constructs.IvRank]:
         universe = request.tickers or common.universe()
