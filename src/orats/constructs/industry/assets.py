@@ -9,17 +9,18 @@ from orats.endpoints.data import endpoints, request as req
 
 
 class AssetAnalyzer:
-    def __init__(self, token: str = None):
+    def __init__(self, token: str = None, mock: bool = False):
         self._token = token
+        self._mock = mock
 
     def asset(self, ticker: str):
-        endpoint = endpoints.TickersEndpoint(self._token)
+        endpoint = endpoints.TickersEndpoint(self._token, mock=self._mock)
         request = req.TickersRequest(ticker=ticker)
         response = endpoint(request)
         return Asset(ticker=response[0])
 
     def historical_volatility(self, tickers: Sequence[str]):
-        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token)
+        endpoint = endpoints.HistoricalVolatilityEndpoint(self._token, mock=self._mock)
         request = req.HistoricalVolatilityRequest(tickers=tickers)
         response = endpoint(request)
         return [VolatilityHistory(history=history) for history in response]
