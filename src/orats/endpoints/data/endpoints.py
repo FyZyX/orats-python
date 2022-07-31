@@ -88,7 +88,7 @@ class DataApiEndpoint(abc.ABC, Generic[Req, Res]):
           One or more Data API response objects.
         """
         if self._mock:
-            return self._generate_fake_data(request)  # type: ignore
+            return self._generate_fake_data(request)
 
         key = self._key(*request.dict().values())
         if key in self._cache:

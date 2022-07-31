@@ -41,7 +41,9 @@ class AssetAnalyzer:
         trade_date: datetime.date = None,
     ):
         endpoint = endpoints.HistoricalVolatilityEndpoint(self._token, mock=self._mock)
-        request = req.HistoricalVolatilityRequest(tickers=tickers, trade_date=trade_date)
+        request = req.HistoricalVolatilityRequest(
+            tickers=tickers, trade_date=trade_date
+        )
         response = endpoint(request)
         return [VolatilityHistory(history=history) for history in response]
 
@@ -70,8 +72,34 @@ class Universe(IndustryConstruct):
         yield from (asset.ticker for asset in self.assets)
 
 
+class PriceBar(IndustryConstruct):
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: int
+
+
 class PriceHistory(IndustryConstruct):
     history: api_constructs.DailyPrice
+
+    def candle(self):
+        return PriceBar(
+            open=self.history.unadjusted_open,
+            high=self.history.unadjusted_high,
+            low=self.history.unadjusted_low,
+            close=self.history.unadjusted_close,
+            volume=self.history.unadjusted_volume,
+        )
+
+    def adjusted_candle(self):
+        return PriceBar(
+            open=self.history.open,
+            high=self.history.high,
+            low=self.history.low,
+            close=self.history.close,
+            volume=self.history.volume,
+        )
 
 
 class VolatilityHistory(IndustryConstruct):
