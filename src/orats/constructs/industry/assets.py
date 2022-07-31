@@ -19,6 +19,12 @@ class AssetAnalyzer:
         response = endpoint(request)
         return Asset(ticker=response[0])
 
+    def universe(self):
+        endpoint = endpoints.TickersEndpoint(self._token, mock=self._mock)
+        request = req.TickersRequest()
+        response = endpoint(request)
+        return [Asset(ticker=ticker) for ticker in response]
+
     def historical_volatility(self, tickers: Sequence[str]):
         endpoint = endpoints.HistoricalVolatilityEndpoint(self._token, mock=self._mock)
         request = req.HistoricalVolatilityRequest(tickers=tickers)
@@ -42,6 +48,12 @@ class Asset(IndustryConstruct):
 
 class Universe(IndustryConstruct):
     assets: Set[Asset]
+
+    def __iter__(self):
+        yield from self.assets
+
+    def symbols(self):
+        yield from (asset.ticker for asset in self.assets)
 
 
 class PriceHistory(IndustryConstruct):
