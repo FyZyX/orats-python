@@ -1,7 +1,6 @@
 import datetime
 import random
 
-from orats.constructs.api.data import Ticker
 from orats.sandbox import common
 
 
@@ -184,8 +183,10 @@ class FakeDataGenerator:
         earnings_effect = common.random_value(0.3)
         iv_ex_earnings_10_day = random.random()
         iv_interpolated_10_day = iv_ex_earnings_10_day + earnings_effect
-        ex_earnings_volatilities = [0.95 ** k * iv_ex_earnings_10_day for k in range(0, 7)]
-        volatilities = [0.95 ** k * iv_interpolated_10_day for k in range(0, 7)]
+        ex_earnings_volatilities = [
+            0.95**k * iv_ex_earnings_10_day for k in range(0, 7)
+        ]
+        volatilities = [0.95**k * iv_interpolated_10_day for k in range(0, 7)]
         spot_price = common.random_increase(100, 65)
         market_width = common.random_value(0.04)
         next_dividend = common.offset_value(spot_price * 0.03, spot_price * 0.02)
