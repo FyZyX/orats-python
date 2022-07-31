@@ -1,13 +1,13 @@
 import datetime
 import random
 
-from orats.sandbox import common
+from orats.endpoints import common
 
 
 class FakeDataGenerator:
     def __init__(self, date: datetime.date = None):
         self._date = date or datetime.date.today()
-        self._last_update = datetime.datetime.now()
+        self._last_update = datetime.datetime.combine(self._date, datetime.time(16, 3))
 
     def set_date(self, date: datetime.date):
         self._date = date
